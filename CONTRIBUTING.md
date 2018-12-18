@@ -4,7 +4,12 @@ Contributions are always welcome and we appreciate any help you can offer. Pleas
 
 ## Getting setup
 
-Getting started is really easy, just run `yarn install`. You can run `yarn test` once the installation is complete. It will run `lerna bootstrap` on postinstall so the installation may take longer than expected. You can ran `yarn test --watch` to have tests automatically run on file changes.
+Getting started is really easy, just follow these steps.
+
+1. [Fork](https://help.github.com/articles/fork-a-repo/) this repo to your GitHub account and clone it.
+2. Install dependencies with `yarn install`.
+3. Run the bootstrap command with `yarn bootstrap`.
+4. Run `yarn test` to verify the tests are passing and everything is setup. You can run `yarn test --watch` to have tests automatically run on changes.
 
 ## Branching
 

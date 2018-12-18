@@ -1,10 +1,6 @@
 const { extendSchema } = require('./index.js');
 
-const {
-	GraphQLObjectType,
-	GraphQLString,
-	GraphQLInt,
-} = require('graphql');
+const { GraphQLObjectType, GraphQLString, GraphQLInt } = require('graphql');
 
 describe('GraphQL Schema Utils', () => {
 	describe('extendSchema', () => {
