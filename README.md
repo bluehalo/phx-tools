@@ -1,4 +1,4 @@
-# Phoenix-Tools
+# Phoenix-Tools [![Build Status](https://travis-ci.org/Asymmetrik/phx-tools.svg?branch=master)](https://travis-ci.org/Asymmetrik/phx-tools) [![Coverage Status](https://coveralls.io/repos/github/Asymmetrik/phx-tools/badge.svg?branch=master)](https://coveralls.io/github/Asymmetrik/phx-tools?branch=master)
 
 A suite of tools developed for JavaScript based FHIR servers.
 
