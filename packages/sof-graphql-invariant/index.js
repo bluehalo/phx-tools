@@ -50,7 +50,7 @@ function operationOutcome (message, code, severity) {
 }
 
 /**
- * @name SmartOnFHIRScopeInvariant
+ * @name smartOnFHIRScopeInvariant
  * @description Resolver that wraps the original resolver and validates scopes
  * if we are using SOF for our authentication. This allows for partial error
  * handling by performing validation on the resource level.
@@ -62,7 +62,7 @@ function operationOutcome (message, code, severity) {
  * @return {Promise|Array<Promise>|Object|Array<Object>} results from
  * invoking a resolver. Can be anything a valid resolver normally returns.
  */
-module.exports = function SmartOnFHIRScopeInvariant(options = {}, resolver) {
+module.exports = function smartOnFHIRScopeInvariant(options = {}, resolver) {
 	let { name, action, schema } = options;
 	// Error if an input schema is not provided
 	if (!isInputType(schema)) {
@@ -82,7 +82,7 @@ module.exports = function SmartOnFHIRScopeInvariant(options = {}, resolver) {
 	}
 
 	// return our resolver function
-	return function ScopeResolver (root, args, context, info) {
+	return function scopeResolver (root, args, context, info) {
 		let req = context && context.req;
 		let env = process.env;
 
