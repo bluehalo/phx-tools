@@ -1,4 +1,4 @@
-# Phoenix-Tools [![Build Status](https://travis-ci.org/Asymmetrik/phx-tools.svg?branch=master)](https://travis-ci.org/Asymmetrik/phx-tools) [![Coverage Status](https://coveralls.io/repos/github/Asymmetrik/phx-tools/badge.svg?branch=master)](https://coveralls.io/github/Asymmetrik/phx-tools?branch=master)
+# Phoenix-Tools [![Build Status](https://travis-ci.org/Asymmetrik/phx-tools.svg?branch=master)](https://travis-ci.org/Asymmetrik/phx-tools) [![Coverage Status](https://coveralls.io/repos/github/Asymmetrik/phx-tools/badge.svg?branch=master)](https://coveralls.io/github/Asymmetrik/phx-tools?branch=master) [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
 A suite of tools developed for JavaScript based FHIR servers.
 
@@ -17,3 +17,6 @@ If you want to create a package, just create a folder in the packages directory.
 ## Packages considered still in beta (and not published on npm)
 
 - `fhir-sanitize-param`
+
+## License
+All packages in `phx-tools` are [MIT licensed](./LICENSE).

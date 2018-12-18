@@ -1,11 +1,11 @@
 {
-	"name": "root",
+	"name": "phx-tools",
 	"private": true,
 	"scripts": {
 		"test": "jest packages",
 		"lint": "eslint \"packages/**/*.js\"",
 		"prettier": "prettier \"packages/**/*.js\" --write",
-		"postinstall": "lerna bootstrap --hoist"
+		"bootstrap": "lerna bootstrap"
 	},
 	"jest": {
 		"verbose": true,

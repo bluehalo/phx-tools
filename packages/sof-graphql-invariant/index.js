@@ -8,14 +8,15 @@ const { GraphQLError, coerceValue, isInputType } = require('graphql');
  * @param {Object} operationOutcome - OperationOutcome instance
  * @return {GraphQLError}
  */
-function formatError (message, resource) {
-	return new GraphQLError(message,
+function formatError(message, resource) {
+	return new GraphQLError(
+		message,
 		null,
 		null,
 		null,
 		['sof-graphql-invariant'],
 		null,
-		resource ? { resource } : null
+		resource ? { resource } : null,
 	);
 }
 
@@ -26,8 +27,8 @@ function formatError (message, resource) {
  * @param {string} token.scope - Space separated list of scopes
  * @return {Array<string>}
  */
-function parseScopes (token) {
-	return token && token.scope && token.scope.split(' ') || [];
+function parseScopes(token) {
+	return (token && token.scope && token.scope.split(' ')) || [];
 }
 
 /**
@@ -38,14 +39,14 @@ function parseScopes (token) {
  * @param {string} severity - Error severity
  * @return {Array<string>}
  */
-function operationOutcome (message, code, severity) {
+function operationOutcome(message, code, severity) {
 	return {
 		resourceType: 'OperationOutcome',
 		issue: {
 			code,
 			severity,
-			diagnostics: message
-		}
+			diagnostics: message,
+		},
 	};
 }
 
@@ -74,15 +75,13 @@ module.exports = function smartOnFHIRScopeInvariant(options = {}, resolver) {
 		let message = 'Invalid resolver, resolver argument must be a function.';
 		return formatError(
 			message,
-			coerceValue(
-				operationOutcome(message, 'exception', 'error'),
-				schema
-			).value
+			coerceValue(operationOutcome(message, 'exception', 'error'), schema)
+				.value,
 		);
 	}
 
 	// return our resolver function
-	return function scopeResolver (root, args, context, info) {
+	return function scopeResolver(root, args, context, info) {
 		let req = context && context.req;
 		let env = process.env;
 
@@ -107,8 +106,8 @@ module.exports = function smartOnFHIRScopeInvariant(options = {}, resolver) {
 				errorMessage,
 				coerceValue(
 					operationOutcome(errorMessage, 'exception', 'error'),
-					schema
-				).value
+					schema,
+				).value,
 			);
 		}
 		// if scopeChecker detected invalid scopes, add more to the message
@@ -121,8 +120,8 @@ module.exports = function smartOnFHIRScopeInvariant(options = {}, resolver) {
 				currentMessage,
 				coerceValue(
 					operationOutcome(currentMessage, 'forbidden', 'error'),
-					schema
-				).value
+					schema,
+				).value,
 			);
 		}
 		// We are all clear
