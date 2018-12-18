@@ -102,8 +102,8 @@ function parseAndSanitizeDate(dateInput) {
 	// If we have a modifier, remove it from the date string before
 	// manipulating it with moment
 	let dateValue = hasModifier ? dateInput.substring(2) : dateInput;
-	let dateString = moment(dateValue).format();
-	let date = moment(dateValue);
+	let dateString = moment(dateValue).utc().format();
+	let date = moment(dateValue).utc();
 
 	return {
 		dateString,
