@@ -3,30 +3,30 @@ const {
 	GraphQLInputObjectType,
 	GraphQLObjectType,
 	GraphQLString,
-	GraphQLList
+	GraphQLList,
 } = require('graphql');
 
 // Mock contexts for the invariant function
 let context = {
 	DEVELOPMENT: {
 		req: {
-			baseUrl: '/3_0_1/$graphiql'
-		}
+			baseUrl: '/3_0_1/$graphiql',
+		},
 	},
 	SCOPES: {
 		req: {
 			user: {
-				scope: 'user/Patient.read'
-			}
-		}
+				scope: 'user/Patient.read',
+			},
+		},
 	},
 	NO_SCOPES: {
 		req: {
 			user: {
-				scope: ''
-			}
-		}
-	}
+				scope: '',
+			},
+		},
+	},
 };
 
 // Mock schemas for the invariant functions options
@@ -34,36 +34,36 @@ let Issue = new GraphQLInputObjectType({
 	name: 'Issue',
 	fields: () => ({
 		code: {
-			type: GraphQLString
+			type: GraphQLString,
 		},
 		severity: {
-			type: GraphQLString
+			type: GraphQLString,
 		},
 		diagnostics: {
-			type: GraphQLString
-		}
-	})
+			type: GraphQLString,
+		},
+	}),
 });
 
 let OperationOutcome = new GraphQLInputObjectType({
 	name: 'OperationOutcome',
 	fields: () => ({
 		resourceType: {
-			type: GraphQLString
+			type: GraphQLString,
 		},
 		issue: {
-			type: new GraphQLList(Issue)
-		}
-	})
+			type: new GraphQLList(Issue),
+		},
+	}),
 });
 
 let BadSchema = new GraphQLObjectType({
 	name: 'NonInputOperationOutcome',
 	fields: () => ({
 		resourceType: {
-			type: GraphQLString
-		}
-	})
+			type: GraphQLString,
+		},
+	}),
 });
 
 let originalEnv;
@@ -83,23 +83,29 @@ describe('GraphQL Scope Checker Test', () => {
 	test('should return an error if the configuration is invalid', () => {
 		let noConfig = scopeInvariant();
 
-		let incorrectSchemaConfig = scopeInvariant({
-			action: 'read',
-			name: 'Patient',
-			schema: BadSchema
-		}, function ResolverNoOp () {});
+		let incorrectSchemaConfig = scopeInvariant(
+			{
+				action: 'read',
+				name: 'Patient',
+				schema: BadSchema,
+			},
+			function ResolverNoOp() {},
+		);
 
 		let noResolverConfig = scopeInvariant({
 			action: 'read',
 			name: 'Patient',
-			schema: OperationOutcome
+			schema: OperationOutcome,
 		});
 
-		let noScopeResolver = scopeInvariant({
-			action: 'MadeUpAction',
-			name: 'Patient',
-			schema: OperationOutcome
-		}, function ResolverNoOp () {});
+		let noScopeResolver = scopeInvariant(
+			{
+				action: 'MadeUpAction',
+				name: 'Patient',
+				schema: OperationOutcome,
+			},
+			function ResolverNoOp() {},
+		);
 
 		let expected = 'Invalid schema, schema must be an input type schema.';
 		expect(noConfig.message).toEqual(expected);
@@ -133,11 +139,14 @@ describe('GraphQL Scope Checker Test', () => {
 
 	test('should not check scopes if auth is not enabled', () => {
 		let expected = 'Data';
-		let resolver = scopeInvariant({
-			action: 'invalid',
-			name: 'Patient',
-			schema: OperationOutcome
-		}, () => expected);
+		let resolver = scopeInvariant(
+			{
+				action: 'invalid',
+				name: 'Patient',
+				schema: OperationOutcome,
+			},
+			() => expected,
+		);
 
 		expect(typeof resolver).toEqual('function');
 		// Define our environment variable
@@ -150,11 +159,14 @@ describe('GraphQL Scope Checker Test', () => {
 
 	test('should not check scopes if disabled for Graphiql', () => {
 		let expected = 'Data';
-		let resolver = scopeInvariant({
-			action: 'invalid',
-			name: 'Patient',
-			schema: OperationOutcome
-		}, () => expected);
+		let resolver = scopeInvariant(
+			{
+				action: 'invalid',
+				name: 'Patient',
+				schema: OperationOutcome,
+			},
+			() => expected,
+		);
 
 		expect(typeof resolver).toEqual('function');
 		// Define our environment variable
@@ -167,11 +179,14 @@ describe('GraphQL Scope Checker Test', () => {
 	});
 
 	test('should return an error if the user does not have valid scopes', () => {
-		let resolver = scopeInvariant({
-			action: 'read',
-			name: 'Patient',
-			schema: OperationOutcome
-		}, () => {});
+		let resolver = scopeInvariant(
+			{
+				action: 'read',
+				name: 'Patient',
+				schema: OperationOutcome,
+			},
+			() => {},
+		);
 
 		expect(typeof resolver).toEqual('function');
 
@@ -186,11 +201,14 @@ describe('GraphQL Scope Checker Test', () => {
 
 	test('should invoke the original resolver if permissions are valid', () => {
 		let expected = 'Data';
-		let resolver = scopeInvariant({
-			action: 'read',
-			name: 'Patient',
-			schema: OperationOutcome
-		}, () => expected);
+		let resolver = scopeInvariant(
+			{
+				action: 'read',
+				name: 'Patient',
+				schema: OperationOutcome,
+			},
+			() => expected,
+		);
 
 		expect(typeof resolver).toEqual('function');
 
