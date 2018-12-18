@@ -17,3 +17,6 @@ If you want to create a package, just create a folder in the packages directory.
 ## Packages considered still in beta (and not published on npm)
 
 - `fhir-sanitize-param`
+
+## License
+All packages in `phx-tools` are [MIT licensed](./LICENSE).
