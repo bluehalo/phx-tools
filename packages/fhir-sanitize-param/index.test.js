@@ -412,8 +412,8 @@ describe('Parameter Sanitization Test', () => {
 			let barValue = args.bar.value;
 
 			expect(errors).toHaveLength(0);
-			expect(fooValue.dateString).toEqual('2013-03-14T04:00:00Z');
-			expect(barValue.dateString).toEqual('2013-01-14T15:00:00Z');
+			expect(fooValue.dateString).toEqual('2013-03-14T00:00:00Z');
+			expect(barValue.dateString).toEqual('2013-01-14T10:00:00Z');
 			expect(moment.isMoment(fooValue.date)).toBeTruthy();
 			expect(moment.isMoment(barValue.date)).toBeTruthy();
 		});
@@ -439,8 +439,8 @@ describe('Parameter Sanitization Test', () => {
 			expect(errors).toHaveLength(0);
 			expect(fooValue.modifier).toEqual('ge');
 			expect(barValue.modifier).toEqual('lt');
-			expect(fooValue.dateString).toEqual('2013-03-14T04:00:00Z');
-			expect(barValue.dateString).toEqual('2013-01-14T15:00:00Z');
+			expect(fooValue.dateString).toEqual('2013-03-14T00:00:00Z');
+			expect(barValue.dateString).toEqual('2013-01-14T10:00:00Z');
 			expect(moment.isMoment(fooValue.date)).toBeTruthy();
 			expect(moment.isMoment(barValue.date)).toBeTruthy();
 		});
