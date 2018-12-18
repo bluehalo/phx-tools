@@ -1,0 +1,30 @@
+{
+	"name": "root",
+	"private": true,
+	"scripts": {
+		"test": "jest packages",
+		"lint": "eslint \"packages/**/*.js\"",
+		"prettier": "prettier \"packages/**/*.js\" --write",
+		"postinstall": "lerna bootstrap --hoist"
+	},
+	"jest": {
+		"verbose": true,
+		"collectCoverage": true,
+		"coverageReporters": [
+			"text",
+			"lcov",
+			"json"
+		]
+	},
+	"prettier": {
+		"trailingComma": "all",
+		"singleQuote": true
+	},
+	"devDependencies": {
+		"coveralls": "^3.0.2",
+		"eslint": "^5.7.0",
+		"jest": "^23.6.0",
+		"lerna": "^3.4.3",
+		"prettier": "^1.14.3"
+	}
+}

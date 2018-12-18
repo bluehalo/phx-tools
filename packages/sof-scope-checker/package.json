@@ -1,0 +1,12 @@
+{
+  "name": "@asymmetrik/sof-scope-checker",
+  "version": "1.0.0",
+  "description": "Smart on FHIR scope checker",
+  "main": "index.js",
+  "repository": "https://bitbucket.org/asymmetrik/phx-tools/src/master/packages/sof-scope-checker",
+  "author": "Robert-W <rwinterbottom@asymmetrik.com>",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
+}
