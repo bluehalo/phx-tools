@@ -10,7 +10,7 @@
     "access": "public"
   },
   "dependencies": {
-    "graphql": "^14.0.2",
-    "@asymmetrik/sof-scope-checker": "^1.0.0"
+    "@asymmetrik/sof-scope-checker": "^1.0.0",
+    "graphql": "^14.0.2"
   }
 }

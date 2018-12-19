@@ -6,7 +6,7 @@
   "repository": "https://bitbucket.org/asymmetrik/phx-tools/src/master/packages/fhir-sanitize-param",
   "author": "Robert-W <rwinterbottom@asymmetrik.com>",
   "license": "MIT",
-	"private": true,
+  "private": true,
   "publishConfig": {
     "access": "public"
   },
