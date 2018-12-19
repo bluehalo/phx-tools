@@ -3,7 +3,7 @@
   "version": "0.9.0",
   "description": "Sanitization tool for FHIR parameters",
   "main": "index.js",
-  "repository": "https://bitbucket.org/asymmetrik/phx-tools/src/master/packages/fhir-sanitize-param",
+  "repository": "https://github.com/Asymmetrik/phx-tools/tree/master/packages/fhir-sanitize-param",
   "author": "Robert-W <rwinterbottom@asymmetrik.com>",
   "license": "MIT",
   "private": true,
