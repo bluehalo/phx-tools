@@ -1,4 +1,4 @@
-# `SoF-Scope-Checker`
+# `SOF-Scope-Checker`
 
 > Utility for validating patient and user level scopes for the SMART on FHIR specification.
 
@@ -35,11 +35,11 @@ app.get(
 )
 ```
 
-See [sof-scope-checker tests](./index.test.js) for more usage examples.
+See [sof-scope-checker tests](https://github.com/Asymmetrik/phx-tools/blob/master/packages/sof-scope-checker/index.test.js) for more usage examples.
 
 ## Arguments
 
-`@asymmetrik/sof-scope-checker tests` exports a single function which takes three arguments. 
+`@asymmetrik/sof-scope-checker` exports a single function which takes three arguments. 
 
 #### `name`
 Name of the resource or patient. 

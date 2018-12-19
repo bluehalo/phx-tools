@@ -50,7 +50,7 @@ app.use(
 
 ```
 
-See [fhir-sanitize-param tests](./index.test.js) for more usage examples.
+See [fhir-sanitize-param tests](https://github.com/Asymmetrik/phx-tools/blob/master/packages/fhir-sanitize-param/index.test.js) for more usage examples.
 
 ## Arguments
 
