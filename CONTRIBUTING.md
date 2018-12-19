@@ -34,6 +34,8 @@ Your README should have at least a `Install` section and a `Usage` section. Plea
 
 Packages versions are managed at the package level independent of the top level `package.json`. They also need a `"publishConfig": { "access": "public" }` property since we are using namespaces. You can copy one of the existing `package.json` files and update `name`, `version` ,`description`, `author`, and `repository` fields.
 
+If you want to create a package, just create a folder in the packages directory. If you do not want to have it published to npm, add `private: true` to that packages package.json.
+
 ## Submitting a pull request
 
 Before submitting a pull request, try to make sure you have done the following.

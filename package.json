@@ -1,6 +1,5 @@
 {
 	"name": "phx-tools",
-	"private": true,
 	"scripts": {
 		"test": "jest packages",
 		"lint": "eslint \"packages/**/*.js\"",
