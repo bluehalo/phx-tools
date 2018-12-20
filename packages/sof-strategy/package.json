@@ -1,6 +1,6 @@
 {
   "name": "@asymmetrik/sof-strategy",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Smart on FHIR authorization strategy for passport",
   "main": "index.js",
   "repository": "https://github.com/Asymmetrik/phx-tools/tree/master/packages/sof-strategy",
