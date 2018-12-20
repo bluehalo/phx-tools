@@ -17,4 +17,4 @@ If you are interested in contributing, see our [CONTRIBUTING.md](./CONTRIBUTING.
 - `fhir-sanitize-param`
 
 ## License
-All packages in `phx-tools` are [MIT licensed](./LICENSE).
+All packages in `phx-tools` are [MIT licensed](https://github.com/Asymmetrik/phx-tools/blob/master/LICENSE).
