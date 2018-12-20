@@ -15,11 +15,11 @@ Getting started is really easy, just follow these steps.
 
 While we do not enforce this with an iron fist, we do encourage you use the following branching strategy.
 
-1. When creating a new branch, branch off of develop.
-2. For new packages, use `package/<package-name>`. For features, use `feature/<feature-name>`. For bugs, use `bug/<bug-or-issue-number>`.
-3. Point your branch back to develop when merging if you branched off of develop. If you branched off some other branch, point to your original.
+* For new packages, use `package/<package-name>`.
+* For features, use `feature/<feature-name>`.
+* For bugs, use `bug/<bug-or-issue-number>`.
 
-## Commit messages
+### Commit messages
 
 We are trying something new, and we want to use lerna to generate change logs for us automatically. In order for this to work correctly, we need to follow the [conventional commit standard](https://www.conventionalcommits.org/). We prefer you use this messages when committing but if not, we will try to reformat them when we merge your PR's into this format.
 
