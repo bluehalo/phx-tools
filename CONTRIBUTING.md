@@ -21,7 +21,7 @@ While we do not enforce this with an iron fist, we do encourage you use the foll
 
 ### Commit messages
 
-We are trying something new, and we want to use lerna to generate change logs for us automatically. In order for this to work correctly, we need to follow the [conventional commit standard](https://www.conventionalcommits.org/). We prefer you use this messages when committing but if not, we will try to reformat them when we merge your PR's into this format.
+We want to use lerna to generate change logs for us automatically. In order for this to work correctly, we need to follow the [conventional commit standard](https://www.conventionalcommits.org/). We prefer you use this messages when committing but if not, we will try to reformat them when we merge your PR's into this format.
 
 ## Creating a new package
 
