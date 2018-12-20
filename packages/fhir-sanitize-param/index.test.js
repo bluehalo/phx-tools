@@ -131,15 +131,26 @@ describe('Parameter Sanitization Test', () => {
 				method: 'GET',
 				query: {
 					foo: 'bar',
+					home: 'http://foo.bar.com',
+					address: 'http://foo.bar.com',
+					reference: 'jhg1237896',
 				},
 			};
 
-			let configs = [{ name: 'foo', type: 'string' }];
+			let configs = [
+				{ name: 'foo', type: 'string' },
+				{ name: 'home', type: 'uri' },
+				{ name: 'address', type: 'url' },
+				{ name: 'reference', type: 'reference' },
+			];
 
 			let { errors, args } = sanitizer(request, configs);
 
 			expect(errors).toHaveLength(0);
 			expect(args.foo.value).toEqual('bar');
+			expect(args.home.value).toEqual('http://foo.bar.com');
+			expect(args.address.value).toEqual('http://foo.bar.com');
+			expect(args.reference.value).toEqual('jhg1237896');
 		});
 
 		test('should convert a number to a string', () => {
@@ -181,10 +192,14 @@ describe('Parameter Sanitization Test', () => {
 				method: 'GET',
 				query: {
 					foo: 123,
+					bar: 123,
 				},
 			};
 
-			let configs = [{ name: 'foo', type: 'number' }];
+			let configs = [
+				{ name: 'foo', type: 'number' },
+				{ name: 'bar', type: 'integer' },
+			];
 
 			let { errors, args } = sanitizer(request, configs);
 
@@ -201,7 +216,7 @@ describe('Parameter Sanitization Test', () => {
 				},
 			};
 
-			let configs = [{ name: 'foo', type: 'number' }];
+			let configs = [{ name: 'foo', type: 'decimal' }];
 
 			let { errors, args } = sanitizer(request, configs);
 

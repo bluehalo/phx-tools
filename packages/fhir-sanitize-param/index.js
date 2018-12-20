@@ -128,6 +128,8 @@ function coerceValue(config, value) {
 	// FHIR specific types
 	switch (type) {
 		case 'number':
+		case 'integer':
+		case 'decimal':
 			// This validator only accepts strings
 			result = validator.toFloat('' + value);
 			// Throw on invalid results
@@ -152,7 +154,10 @@ function coerceValue(config, value) {
 			// Throw if we dont have a boolean value
 			invariant(typeof result === 'boolean', mismatchError(type, name));
 			break;
+		case 'uri':
+		case 'url':
 		case 'string':
+		case 'reference':
 			// strip any html tags from the query
 			// xss helps prevent html from slipping in
 			// strip a certain range of unicode characters
