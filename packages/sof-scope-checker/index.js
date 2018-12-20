@@ -21,18 +21,34 @@ function allowedScopes(name, action) {
 	];
 }
 
+/**
+ * @class FhirError
+ * @extends Error
+ * @description Adds an additional type property for knowing the type of issue
+ */
+class FhirError extends Error {
+	constructor(message, type) {
+		super(message);
+		this.type = type;
+	}
+}
+
 module.exports = function SmartOnFHIRScopeChecker(name, action, scopes) {
 	if (!Array.isArray(scopes)) {
 		return {
-			error: new Error('Invalid scopes. This parameter should be an array.'),
+			error: new FhirError(
+				'Invalid scopes. This parameter should be an array.',
+				'internal',
+			),
 			success: false,
 		};
 	}
 
 	if (!(name === '*' || name.length > 1)) {
 		return {
-			error: new Error(
+			error: new FhirError(
 				'Invalid name. This parameter should be an asterisk or valid resource type.',
+				'internal',
 			),
 			success: false,
 		};
@@ -40,8 +56,9 @@ module.exports = function SmartOnFHIRScopeChecker(name, action, scopes) {
 
 	if (!(action === 'read' || action === 'write' || action === '*')) {
 		return {
-			error: new Error(
+			error: new FhirError(
 				'Invalid action. This parameter should be (read | write | *).',
+				'internal',
 			),
 			success: false,
 		};
@@ -55,7 +72,10 @@ module.exports = function SmartOnFHIRScopeChecker(name, action, scopes) {
 	return {
 		error: hasSufficientScope
 			? null
-			: new Error('None of the provided scopes matched an allowed scope.'),
+			: new FhirError(
+					'None of the provided scopes matched an allowed scope.',
+					'forbidden',
+			  ),
 		success: hasSufficientScope,
 	};
 };

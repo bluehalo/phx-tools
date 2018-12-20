@@ -58,8 +58,8 @@ function unsupportedError(type, name) {
 
 /**
  * @function findMatchForConfig
- * @description Given a property name, find a parameter that starts with that
- * name. We must not look only for exact matches, because we have cases where
+ * @description Given a property name, find a parameter that matches the name.
+ * We must not look only for exact matches, because we have cases where
  * we need to match args with names like foo:modifier.
  * @param {String} name - Name of the parameter
  * @param {Object} params - All params in the request
@@ -67,7 +67,7 @@ function unsupportedError(type, name) {
  */
 function findMatchForConfig(name, params) {
 	let keys = Object.getOwnPropertyNames(params);
-	let matchingKey = keys.find(key => key.startsWith(name));
+	let matchingKey = keys.find(key => name === key.split(':')[0]);
 	return { field: matchingKey, value: params[matchingKey] };
 }
 
@@ -186,6 +186,26 @@ function coerceValue(config, value) {
 }
 
 /**
+ * @function parseArguments
+ * @description Parse only arguments needed for this type of request
+ * @param {Express.req} req - Request from an express server
+ * @return {Object} - Arguments object
+ */
+function parseArguments(req) {
+	let args = {};
+	// Merge query from get only
+	if (req.method === 'GET') {
+		args = Object.assign(args, req.query);
+	}
+	// Merge body from put and post only
+	if (/PUT|POST/.test(req.method)) {
+		args = Object.assign(args, req.body);
+	}
+	// Merge params for all requests
+	return Object.assign(args, req.params);
+}
+
+/**
  * @function SanitizeFHIRParams
  * @description Sanitize incoming parameters based on FHIR definitions
  * @param {Express.req} - Express Request object
@@ -196,8 +216,8 @@ module.exports = function SanitizeFHIRParams(req = {}, configs = []) {
 	let errors = [];
 	let args = {};
 
-	// parse all available params
-	let params = Object.assign({}, req.query, req.body, req.params);
+	// parse all available arguments
+	let params = parseArguments(req);
 
 	// for each item in our config, sanitize the configured param
 	for (let i = 0; i < configs.length; i++) {
@@ -210,7 +230,11 @@ module.exports = function SanitizeFHIRParams(req = {}, configs = []) {
 		if (!value && config.required) {
 			errors.push(new Error(config.name + ' is required and missing.'));
 		}
-
+		// If we are missing the field entirely, we cannot do anything with it
+		// this is fine, just ignore. no need to error unless param is required
+		else if (!field) {
+			continue;
+		}
 		// Otherwise we need to attempt to sanitize the input
 		else {
 			// Wrap in a try catch to invariant, validation, or parsing errors

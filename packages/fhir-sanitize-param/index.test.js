@@ -17,6 +17,7 @@ describe('Parameter Sanitization Test', () => {
 
 		test('should return an error if given an unsupported type', () => {
 			let request = {
+				method: 'GET',
 				query: {
 					foo: 'bar',
 				},
@@ -59,8 +60,9 @@ describe('Parameter Sanitization Test', () => {
 			expect(Object.getOwnPropertyNames(args)).toHaveLength(0);
 		});
 
-		test('should parse args from all three possible places', () => {
+		test('should parse args based on the method type', () => {
 			let request = {
+				method: 'GET',
 				query: { foo: 'foo' },
 				body: { bar: 'bar' },
 				params: { baz: 'baz' },
@@ -75,21 +77,17 @@ describe('Parameter Sanitization Test', () => {
 			let { errors, args } = sanitizer(request, configs);
 
 			expect(errors).toHaveLength(0);
+			expect(args.bar).toBeUndefined();
 			expect(args.foo.value).toEqual('foo');
-			expect(args.bar.value).toEqual('bar');
 			expect(args.baz.value).toEqual('baz');
 		});
 
-		test('should merge args in order of query, body, params', () => {
+		test('should override body with url params if there is a collision', () => {
 			let request = {
-				query: {
-					foo: 'foo',
-					bar: 'notBar',
-					baz: 'notBaz',
-				},
+				method: 'POST',
 				body: {
 					bar: 'bar',
-					baz: 'alsoNotBaz',
+					baz: 'foo',
 				},
 				params: {
 					baz: 'baz',
@@ -97,7 +95,6 @@ describe('Parameter Sanitization Test', () => {
 			};
 
 			let configs = [
-				{ name: 'foo', type: 'string' },
 				{ name: 'bar', type: 'string' },
 				{ name: 'baz', type: 'string' },
 			];
@@ -105,13 +102,13 @@ describe('Parameter Sanitization Test', () => {
 			let { errors, args } = sanitizer(request, configs);
 
 			expect(errors).toHaveLength(0);
-			expect(args.foo.value).toEqual('foo');
 			expect(args.bar.value).toEqual('bar');
 			expect(args.baz.value).toEqual('baz');
 		});
 
 		test('should parse modifiers from the fieldname if present', () => {
 			let request = {
+				method: 'GET',
 				query: {
 					'foo:not': 'bar',
 				},
@@ -131,6 +128,7 @@ describe('Parameter Sanitization Test', () => {
 	describe('string', () => {
 		test('should correctly parse a string', () => {
 			let request = {
+				method: 'GET',
 				query: {
 					foo: 'bar',
 				},
@@ -146,6 +144,7 @@ describe('Parameter Sanitization Test', () => {
 
 		test('should convert a number to a string', () => {
 			let request = {
+				method: 'GET',
 				query: {
 					foo: '1275',
 				},
@@ -161,6 +160,7 @@ describe('Parameter Sanitization Test', () => {
 
 		test('should strip invalid characters from the string', () => {
 			let request = {
+				method: 'GET',
 				query: {
 					foo: "<script>eval('');</script>barbaz\n\r",
 				},
@@ -178,6 +178,7 @@ describe('Parameter Sanitization Test', () => {
 	describe('number', () => {
 		test('should correctly parse an int', () => {
 			let request = {
+				method: 'GET',
 				query: {
 					foo: 123,
 				},
@@ -194,6 +195,7 @@ describe('Parameter Sanitization Test', () => {
 
 		test('should correctly parse an float', () => {
 			let request = {
+				method: 'GET',
 				query: {
 					foo: '3.14159_pi',
 				},
@@ -209,6 +211,7 @@ describe('Parameter Sanitization Test', () => {
 
 		test('should not return NaN for bad mixed strings', () => {
 			let request = {
+				method: 'GET',
 				query: {
 					foo: 'foo3.14159',
 				},
@@ -227,6 +230,7 @@ describe('Parameter Sanitization Test', () => {
 	describe('boolean', () => {
 		test('should accept many falsy conditions', () => {
 			let request = {
+				method: 'GET',
 				query: {
 					foo: '',
 					bar: '0',
@@ -250,6 +254,7 @@ describe('Parameter Sanitization Test', () => {
 
 		test('should accept many truthy conditions', () => {
 			let request = {
+				method: 'GET',
 				query: {
 					foo: '1',
 					bar: 'true',
@@ -270,6 +275,7 @@ describe('Parameter Sanitization Test', () => {
 
 		test("should treat any input other than true or '1' as false", () => {
 			let request = {
+				method: 'GET',
 				query: {
 					foo: '3.14159',
 					bar: "['true']",
@@ -290,6 +296,7 @@ describe('Parameter Sanitization Test', () => {
 
 		test('should return an error for an invalid boolean type', () => {
 			let request = {
+				method: 'GET',
 				query: {
 					foo: ['3.14159'],
 					// will be false because validator library only accepts strings
@@ -319,6 +326,7 @@ describe('Parameter Sanitization Test', () => {
 	describe('token', () => {
 		test('should parse code and system from a token input', () => {
 			let request = {
+				method: 'PUT',
 				body: {
 					foo: 'http://acme.org/patient|2345',
 				},
@@ -336,6 +344,7 @@ describe('Parameter Sanitization Test', () => {
 
 		test('should parse only code', () => {
 			let request = {
+				method: 'POST',
 				body: {
 					foo: '2345',
 					bar: '|6789',
@@ -360,6 +369,7 @@ describe('Parameter Sanitization Test', () => {
 
 		test('should parse only system', () => {
 			let request = {
+				method: 'PUT',
 				body: {
 					foo: 'http://acme.org/patient|',
 				},
@@ -377,6 +387,7 @@ describe('Parameter Sanitization Test', () => {
 
 		test('should return an error for an invalid type', () => {
 			let request = {
+				method: 'POST',
 				body: {
 					foo: ['http://acme.org/patient|'],
 				},
@@ -395,6 +406,7 @@ describe('Parameter Sanitization Test', () => {
 	describe('date', () => {
 		test('should parse a simple date string', () => {
 			let request = {
+				method: 'GET',
 				query: {
 					foo: '2013-03-14',
 					bar: '2013-01-14T10:00',
@@ -420,6 +432,7 @@ describe('Parameter Sanitization Test', () => {
 
 		test('should keep modifiers when the type is date', () => {
 			let request = {
+				method: 'GET',
 				query: {
 					foo: 'ge2013-03-14',
 					bar: 'lt2013-01-14T10:00',
@@ -447,6 +460,7 @@ describe('Parameter Sanitization Test', () => {
 
 		test('should return an error if given an invalid date string', () => {
 			let request = {
+				method: 'GET',
 				query: {
 					foo: 'something fishy',
 				},
@@ -465,6 +479,7 @@ describe('Parameter Sanitization Test', () => {
 	describe('json_string', () => {
 		test('should parse JSON and return it as an object', () => {
 			let request = {
+				method: 'POST',
 				body: {
 					foo: '{"resourceType": "Patient"}',
 				},
@@ -481,6 +496,7 @@ describe('Parameter Sanitization Test', () => {
 
 		test('should return an error for invalid JSON', () => {
 			let request = {
+				method: 'POST',
 				body: {
 					foo: '{resourceType: "Patient"}',
 					bar: '{"resourceType": "Patient"',

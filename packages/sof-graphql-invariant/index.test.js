@@ -111,7 +111,6 @@ describe('GraphQL Scope Checker Test', () => {
 		expect(noConfig.message).toEqual(expected);
 		expect(noConfig.path[0]).toEqual('sof-graphql-invariant');
 
-		expected = 'Invalid schema, schema must be an input type schema.';
 		expect(incorrectSchemaConfig.message).toEqual(expected);
 		expect(incorrectSchemaConfig.path[0]).toEqual('sof-graphql-invariant');
 

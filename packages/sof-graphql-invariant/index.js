@@ -98,21 +98,21 @@ module.exports = function smartOnFHIRScopeInvariant(options = {}, resolver) {
 		// Parse our scopes and validate them
 		let scopes = parseScopes(req && req.user);
 		let { error } = scopeChecker(name, action, scopes);
-		let errorMessage = error && error.message;
+		let errorType = error && error.type;
 
 		// This message means scopeChecker received an invalid configuration
-		if (errorMessage && errorMessage.startsWith('Invalid')) {
+		if (errorType === 'internal') {
 			return formatError(
-				errorMessage,
+				error.message,
 				coerceValue(
-					operationOutcome(errorMessage, 'exception', 'error'),
+					operationOutcome(error.message, 'exception', 'error'),
 					schema,
 				).value,
 			);
 		}
 		// if scopeChecker detected invalid scopes, add more to the message
-		else if (errorMessage) {
-			let currentMessage = errorMessage;
+		else if (errorType === 'forbidden') {
+			let currentMessage = error.message;
 			currentMessage += ` UserScopes: ${scopes}.`;
 			currentMessage += ` Attempted ${action} on ${name}.`;
 
