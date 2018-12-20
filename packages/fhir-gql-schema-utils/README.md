@@ -34,7 +34,18 @@ let FooSchema = new GraphQLObjectType({
 });
 
 // At this point, FooSchema will now have all the fields that BaseSchema
-// and AnotherSchema have. It currently copies, type, description, and resolve.
+// and AnotherSchema have.
 ```
 
-See [fhir-gql-schema-utils tests](./index.test.js) for more usage examples.
+See [fhir-gql-schema-utils tests](https://github.com/Asymmetrik/phx-tools/blob/master/packages/fhir-gql-schema-utils/index.test.js) for more usage examples.
+
+## Arguments
+
+`@asymmetrik/fhir-gql-schema-utils` currently only contains the one utility. We will be adding more over time but for now you can only use `extendSchema`.
+
+### extendSchema
+
+`extendSchema` accepts a comma separated list of Objects and/or GraphQLSchemas. You can add as many or as few as you like. The default is to return an empty object. The only fields copied over right now are `type`, `description`, and `resolve`.
+
+Type: `Object|GraphQLSchema`  
+Required: `false`  

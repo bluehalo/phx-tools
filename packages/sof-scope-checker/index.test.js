@@ -4,6 +4,7 @@ describe('Scope Checker Test', () => {
 	describe('invalid configuration', () => {
 		test('should throw an error on bad name argument', () => {
 			let responseObject = scopeChecker('', 'read', []);
+			expect(responseObject.error.type).toBe('internal');
 			expect(responseObject.error.message).toContain(
 				'Invalid name. This parameter should be an asterisk or valid resource type.',
 			);
@@ -11,6 +12,7 @@ describe('Scope Checker Test', () => {
 
 		test('should throw an error on bad action argument', () => {
 			let responseObject = scopeChecker('Patient', 'writ', []);
+			expect(responseObject.error.type).toBe('internal');
 			expect(responseObject.error.message).toContain(
 				'Invalid action. This parameter should be (read | write | *).',
 			);
@@ -18,6 +20,7 @@ describe('Scope Checker Test', () => {
 
 		test('should throw an error on bad scopes argument', () => {
 			let responseObject = scopeChecker('Patient', 'read', 'user/*.*');
+			expect(responseObject.error.type).toBe('internal');
 			expect(responseObject.error.message).toContain(
 				'Invalid scopes. This parameter should be an array.',
 			);
@@ -27,6 +30,7 @@ describe('Scope Checker Test', () => {
 	describe('valid configuration', () => {
 		test('should throw an error on unfound scope', () => {
 			let responseObject = scopeChecker('Patient', 'write', ['user/*.read']);
+			expect(responseObject.error.type).toBe('forbidden');
 			expect(responseObject.error.message).toContain(
 				'None of the provided scopes matched an allowed scope',
 			);

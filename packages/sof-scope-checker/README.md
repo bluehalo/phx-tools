@@ -1,4 +1,4 @@
-# `SoF-Scope-Checker`
+# `SOF-Scope-Checker`
 
 > Utility for validating patient and user level scopes for the SMART on FHIR specification.
 
@@ -19,6 +19,7 @@ let hasValidScopes = (name, action) => {
     let { error, success } = scopeChecker(name, action, scopes);
 
     // Log the error, wrap in operation outcome or GraphQL specific error
+    // You can check the type of the error as well since we use custom errors
 
     if (error) {
       next(error);
@@ -35,11 +36,13 @@ app.get(
 )
 ```
 
-See [sof-scope-checker tests](./index.test.js) for more usage examples.
+See [sof-scope-checker tests](https://github.com/Asymmetrik/phx-tools/blob/master/packages/sof-scope-checker/index.test.js) for more usage examples.
+
+NOTE: The error returned is an extension of the native JS error. It adds a type property to the error which can have a value of 'internal' representing a misconfiguration, or 'forbidden' representing a case where the scopes are not sufficient.
 
 ## Arguments
 
-`@asymmetrik/sof-scope-checker tests` exports a single function which takes three arguments. 
+`@asymmetrik/sof-scope-checker` exports a single function which takes three arguments. 
 
 #### `name`
 Name of the resource or patient. 

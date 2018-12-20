@@ -39,4 +39,26 @@ app.use(
 );
 ```
 
-See [sof-strategy tests](./index.test.js) for more usage examples.
+See [sof-strategy tests](https://github.com/Asymmetrik/phx-tools/blob/master/packages/sof-strategy/index.test.js) for more usage examples.
+
+## Arguments
+
+`@asymmetrik/sof-strategy` exports a single function which takes a single options argument with the following properties.
+
+ #### `introspectionUrl`
+ Introspection endpoint. The strategy will attempt to make a request to this endpoint with a token(provided by passport.js), clientId, clientSecret to validate the token has not been modified or resigned.
+
+ Type: `String`  
+ Required: `true`  
+ 
+ #### `clientSecret`
+ Necessary to validate the bearer token. Do not store these in client side code no matter what. This module should only be used server-side.
+
+ Type: `String`  
+ Required: `true`  
+ 
+ #### `clientId`
+ Necessary to validate the bearer token. Do not store these in client side code no matter what. This module should only be used server-side.
+
+ Type: `String`  
+ Required: `true`  

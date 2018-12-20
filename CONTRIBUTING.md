@@ -34,7 +34,7 @@ Your README should have at least a `Install` section and a `Usage` section. Plea
 
 Packages versions are managed at the package level independent of the top level `package.json`. They also need a `"publishConfig": { "access": "public" }` property since we are using namespaces. You can copy one of the existing `package.json` files and update `name`, `version` ,`description`, `author`, and `repository` fields.
 
-If you want to create a package, just create a folder in the packages directory. If you do not want to have it published to npm, add `private: true` to that packages package.json.
+Packages should be added to the packages directory. If you do not want to have it published to npm, add `private: true` to the packages package.json.
 
 ## Submitting a pull request
 
@@ -42,4 +42,4 @@ Before submitting a pull request, try to make sure you have done the following.
 
 1. Run `yarn prettier`. This formats code so we won't need any debates on style.
 2. Run `yarn lint` and fix any issues that arise. Prettier should prevent a lot of these but there are still things ESLint can catch that prettier won't fix.
-3. Run `yarn test`. Make sure your package's test's passes. Try to get your code coverage as close as possible to 100%. We are sticklers for having useful tests.
+3. Run `yarn test`. Make sure your package's test's passes. Try to get your code coverage as close as possible to 100%. We are sticklers for having useful tests. 100% is sometimes a false sense of security so while we like to see it, we would rather see use case driven testing. 

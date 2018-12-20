@@ -1,4 +1,4 @@
-# `SoF-GraphQL-Invariant`
+# `SOF-GraphQL-Invariant`
 
 > Utility for validating patient and user level scopes for the SMART on FHIR
 specification in a GraphQL based server.
@@ -52,7 +52,7 @@ let root = new GraphQLObjectType({
 });
 ```
 
-See [sof-graphql-invariant tests](./index.test.js) for more usage examples.
+See [sof-graphql-invariant tests](https://github.com/Asymmetrik/phx-tools/blob/master/packages/sof-graphql-invariant/index.test.js) for more usage examples.
 
 ### Disabling
 By default if you use this invariant, it will check scopes on all incoming requests. If you want to disable this or provide a toggle mechanism, you can do so by setting an environment variable. To disable authentication, set `SOF_AUTHENTICATION` to false. It will only disable authentication if this is explicitly set to false.
@@ -110,7 +110,7 @@ const ExamplePatientMutation = {
 
 ## Arguments
 
-`@asymmetrik/sof-graphql-invariant tests` exports a single function which takes two arguments. One is a set of options and the other is a resolver function.
+`@asymmetrik/sof-graphql-invariant` exports a single function which takes two arguments. One is a set of options and the other is a resolver function.
 
 ### Options
 The first argument we have is an options object, it contains all of the following:
