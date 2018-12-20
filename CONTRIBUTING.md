@@ -16,8 +16,8 @@ Getting started is really easy, just follow these steps.
 While we do not enforce this with an iron fist, we do encourage you use the following branching strategy.
 
 * For new packages, use `package/<package-name>`.
-* For features, use `feature/<feature-name>`.
-* For bugs, use `bug/<bug-or-issue-number>`.
+* For features, use `feat/<feature-name>`.
+* For bugs, use `fix/<bug-or-issue-number>`.
 
 ### Commit messages
 
