@@ -46,4 +46,6 @@ Before submitting a pull request, try to make sure you have done the following.
 
 1. Run `yarn prettier`. This formats code so we won't need any debates on style.
 2. Run `yarn lint` and fix any issues that arise. Prettier should prevent a lot of these but there are still things ESLint can catch that prettier won't fix.
-3. Run `yarn test`. Make sure your package's test's passes. Try to get your code coverage as close as possible to 100%. We are sticklers for having useful tests. 100% is sometimes a false sense of security so while we like to see it, we would rather see use case driven testing. 
+3. Run `yarn test`. Make sure your package's test's passes. Try to get your code coverage as close as possible to 100%. We are sticklers for having useful tests. 100% is sometimes a false sense of security so while we like to see it, we would rather see use case driven testing.
+
+Once everything is ready to go, submit a PR to the `master` branch.
