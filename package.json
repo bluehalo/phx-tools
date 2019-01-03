@@ -4,7 +4,8 @@
 		"test": "jest packages",
 		"lint": "eslint \"packages/**/*.js\"",
 		"prettier": "prettier \"packages/**/*.js\" --write",
-		"bootstrap": "lerna bootstrap"
+		"bootstrap": "lerna bootstrap",
+		"todo": "grep -nr --exclude-dir={node_modules} TODO packages"
 	},
 	"jest": {
 		"verbose": true,

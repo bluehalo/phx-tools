@@ -1,6 +1,6 @@
 # Contributing
 
-Contributions are always welcome and we appreciate any help you can offer. Please read the entire contributors guide.
+Contributions are always welcome and we appreciate any help you can offer. Please take a moment to read the entire contributors guide.
 
 ## Getting setup
 
@@ -21,7 +21,7 @@ While we do not enforce this with an iron fist, we do encourage you use the foll
 
 ### Commit messages
 
-We want to use lerna to generate change logs for us automatically. In order for this to work correctly, we need to follow the [conventional commit standard](https://www.conventionalcommits.org/). We prefer you use this messages when committing but if not, we will try to reformat them when we merge your PR's into this format.
+We want to use lerna to generate change logs for us automatically. In order for this to work correctly, we need to follow the [conventional commit standard](https://www.conventionalcommits.org/). Please use this message standard when committing, if not, we will have to reformat them when we merge your PR's into this format.
 
 ## Creating a new package
 
