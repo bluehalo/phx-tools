@@ -86,12 +86,12 @@ module.exports = function smartOnFHIRScopeInvariant(options = {}, resolver) {
 		let env = process.env;
 
 		// Mechanism for disabling this feature, should be enabled by default
-		if (env && env.SOF_AUTHENTICATION === false) {
+		if (env && env.SOF_AUTHENTICATION === 'false') {
 			return resolver(root, args, context, info);
 		}
 
 		// Mechanism for disabling when using Graphiql via graphql-express
-		if (env && env.HAS_GRAPHIQL === true && /\$graphiql$/.test(req.baseUrl)) {
+		if (env && env.HAS_GRAPHIQL === 'true' && /\$graphiql$/.test(req.baseUrl)) {
 			return resolver(root, args, context, info);
 		}
 
