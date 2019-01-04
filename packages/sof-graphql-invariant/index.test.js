@@ -149,7 +149,7 @@ describe('GraphQL Scope Checker Test', () => {
 
 		expect(typeof resolver).toEqual('function');
 		// Define our environment variable
-		process.env.SOF_AUTHENTICATION = false;
+		process.env.SOF_AUTHENTICATION = 'false';
 		// If we invoke the result with bad scopes, instead of an error, we should
 		// get results because we are disabling auth
 		let results = resolver(null, null, null, null);
@@ -169,7 +169,7 @@ describe('GraphQL Scope Checker Test', () => {
 
 		expect(typeof resolver).toEqual('function');
 		// Define our environment variable
-		process.env.HAS_GRAPHIQL = true;
+		process.env.HAS_GRAPHIQL = 'true';
 
 		// If we invoke the result with bad scopes, instead of an error, we should
 		// get results because we are disabling auth

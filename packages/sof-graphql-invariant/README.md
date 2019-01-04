@@ -54,14 +54,28 @@ let root = new GraphQLObjectType({
 
 See [sof-graphql-invariant tests](https://github.com/Asymmetrik/phx-tools/blob/master/packages/sof-graphql-invariant/index.test.js) for more usage examples.
 
+### Environment variables
+
+#### `SOF_AUTHENTICATION`
+Disable authentication, it is enabled by default. See [disabling](#disabling).
+
+Type: `String`  
+Value: `false` 
+
+#### `HAS_GRAPHIQL`
+Disable authentication for graphiql only while keeping it on other endpoints. See [Disabling for Graphiql only](#disabling-for-graphiql-only).
+
+Type: `String`  
+Value: `true`  
+
 ### Disabling
-By default if you use this invariant, it will check scopes on all incoming requests. If you want to disable this or provide a toggle mechanism, you can do so by setting an environment variable. To disable authentication, set `SOF_AUTHENTICATION` to false. It will only disable authentication if this is explicitly set to false.
+If you use this invariant, it will check scopes on all incoming requests. If you want to disable this or provide a toggle mechanism, you can do so by setting an environment variable. To disable authentication, set `SOF_AUTHENTICATION` to false. It will only disable authentication if this is explicitly set to false.
 
 ```javascript
 const scopeInvariant = require('@asymmetrik/sof-graphql-invariant');
 
 // Set the ENV
-process.env.SOF_AUTHENTICATION = false;
+process.env.SOF_AUTHENTICATION = 'false';
 
 /**
 * NOTE: You *MUST* still provide a valid config if you are using
@@ -82,13 +96,13 @@ const ExamplePatientQuery = {
 ```
 
 
-### Enabling while allowing Graphiql to remain unauthenticated
-Sometimes it is useful to enable authentication in development but disable it when you are using the graphiql explorer. This requires two things. First is an environment variable stating you are using it, `HAS_GRAPHIQL`. Second, that the endpoint ends with `$graphiql`. If you do this, you can have authentication enabled on your graphql scehams but not if the request is coming from GraphiQL.
+### Disabling for Graphiql only
+Sometimes it is useful to enable authentication in development but disable it when you are using the graphiql explorer. This requires two things. First is an environment variable stating you are using it, `HAS_GRAPHIQL`. Second, that the endpoint ends with `$graphiql`. If you do this, you can have authentication enabled on your graphql schemas but not if the request is coming from GraphiQL.
 
 ```javascript
 const scopeInvariant = require('@asymmetrik/sof-graphql-invariant');
 // Set the ENV
-process.env.HAS_GRAPHIQL = true;
+process.env.HAS_GRAPHIQL = 'true';
 
 /**
 * NOTE: You *MUST* still provide a valid config if you are using
