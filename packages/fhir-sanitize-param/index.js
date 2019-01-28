@@ -110,7 +110,7 @@ function splitPrefixFromValue(inputValue) {
 
 	return {
 		prefix: prefix,
-		value: value
+		value: value,
 	};
 }
 
@@ -137,9 +137,9 @@ function sanitizeBoolean(name, inputValue, type = 'boolean') {
  * @returns {*}
  */
 function sanitizeDate(name, inputValue, type = 'date') {
-	let {prefix, value} = splitPrefixFromValue(inputValue);
+	let { prefix, value } = splitPrefixFromValue(inputValue);
 	invariant(moment(value).isValid(), mismatchError(type, name));
-	return (prefix + value);
+	return prefix + value;
 }
 
 /**
@@ -151,9 +151,12 @@ function sanitizeDate(name, inputValue, type = 'date') {
  * @returns {*}
  */
 function sanitizeNumber(name, inputValue, type = 'number') {
-	let {prefix, value} = splitPrefixFromValue(inputValue);
+	let { prefix, value } = splitPrefixFromValue(inputValue);
 	const coercedVal = validator.toFloat('' + value);
-	invariant(typeof coercedVal === 'number' && !Number.isNaN(coercedVal), mismatchError(type, name));
+	invariant(
+		typeof coercedVal === 'number' && !Number.isNaN(coercedVal),
+		mismatchError(type, name),
+	);
 	const expectedval = Number(coercedVal);
 	const givenval = Number(value);
 
@@ -161,7 +164,7 @@ function sanitizeNumber(name, inputValue, type = 'number') {
 		expectedval === givenval,
 		`Expected value: ${expectedval} does not equal given value: ${givenval}`,
 	);
-	return (prefix + '' + value);
+	return prefix + '' + value;
 }
 
 /**
@@ -217,14 +220,14 @@ function sanitizeQuantity(name, inputValue, type = 'quantity') {
 	let system = '';
 	let code = '';
 	if (token) {
-		({system, code} = sanitizeToken(name, token, 'quantity.token'));
+		({ system, code } = sanitizeToken(name, token, 'quantity.token'));
 	}
 	invariant(number, mismatchError(type, name));
 
 	return {
 		number: number,
 		system: system,
-		code: code
+		code: code,
 	};
 }
 

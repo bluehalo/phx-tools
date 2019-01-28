@@ -19,13 +19,18 @@ describe('Parameter Sanitization Test', () => {
 					method: 'GET',
 					query: {
 						foo: 'foo',
-						bar: 'bar'
+						bar: 'bar',
 					},
 				};
-				let configs = [{ name: 'foo', type: 'string' }, { name: 'bar', type: 'whoknows' }];
+				let configs = [
+					{ name: 'foo', type: 'string' },
+					{ name: 'bar', type: 'whoknows' },
+				];
 				let { errors, args } = sanitizer(request, configs);
 				expect(errors).toHaveLength(1);
-				expect(errors[0].message).toContain('Unsupported type whoknows for parameter bar');
+				expect(errors[0].message).toContain(
+					'Unsupported type whoknows for parameter bar',
+				);
 				expect(args._raw.bar === 'bar');
 				expect(args.foo[0].value === 'foo');
 			});
@@ -112,7 +117,7 @@ describe('Parameter Sanitization Test', () => {
 		});
 
 		describe('number', () => {
-			test('Should implicitly apply \'eq\' prefix', () => {
+			test("Should implicitly apply 'eq' prefix", () => {
 				let request = {
 					method: 'GET',
 					query: {
@@ -174,7 +179,9 @@ describe('Parameter Sanitization Test', () => {
 				let configs = [{ name: 'foo', type: 'number' }];
 				let { errors, args } = sanitizer(request, configs);
 				expect(errors).toHaveLength(1);
-				expect(errors[0].message).toContain('expected number for parameter foo');
+				expect(errors[0].message).toContain(
+					'expected number for parameter foo',
+				);
 				expect(args.foo).toBeUndefined();
 			});
 
@@ -188,7 +195,9 @@ describe('Parameter Sanitization Test', () => {
 				let configs = [{ name: 'foo', type: 'number' }];
 				let { errors, args } = sanitizer(request, configs);
 				expect(errors).toHaveLength(1);
-				expect(errors[0].message).toContain('Expected value: 3.14159 does not equal given value: NaN');
+				expect(errors[0].message).toContain(
+					'Expected value: 3.14159 does not equal given value: NaN',
+				);
 				expect(args.foo).toBeUndefined();
 			});
 
@@ -359,10 +368,10 @@ describe('Parameter Sanitization Test', () => {
 				let request = {
 					method: 'GET',
 					query: {
-						foo: '12'
-					}
+						foo: '12',
+					},
 				};
-				let configs = [{name: 'foo', type: 'quantity'}];
+				let configs = [{ name: 'foo', type: 'quantity' }];
 				let { errors, args } = sanitizer(request, configs);
 				let quantity = args.foo[0].value[0];
 				expect(errors).toHaveLength(0);
@@ -375,10 +384,10 @@ describe('Parameter Sanitization Test', () => {
 				let request = {
 					method: 'GET',
 					query: {
-						foo: '12|http://unitsofmeasure.org|'
-					}
+						foo: '12|http://unitsofmeasure.org|',
+					},
 				};
-				let configs = [{name: 'foo', type: 'quantity'}];
+				let configs = [{ name: 'foo', type: 'quantity' }];
 				let { errors, args } = sanitizer(request, configs);
 				let quantity = args.foo[0].value[0];
 				expect(errors).toHaveLength(0);
@@ -392,10 +401,13 @@ describe('Parameter Sanitization Test', () => {
 					method: 'GET',
 					query: {
 						foo: '12||mg',
-						bar: '12|mg'
-					}
+						bar: '12|mg',
+					},
 				};
-				let configs = [{name: 'foo', type: 'quantity'}, {name: 'bar', type: 'quantity'}];
+				let configs = [
+					{ name: 'foo', type: 'quantity' },
+					{ name: 'bar', type: 'quantity' },
+				];
 				let { errors, args } = sanitizer(request, configs);
 				let fooQuantity = args.foo[0].value[0];
 				let barQuantity = args.bar[0].value[0];
@@ -412,10 +424,10 @@ describe('Parameter Sanitization Test', () => {
 				let request = {
 					method: 'GET',
 					query: {
-						foo: 'lt1.010|http://unitsofmeasure.org|kg'
-					}
+						foo: 'lt1.010|http://unitsofmeasure.org|kg',
+					},
 				};
-				let configs = [{name: 'foo', type: 'quantity'}];
+				let configs = [{ name: 'foo', type: 'quantity' }];
 				let { errors, args } = sanitizer(request, configs);
 				let quantity = args.foo[0].value[0];
 				expect(errors).toHaveLength(0);
@@ -428,13 +440,15 @@ describe('Parameter Sanitization Test', () => {
 				let request = {
 					method: 'GET',
 					query: {
-						foo: 'lt1.0asdf0|http://unitsofmeasure.org|kg'
-					}
+						foo: 'lt1.0asdf0|http://unitsofmeasure.org|kg',
+					},
 				};
-				let configs = [{name: 'foo', type: 'quantity'}];
+				let configs = [{ name: 'foo', type: 'quantity' }];
 				let { errors, args } = sanitizer(request, configs);
 				expect(errors).toHaveLength(1);
-				expect(errors[0].message).toContain('Expected value: 1 does not equal given value: NaN');
+				expect(errors[0].message).toContain(
+					'Expected value: 1 does not equal given value: NaN',
+				);
 				expect(Object.getOwnPropertyNames(args)).toHaveLength(0);
 			});
 
@@ -442,13 +456,15 @@ describe('Parameter Sanitization Test', () => {
 				let request = {
 					method: 'GET',
 					query: {
-						foo: '|http://unitsofmeasure.org|kg'
-					}
+						foo: '|http://unitsofmeasure.org|kg',
+					},
 				};
-				let configs = [{name: 'foo', type: 'quantity'}];
+				let configs = [{ name: 'foo', type: 'quantity' }];
 				let { errors, args } = sanitizer(request, configs);
 				expect(errors).toHaveLength(1);
-				expect(errors[0].message).toContain('expected quantity.number for parameter foo');
+				expect(errors[0].message).toContain(
+					'expected quantity.number for parameter foo',
+				);
 				expect(Object.getOwnPropertyNames(args)).toHaveLength(0);
 			});
 		});

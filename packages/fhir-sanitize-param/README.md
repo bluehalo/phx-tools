@@ -74,8 +74,9 @@ Is this parameter required.
 Type: `String`  
 Required: `false`  
 
+**NOTE:** Arguments present in the request that have not been specified in the array of allowed arguments will be passed through un-sanitized under a separate key `args._raw`. You will need to perform your own validation on this afterwards.
+
+
 ### Valid Types
 
-Allowed types are currently `number`, `date`, `boolean`, `string`, `token`, and `json_string`.
-
-**NOTE:** `json_string` expects stringified JSON and will attempt to call `JSON.parse` on it. The resulting object will be passed through as the sanitized argument. You will need to perform your own validation on this afterwards.
+Allowed types are currently `number`, `date`, `uri` `reference`, `string`, `token`, `quantity` and `boolean`.
