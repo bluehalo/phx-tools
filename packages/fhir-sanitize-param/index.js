@@ -84,7 +84,8 @@ function parseArguments(req) {
 		args = Object.assign(args, req.query);
 	}
 	// For PUT and POST requests, merge request body
-	if (/PUT|POST/.test(req.method)) {
+	// TODO Maybe only do this if the url endpoint is '_search'?
+	else if (req.method === 'POST') {
 		args = Object.assign(args, req.body);
 	}
 	// For all requests, merge request params
@@ -124,7 +125,7 @@ function splitPrefixFromValue(inputValue) {
  */
 function sanitizeBoolean(name, inputValue, type = 'boolean') {
 	let value = validator.toBoolean(inputValue, true);
-	invariant(typeof value === 'boolean', mismatchError(type, name));
+	invariant(typeof value === type, mismatchError(type, name));
 	return value;
 }
 
@@ -195,14 +196,28 @@ function sanitizeString(name, inputValue, type) {
 function sanitizeToken(name, inputValue, type = 'token') {
 	// Throw if the value is not a string, because we will not be able to make a token out of it
 	invariant(typeof inputValue === 'string', mismatchError(type, name));
-	// Tokens may contain codes and systems that are separated by pipes make sure to correctly parse these values
 	let chunks = inputValue.split('|');
-	let system = chunks.length === 1 ? '' : chunks[0];
-	let code = chunks.length === 1 ? inputValue : chunks[1];
+
+	// Tokens have 1 or 2 parts containing codes and systems that are separated by pipes.
+	invariant([1, 2].includes(chunks.length), mismatchError(type, name));
+	let system;
+	let code;
+	switch (chunks.length) {
+		case 1:
+			system = '';
+			code = chunks[0];
+			break;
+		case 2:
+			system = chunks[0];
+			code = chunks[1];
+			break;
+	}
+	system = validator.stripLow(xss(sanitize(system)));
+	code = validator.stripLow(xss(sanitize(code)));
 
 	return {
-		code: validator.stripLow(xss(sanitize(code))),
-		system: validator.stripLow(xss(sanitize(system))),
+		code: code,
+		system: system
 	};
 }
 
@@ -313,8 +328,8 @@ module.exports = function SanitizeFHIRParams(req = {}, configs = []) {
 		else if (field) {
 			try {
 				// Unless a _has chain is provided, split only once, so have 2 pieces
-				let [_, ...suffix] = field.split(':', 2);
-				suffix = suffix[0] ? '' + suffix[0] : '';
+				// TODO handle reverse chaining
+				let [_, suffix = ''] = field.split(':', 2);
 
 				// Handle implicit URI logic before handling explicit modifiers
 				if (config.type === 'uri') {
@@ -322,9 +337,9 @@ module.exports = function SanitizeFHIRParams(req = {}, configs = []) {
 						// Implicitly make any search on a uri that ends with a trailing '/' a 'below' search
 						suffix = 'below';
 					}
-					if (value.startsWith('urn')) {
-						// No modifiers used with with URNs.
-						suffix = '';
+					if (value.startsWith('urn') && suffix) {
+						// Modifiers cannot be used with URN values. If a suffix was supplied
+						throw new Error(`Search modifiers are not supported for parameter ${config.name} as a URN of type uri.`);
 					}
 				}
 				let sanitizedValue = coerceValue(config, value, suffix === 'missing');
@@ -335,7 +350,6 @@ module.exports = function SanitizeFHIRParams(req = {}, configs = []) {
 						suffix: suffix,
 					});
 				});
-				args._raw = params; //TODO - This puts everything in _raw without processing it. Discuss further.
 			} catch (err) {
 				errors.push(err);
 			}

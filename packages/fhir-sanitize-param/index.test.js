@@ -14,27 +14,6 @@ describe('Parameter Sanitization Test', () => {
 				expect(Object.getOwnPropertyNames(args)).toHaveLength(0);
 			});
 
-			test('Should throw an error, but still pass argument through as _raw if given an unsupported type', () => {
-				let request = {
-					method: 'GET',
-					query: {
-						foo: 'foo',
-						bar: 'bar',
-					},
-				};
-				let configs = [
-					{ name: 'foo', type: 'string' },
-					{ name: 'bar', type: 'whoknows' },
-				];
-				let { errors, args } = sanitizer(request, configs);
-				expect(errors).toHaveLength(1);
-				expect(errors[0].message).toContain(
-					'Unsupported type whoknows for parameter bar',
-				);
-				expect(args._raw.bar === 'bar');
-				expect(args.foo[0].value === 'foo');
-			});
-
 			test('should return an error if missing a required type', () => {
 				let request = {};
 				let configs = [{ name: 'foo', type: 'string', required: true }];
@@ -298,7 +277,7 @@ describe('Parameter Sanitization Test', () => {
 		describe('token', () => {
 			test('should parse code and system from a token input', () => {
 				let request = {
-					method: 'PUT',
+					method: 'POST',
 					body: {
 						foo: 'http://acme.org/patient|2345',
 					},
@@ -335,7 +314,7 @@ describe('Parameter Sanitization Test', () => {
 
 			test('should parse only system', () => {
 				let request = {
-					method: 'PUT',
+					method: 'POST',
 					body: {
 						foo: 'http://acme.org/patient|',
 					},
@@ -767,7 +746,7 @@ describe('Parameter Sanitization Test', () => {
 				expect(args.foo[0].suffix).toEqual('above');
 			});
 
-			test('should not allow suffix with URNs', () => {
+			test('Should not allow suffix with URNs', () => {
 				let request = {
 					method: 'GET',
 					query: {
@@ -776,9 +755,9 @@ describe('Parameter Sanitization Test', () => {
 				};
 				let configs = [{ name: 'foo', type: 'uri' }];
 				let { errors, args } = sanitizer(request, configs);
-				expect(errors).toHaveLength(0);
-				expect(args.foo[0].value).toEqual(['urn:oid:1.2.3.4.5']);
-				expect(args.foo[0].suffix).toEqual('');
+				expect(errors).toHaveLength(1);
+				expect(errors[0].message).toContain('Search modifiers are not supported for parameter foo as a URN of type uri.')
+				expect(args === {});
 			});
 		});
 	});
