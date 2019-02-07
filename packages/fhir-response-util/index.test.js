@@ -165,7 +165,6 @@ describe('FHIR Response Utility', () => {
 			let expectedContentLocation =
 				'https://localhost:3000/4_0_0/Patient/foo/_history/1';
 
-			// Should not set ETag if deleted prop is not present
 			expect(res.set.mock.calls).toHaveLength(4);
 			expect(res.set.mock.calls[0][0]).toBe('Content-Location');
 			expect(res.set.mock.calls[0][1]).toBe(expectedContentLocation);
@@ -180,8 +179,8 @@ describe('FHIR Response Utility', () => {
 
 		test('should set the correct Location and Last-modified headers always', () => {
 			let results = { id: 'foo' };
-			// Number of milliseconds tolerance we want to allow
 			let expectedDate = new Date().getTime();
+			// Number of milliseconds tolerance we want to allow
 			let tolerance = 60 * 1000;
 
 			handler.update(req, res, results, { type: 'Patient' });
@@ -195,7 +194,7 @@ describe('FHIR Response Utility', () => {
 			// The dates wont be exact due to the time the test takes to run, we give
 			// ourselves a 60 second buffer incase the CI is slow or the test stalls
 			expect(
-				Math.abs(expectedDate - lastModifiedTime) < tolerance,
+				Math.abs(lastModifiedTime - expectedDate) < tolerance,
 			).toBeTruthy();
 			expect(res.set.mock.calls[1][0]).toBe('Location');
 			expect(res.set.mock.calls[1][1]).toBe('4_0_0/Patient/foo');

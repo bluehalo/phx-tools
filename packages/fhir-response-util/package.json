@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "description": "Utility for handling the headers, content, and status types for a response.",
   "main": "index.js",
-	"homepage": "https://github.com/Asymmetrik/phx-tools",
+  "homepage": "https://github.com/Asymmetrik/phx-tools",
   "repository": {
-		"type": "git",
-		"url": "https://github.com/Asymmetrik/phx-tools.git"
+    "type": "git",
+    "url": "https://github.com/Asymmetrik/phx-tools.git"
 	},
   "author": "Robert-W <rwinterbottom@asymmetrik.com>",
   "license": "MIT",
