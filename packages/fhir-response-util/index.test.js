@@ -4,8 +4,8 @@ let req = {
 	protocol: 'https',
 	get: _prop => 'localhost:3000',
 	params: {
-		base_version: '4_0_0'
-	}
+		base_version: '4_0_0',
+	},
 };
 
 let res, end, json;
@@ -19,8 +19,8 @@ describe('FHIR Response Utility', () => {
 			type: jest.fn(),
 			status: jest.fn(() => ({
 				end: end,
-				json: json
-			}))
+				json: json,
+			})),
 		};
 	});
 
@@ -74,8 +74,8 @@ describe('FHIR Response Utility', () => {
 				results: 'GOLD',
 				meta: {
 					lastUpdated: 'now',
-					versionId: '1'
-				}
+					versionId: '1',
+				},
 			};
 
 			handler.readOne(req, res, results);
@@ -194,7 +194,9 @@ describe('FHIR Response Utility', () => {
 			expect(res.set.mock.calls[0][0]).toBe('Last-Modified');
 			// The dates wont be exact due to the time the test takes to run, we give
 			// ourselves a 60 second buffer incase the CI is slow or the test stalls
-			expect(Math.abs(expectedDate - lastModifiedTime) < tolerance).toBeTruthy();
+			expect(
+				Math.abs(expectedDate - lastModifiedTime) < tolerance,
+			).toBeTruthy();
 			expect(res.set.mock.calls[1][0]).toBe('Location');
 			expect(res.set.mock.calls[1][1]).toBe('4_0_0/Patient/foo');
 

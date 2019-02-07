@@ -64,10 +64,7 @@ function create(req, res, json, options) {
 
 	if (json.resource_version) {
 		let pathname = path.posix.join(location, '_history', json.resource_version);
-		res.set(
-			'Content-Location',
-			`${baseUrl}/${pathname}`,
-		);
+		res.set('Content-Location', `${baseUrl}/${pathname}`);
 		res.set('ETag', json.resource_version);
 	}
 
@@ -92,10 +89,7 @@ function update(req, res, json, options) {
 
 	if (json.resource_version) {
 		let pathname = path.posix.join(location, '_history', json.resource_version);
-		res.set(
-			'Content-Location',
-			`${baseUrl}/${pathname}`,
-		);
+		res.set('Content-Location', `${baseUrl}/${pathname}`);
 		res.set('ETag', json.resource_version);
 	}
 
