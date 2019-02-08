@@ -84,7 +84,7 @@ describe('FHIR Response Utility', () => {
 			expect(res.set.mock.calls[0][0]).toBe('Last-Modified');
 			expect(res.set.mock.calls[0][1]).toBe(results.meta.lastUpdated);
 			expect(res.set.mock.calls[1][0]).toBe('ETag');
-			expect(res.set.mock.calls[1][1]).toBe(results.meta.versionId);
+			expect(res.set.mock.calls[1][1]).toBe(`W/"${results.meta.versionId}"`);
 
 			expect(res.status.mock.calls).toHaveLength(1);
 			expect(res.status.mock.calls[0][0]).toBe(200);

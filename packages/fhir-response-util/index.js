@@ -42,7 +42,7 @@ function readOne(req, res, json) {
 
 	if (json && json.meta) {
 		res.set('Last-Modified', json.meta.lastUpdated);
-		res.set('ETag', json.meta.versionId);
+		res.set('ETag', `W/"${json.meta.versionId}"`);
 	}
 
 	res.type(getContentType(fhirVersion));
