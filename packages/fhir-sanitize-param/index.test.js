@@ -94,7 +94,7 @@ describe('Parameter Sanitization Test', () => {
 				expect(args.baz[0].value).toEqual(['baz']);
 			});
 
-			test('Should return an error for an invalid type', () => {
+			test('Should return an error for an invalid value for the given type', () => {
 				let request = {
 					method: 'POST',
 					body: {
@@ -105,6 +105,19 @@ describe('Parameter Sanitization Test', () => {
 				let { errors, args } = sanitizer(request, configs);
 				expect(errors).toHaveLength(1);
 				expect(errors[0].message).toContain('expected token for parameter foo');
+				expect(Object.getOwnPropertyNames(args)).toHaveLength(0);
+			});
+			test('Should return an error for an invalid type', () => {
+				let request = {
+					method: 'POST',
+					body: {
+						foo: ['http://acme.org/patient|'],
+					},
+				};
+				let configs = [{ name: 'foo', type: 'asdf' }];
+				let { errors, args } = sanitizer(request, configs);
+				expect(errors).toHaveLength(1);
+				expect(errors[0].message).toContain('Unsupported type asdf for parameter foo. Please double check your parameter config');
 				expect(Object.getOwnPropertyNames(args)).toHaveLength(0);
 			});
 		});
