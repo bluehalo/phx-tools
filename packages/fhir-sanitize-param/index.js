@@ -83,8 +83,7 @@ function parseArguments(req) {
 	if (req.method === 'GET') {
 		args = Object.assign(args, req.query);
 	}
-	// For PUT and POST requests, merge request body
-	// TODO Maybe only do this if the url endpoint is '_search'?
+	// POST requests, merge request body
 	else if (req.method === 'POST') {
 		args = Object.assign(args, req.body);
 	}
@@ -154,10 +153,7 @@ function sanitizeDate(name, inputValue, type = 'date') {
 function sanitizeNumber(name, inputValue, type = 'number') {
 	let { prefix, value } = splitPrefixFromValue(inputValue);
 	const coercedVal = validator.toFloat('' + value);
-	invariant(
-		typeof coercedVal === 'number' && !Number.isNaN(coercedVal),
-		mismatchError(type, name),
-	);
+	invariant(!isNaN(coercedVal), mismatchError(type, name));
 	const expectedval = Number(coercedVal);
 	const givenval = Number(value);
 

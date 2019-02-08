@@ -93,6 +93,20 @@ describe('Parameter Sanitization Test', () => {
 				expect(args.bar[0].value).toEqual(['bar']);
 				expect(args.baz[0].value).toEqual(['baz']);
 			});
+
+			test('Should return an error for an invalid type', () => {
+				let request = {
+					method: 'POST',
+					body: {
+						foo: [['http://acme.org/patient|']],
+					},
+				};
+				let configs = [{ name: 'foo', type: 'token' }];
+				let { errors, args } = sanitizer(request, configs);
+				expect(errors).toHaveLength(1);
+				expect(errors[0].message).toContain('expected token for parameter foo');
+				expect(Object.getOwnPropertyNames(args)).toHaveLength(0);
+			});
 		});
 
 		describe('number', () => {
@@ -325,20 +339,6 @@ describe('Parameter Sanitization Test', () => {
 				expect(errors).toHaveLength(0);
 				expect(token.code).toEqual('');
 				expect(token.system).toEqual('http://acme.org/patient');
-			});
-
-			test('should return an error for an invalid type', () => {
-				let request = {
-					method: 'POST',
-					body: {
-						foo: [['http://acme.org/patient|']],
-					},
-				};
-				let configs = [{ name: 'foo', type: 'token' }];
-				let { errors, args } = sanitizer(request, configs);
-				expect(errors).toHaveLength(1);
-				expect(errors[0].message).toContain('expected token for parameter foo');
-				expect(Object.getOwnPropertyNames(args)).toHaveLength(0);
 			});
 		});
 

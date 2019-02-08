@@ -74,9 +74,44 @@ Is this parameter required.
 Type: `String`  
 Required: `false`  
 
-**NOTE:** Arguments present in the request that have not been specified in the array of allowed arguments will be passed through un-sanitized under a separate key `args._raw`. You will need to perform your own validation on this afterwards.
-
-
 ### Valid Types
 
 Allowed types are currently `number`, `date`, `uri` `reference`, `string`, `token`, `quantity` and `boolean`.
+
+## Outputs
+The sanitizer returns two objects, `{errors, args}`. The returned objects have the following properties:
+
+#### `errors`
+The returned `errors` is just a list of errors detected during the sanitization process. If no errors
+were detected, this will be an empty list. 
+
+#### `args`
+The `args` object returned will be structured as follows. The keys of the object are the names of the parameters
+supplied in allowed arguments to the function. The values for these keys is a list of objects. These inner objects
+will have two keys, `value`, a comma separated list of values, and `suffix`, which is the modifier (if one was supplied).
+
+The object is structured this way to represent the various and/or conditions supplied in the request in a way that
+the query builder can understand. Items within one of the `value` lists are meant to have and OR operation between them, 
+while objects within a named parameter list are meant to have an AND operator between them.
+
+For example given the request and allowed arguments:
+```
+let req = {
+  method: 'GET',
+ 	query: {
+ 	  foo: ['eq42', 'gt500,lt1000'],
+ 	},
+};
+let allowedArgs = [{ name: 'foo', type: 'number' }];
+let {errors, args} = sanitizer(req, allowedArgs)
+```
+The args object returned will look like this:
+```
+{
+  foo:[
+    {value:["eq42"], suffix:""},{value:["gt500","lt1000"],suffix:""}
+  ]
+}
+```
+
+
