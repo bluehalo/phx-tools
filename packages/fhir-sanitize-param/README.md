@@ -76,7 +76,7 @@ Required: `false`
 
 ### Valid Types
 
-Allowed types are currently `number`, `date`, `uri` `reference`, `string`, `token`, `quantity` and `boolean`.
+Allowed types are currently `number`, `date`, `uri`, `reference`, `string`, `token`, `quantity` and `boolean`.
 
 ## Outputs
 The sanitizer returns two objects, `{errors, args}`. The returned objects have the following properties:
@@ -109,9 +109,10 @@ The args object returned will look like this:
 ```
 {
   foo:[
-    {value:["eq42"], suffix:""},{value:["gt500","lt1000"],suffix:""}
+    {value:["eq555"], suffix:""},{value:["gt500","lt1000"],suffix:""}
   ]
 }
 ```
+This example is a bit contrived, but it asks the query builder to find records where the parameter `foo == 555 AND (foo > 500 OR foo < 1000)`. 
 
 
