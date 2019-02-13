@@ -49,3 +49,10 @@ Before submitting a pull request, try to make sure you have done the following.
 3. Run `yarn test`. Make sure your package's test's passes. Try to get your code coverage as close as possible to 100%. We are sticklers for having useful tests. 100% is sometimes a false sense of security so while we like to see it, we would rather see use case driven testing.
 
 Once everything is ready to go, submit a PR to the `master` branch.
+
+## Deploying
+
+When you are ready to publish the packages to NPM, run the following commands.
+
+1. `lerna version --conventional-commits`
+2. `lerna publish`

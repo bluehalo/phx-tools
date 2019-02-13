@@ -6,7 +6,6 @@
 	"homepage": "https://github.com/Asymmetrik/phx-tools",
   "author": "Robert-W <rwinterbottom@asymmetrik.com>",
   "license": "MIT",
-  "private": true,
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/Asymmetrik/phx-tools.git"
