@@ -4,8 +4,7 @@
   "version": "independent",
 	"command": {
 		"publish": {
-			"npmClient": "npm",
-			"conventionalCommits": "true"
+			"npmClient": "npm"
 		}
 	}
 }
