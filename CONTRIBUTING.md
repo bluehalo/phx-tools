@@ -52,7 +52,6 @@ Once everything is ready to go, submit a PR to the `master` branch.
 
 ## Deploying
 
-When you are ready to publish the packages to NPM, run the following commands.
+When you are ready to publish the packages to NPM, run the following command.
 
-1. `lerna version --conventional-commits`
-2. `lerna publish`
+1. `lerna publish --conventional-commits`
