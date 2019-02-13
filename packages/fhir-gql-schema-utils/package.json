@@ -1,15 +1,15 @@
 {
   "name": "@asymmetrik/fhir-gql-schema-utils",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Suite of FHIR related utilities for GraphQL schemas.",
   "main": "index.js",
-	"homepage": "https://github.com/Asymmetrik/phx-tools",
+  "homepage": "https://github.com/Asymmetrik/phx-tools",
   "author": "Robert-W <rwinterbottom@asymmetrik.com>",
   "license": "MIT",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/Asymmetrik/phx-tools.git"
-	},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Asymmetrik/phx-tools.git"
+  },
   "publishConfig": {
     "access": "public"
   },
