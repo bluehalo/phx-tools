@@ -12,9 +12,5 @@ If you are interested in contributing, see our [CONTRIBUTING.md](./CONTRIBUTING.
 
 **phx-tools** is a monorepo, similar to Babel, and managed with [Lerna](https://github.com/lerna/lerna). We have a `packages` directory that contains all of our various tools. We went for this approach for many of the same reasons Babel did, you can read up on that [here](https://github.com/babel/babel/blob/master/doc/design/monorepo.md) if interested.
 
-## Packages considered still in beta (and not published on npm)
-
-- `fhir-sanitize-param`
-
 ## License
 All packages in `phx-tools` are [MIT licensed](https://github.com/Asymmetrik/phx-tools/blob/master/LICENSE).
