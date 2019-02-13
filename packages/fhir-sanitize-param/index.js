@@ -72,125 +72,6 @@ function findMatchForConfig(name, params) {
 }
 
 /**
- * @function parseAndSanitizeToken
- * @description Given a token, parse it into a code and system
- * @param {String} token - Token to be parsed
- * @return {Token}
- */
-function parseAndSanitizeToken(token) {
-	let chunks = token.split('|');
-	let system = chunks.length === 1 ? '' : chunks[0];
-	let code = chunks.length === 1 ? token : chunks[1];
-
-	return {
-		code: validator.stripLow(xss(sanitize(code))),
-		system,
-	};
-}
-
-/**
- * @function parseAndSanitizeDate
- * @description Given a token, parse it into a code and system
- * @param {String} possibleDate - Datestring to be parsed
- * @return {DateInfo}
- */
-function parseAndSanitizeDate(dateInput) {
-	// Looks for a string like this
-	// 'ge2010-01-01' or 'gt2013-01-14T10:00'
-	let hasModifier = /^[a-z]{2}[0-9|T|:|-]*$/.test(dateInput);
-	let modifier = hasModifier ? dateInput.substring(0, 2) : '';
-	// If we have a modifier, remove it from the date string before
-	// manipulating it with moment
-	let dateValue = hasModifier ? dateInput.substring(2) : dateInput;
-	let dateString = moment.utc(dateValue).format();
-	let date = moment.utc(dateValue);
-
-	return {
-		dateString,
-		modifier,
-		date,
-	};
-}
-
-/**
- * @function coerceValue
- * @throws
- * @description Given a value and a type, attempt to coerce the value to the
- * correct type
- * @param {ParamConfig} config
- * @param {*} value - Value that will be coerced
- * @return {*}
- */
-function coerceValue(config, value) {
-	let { name, type } = config;
-	let result;
-	// Check all expected types, the config may need to be updated to reflect
-	// FHIR specific types
-	switch (type) {
-		case 'number':
-		case 'integer':
-		case 'decimal':
-			// This validator only accepts strings
-			result = validator.toFloat('' + value);
-			// Throw on invalid results
-			invariant(
-				typeof result === 'number' && !Number.isNaN(result),
-				mismatchError(type, name),
-			);
-			break;
-		case 'date':
-			// Dates will have a custom format as well
-			// for the values since they can have modifiers
-			// in a different format, like gte
-			result = parseAndSanitizeDate(value);
-			// Throw if unable to make a moment date from value
-			invariant(
-				moment(result.dateString).isValid() && moment.isMoment(result.date),
-				mismatchError(type, name),
-			);
-			break;
-		case 'boolean':
-			result = validator.toBoolean(value, true);
-			// Throw if we dont have a boolean value
-			invariant(typeof result === 'boolean', mismatchError(type, name));
-			break;
-		case 'uri':
-		case 'url':
-		case 'string':
-		case 'reference':
-			// strip any html tags from the query
-			// xss helps prevent html from slipping in
-			// strip a certain range of unicode characters
-			// replace any non word characters
-			result = validator.stripLow(xss(sanitize(value)));
-			// Throw if this somehow passes above
-			invariant(typeof result === 'string', mismatchError(type, name));
-			break;
-		case 'token':
-			// Throw if the value is not a string, because we will not be able
-			// to make a token out of it
-			invariant(typeof value === 'string', mismatchError(type, name));
-			// tokens may contain codes and systems that are separated by pipes
-			// make sure to correctly parse these values
-			result = parseAndSanitizeToken(value);
-			break;
-		case 'json_string':
-			// This is a custom field for writing values, we need to accept
-			// strings of JSON and attempt to parse them. There will also
-			// need to be validation done at the write level to make sure the
-			// resource is itself valid
-			// This will throw if value is not correct, no need to invariant
-			result = JSON.parse(value);
-			break;
-		default:
-			// Force an invariant here
-			invariant(false, unsupportedError(type, name));
-	}
-
-	return result;
-}
-
-/**
  * @function parseArguments
  * @description Parse only arguments needed for this type of request
  * @param {Express.req} req - Request from an express server
@@ -198,16 +79,219 @@ function coerceValue(config, value) {
  */
 function parseArguments(req) {
 	let args = {};
-	// Merge query from get only
+	// For GET requests, merge request query
 	if (req.method === 'GET') {
 		args = Object.assign(args, req.query);
 	}
-	// Merge body from put and post only
-	if (/PUT|POST/.test(req.method)) {
+	// POST requests, merge request body
+	else if (req.method === 'POST') {
 		args = Object.assign(args, req.body);
 	}
-	// Merge params for all requests
+	// For all requests, merge request params
 	return Object.assign(args, req.params);
+}
+
+/**
+ * @function splitPrefixFromValue
+ * @description Separate the prefix (if there is one) from the actual value
+ * @param inputValue
+ * @returns {{prefix: string, value: *}}
+ */
+function splitPrefixFromValue(inputValue) {
+	// Default the prefix to 'eq'.
+	let prefix = 'eq';
+	let value = inputValue;
+
+	let prefixTestMatches = /^([a-z]+)(\d+.*)/.exec(inputValue);
+	if (prefixTestMatches && prefixTestMatches.length > 2) {
+		prefix = validator.stripLow(xss(sanitize(prefixTestMatches[1])));
+		value = validator.stripLow(xss(sanitize(prefixTestMatches[2])));
+	}
+
+	return {
+		prefix: prefix,
+		value: value,
+	};
+}
+
+/**
+ * @function sanitizeBoolean
+ * @description Sanitize boolean values
+ * @param name
+ * @param inputValue
+ * @param type
+ * @returns {*}
+ */
+function sanitizeBoolean(name, inputValue, type = 'boolean') {
+	let value = validator.toBoolean(inputValue, true);
+	invariant(typeof value === type, mismatchError(type, name));
+	return value;
+}
+
+/**
+ * @function sanitizeDate
+ * @description Sanitize date values
+ * @param name
+ * @param inputValue
+ * @param type
+ * @returns {*}
+ */
+function sanitizeDate(name, inputValue, type = 'date') {
+	let { prefix, value } = splitPrefixFromValue(inputValue);
+	invariant(moment(value).isValid(), mismatchError(type, name));
+	return prefix + value;
+}
+
+/**
+ * @function sanitizeNumber
+ * @description Sanitize number values
+ * @param name
+ * @param inputValue
+ * @param type
+ * @returns {*}
+ */
+function sanitizeNumber(name, inputValue, type = 'number') {
+	let { prefix, value } = splitPrefixFromValue(inputValue);
+	const coercedVal = validator.toFloat('' + value);
+	invariant(!isNaN(coercedVal), mismatchError(type, name));
+	const expectedval = Number(coercedVal);
+	const givenval = Number(value);
+
+	invariant(
+		expectedval === givenval,
+		`Expected value: ${expectedval} does not equal given value: ${givenval}`,
+	);
+	return prefix + '' + value;
+}
+
+/**
+ * @function sanitizeString
+ * @description Sanitize string values
+ * @param name
+ * @param inputValue
+ * @param type
+ * @returns {*}
+ */
+function sanitizeString(name, inputValue, type) {
+	// Strip any html tags from the query (xss helps prevent html from slipping in)
+	// Strip a certain range of unicode characters and replace any non word characters
+	let value = validator.stripLow(xss(sanitize(inputValue)));
+	// Throw if this somehow passes above
+	invariant(typeof value === 'string', mismatchError(type, name));
+	return value;
+}
+
+/**
+ * @function sanitizeToken
+ * @description Sanitize token values
+ * @param name
+ * @param inputValue
+ * @param type
+ * @returns {*}
+ */
+function sanitizeToken(name, inputValue, type = 'token') {
+	// Throw if the value is not a string, because we will not be able to make a token out of it
+	invariant(typeof inputValue === 'string', mismatchError(type, name));
+	let chunks = inputValue.split('|');
+
+	// Tokens have 1 or 2 parts containing codes and systems that are separated by pipes.
+	invariant([1, 2].includes(chunks.length), mismatchError(type, name));
+	let system;
+	let code;
+	switch (chunks.length) {
+		case 1:
+			system = '';
+			code = chunks[0];
+			break;
+		case 2:
+			system = chunks[0];
+			code = chunks[1];
+			break;
+	}
+	system = validator.stripLow(xss(sanitize(system)));
+	code = validator.stripLow(xss(sanitize(code)));
+
+	return {
+		code: code,
+		system: system
+	};
+}
+
+/**
+ * @function sanitizeQuantity
+ * @description Sanitize quantity values
+ * @param name
+ * @param inputValue
+ * @param type
+ * @returns {*}
+ */
+function sanitizeQuantity(name, inputValue, type = 'quantity') {
+	let [number, token] = inputValue.split(/\|(.+)/);
+	number = sanitizeNumber(name, number, 'quantity.number');
+	let system = '';
+	let code = '';
+	if (token) {
+		({ system, code } = sanitizeToken(name, token, 'quantity.token'));
+	}
+	invariant(number, mismatchError(type, name));
+
+	return {
+		number: number,
+		system: system,
+		code: code,
+	};
+}
+
+/**
+ * @function coerceValue
+ * @description Given a value and a type, attempt to coerce the value to the correct type
+ * @param config
+ * @param requestValue
+ * @param isMissingQuery
+ * @returns {*}
+ */
+function coerceValue(config, requestValue, isMissingQuery) {
+	let { name, type } = config;
+	requestValue = Array.isArray(requestValue) ? requestValue : [requestValue];
+	const sanitizedResult = requestValue.map(values => {
+		invariant(typeof values === 'string', mismatchError(type, name));
+		return values.split(',').map(value => {
+			let result;
+
+			if (isMissingQuery) {
+				type = 'missing_query';
+			}
+			// Check all expected types
+			switch (type) {
+				case 'number':
+					result = sanitizeNumber(name, value);
+					break;
+				case 'date':
+					result = sanitizeDate(name, value);
+					break;
+				case 'uri':
+				case 'reference':
+				case 'string':
+					result = sanitizeString(name, value, type);
+					break;
+				case 'token':
+					result = sanitizeToken(name, value);
+					break;
+				case 'quantity':
+					result = sanitizeQuantity(name, value);
+					break;
+				case 'boolean':
+				case 'missing_query':
+					result = sanitizeBoolean(name, value);
+					break;
+				default:
+					// Force an invariant here
+					invariant(false, unsupportedError(type, name));
+			}
+			return result;
+		});
+	});
+	return sanitizedResult;
 }
 
 /**
@@ -221,10 +305,10 @@ module.exports = function SanitizeFHIRParams(req = {}, configs = []) {
 	let errors = [];
 	let args = {};
 
-	// parse all available arguments
+	// Parse all available params
 	let params = parseArguments(req);
 
-	// for each item in our config, sanitize the configured param
+	// For each item in our config, sanitize the configured param
 	for (let i = 0; i < configs.length; i++) {
 		let config = configs[i];
 
@@ -235,31 +319,37 @@ module.exports = function SanitizeFHIRParams(req = {}, configs = []) {
 		if (!value && config.required) {
 			errors.push(new Error(config.name + ' is required and missing.'));
 		}
-		// If we are missing the field entirely, we cannot do anything with it
-		// this is fine, just ignore. no need to error unless param is required
-		else if (!field) {
-			continue;
-		}
-		// Otherwise we need to attempt to sanitize the input
-		else {
-			// Wrap in a try catch to invariant, validation, or parsing errors
-			try {
-				// Foo:modifier1:modifier2 =>
-				// fieldname = Foo
-				// modifiers = [ modifier1, modifier2 ]
-				// eslint-disable-next-line no-unused-vars
-				let [_, ...modifiers] = field.split(':');
-				let saniitizedValue = coerceValue(config, value);
 
-				args[config.name] = {
-					value: saniitizedValue,
-					modifiers,
-				};
+		// Otherwise we need to attempt to sanitize the input
+		else if (field) {
+			try {
+				// Unless a _has chain is provided, split only once, so have 2 pieces
+				// TODO handle reverse chaining
+				let [_, suffix = ''] = field.split(':', 2);
+
+				// Handle implicit URI logic before handling explicit modifiers
+				if (config.type === 'uri') {
+					if (value.endsWith('/') && suffix === '') {
+						// Implicitly make any search on a uri that ends with a trailing '/' a 'below' search
+						suffix = 'below';
+					}
+					if (value.startsWith('urn') && suffix) {
+						// Modifiers cannot be used with URN values. If a suffix was supplied
+						throw new Error(`Search modifiers are not supported for parameter ${config.name} as a URN of type uri.`);
+					}
+				}
+				let sanitizedValue = coerceValue(config, value, suffix === 'missing');
+				args[config.name] = [];
+				sanitizedValue.forEach(sanVal => {
+					args[config.name].push({
+						value: sanVal,
+						suffix: suffix,
+					});
+				});
 			} catch (err) {
 				errors.push(err);
 			}
 		}
 	}
-
 	return { errors, args };
 };
