@@ -1,6 +1,11 @@
 # FHIR-QB
 > Utility for standard rest API's to build search queries from incoming requests.
 
+## Install
+```shell
+yarn add @asymmetrik/fhir-qb
+```
+
 ## Arguments
 
 `@asymmetrik/fhir-qb` exports a single class called QueryBuilder. When creating a new QueryBuilder, you must supply the 
@@ -10,6 +15,8 @@ qb = new QueryBuilder('fhir-qb-mongo')
 ```
 See [DB Specific Implementations](#db-specific-implementations) below.
 
+
+## Usage
 The QueryBuilder class has a method called `buildSearchQuery` which takes two arguments. It takes an Express request object and an object containing argument definitions.
 The allowed arguments are generated per resource and have the following properties:
 
@@ -17,7 +24,7 @@ The allowed arguments are generated per resource and have the following properti
 Data type we expect the parameter to be in. We will try to coerce the value into these types to an extent. See [Valid Types](#valid-types) below.
 
 #### `fhirtype`
-Data type we expect the parameter to be in of the types listed in the FHIR specification. Not currently being used.
+Data type we expect the parameter to be in of the types listed in the FHIR specification. Currently being used to specify what type of token token parameters are.
 
 #### `xpath`
 Path to the parameter within the resource

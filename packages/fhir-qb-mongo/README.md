@@ -1,6 +1,11 @@
 # FHIR-Query-Builder-Mongo
 > Utility for building Mongo DB queries based on incoming requests.
 
+## Install
+```shell
+yarn add @asymmetrik/fhir-qb-mongo
+```
+
 ## Usage
 This module is meant to be imported and used by the fhir-qb. Included are implementations of the following methods:
 ```

@@ -13,9 +13,8 @@ const sanitize = require('@asymmetrik/fhir-sanitize-param');
  */
 
 class QueryBuilder {
-	// TODO think of a better name for this. 'implementation doesn't feel right'/
-	constructor(implementation) {
-		this.qb = require(`../${implementation}`);
+	constructor(packageName) {
+		this.qb = require(`@asymmetrik/${packageName}`);
 	}
 
 	/**
@@ -256,12 +255,10 @@ class QueryBuilder {
 			value,
 		}));
 
-		//todo make sure these are matched to our db
 		const valueKey = `${field}.value`;
 		const systemKey = `${field}.system`;
 
-		// TODO should I reject negative quantities?
-		// let targetQuantity = Number(value);
+		// TODO should we reject negative quantities?
 		let quantityQuery;
 		field = valueKey;
 		let bounds;
@@ -314,7 +311,7 @@ class QueryBuilder {
 		// 1. [id]	2. [type]/[id]	3. [url]
 		if (value.match(/^http/)) {
 			// If the requestValue begins with "http", it's a url.
-			// The reference type will be the second to last value, with the id being the last value. TODO do I need to clean trailing slashes?
+			// The reference type will be the second to last value, with the id being the last value. TODO do we need to clean trailing slashes?
 			targetReference = [
 				referenceParts[referenceParts.length - 2],
 				referenceParts[referenceParts.length - 1],
@@ -543,7 +540,7 @@ class QueryBuilder {
 				let [param, suffix = ''] = rawParam.split(':', 2);
 				let paramDefinition = paramDefinitions[param];
 
-				// TODO change this to accommodate universal params (ex. _id, _sort, etc.)
+				// TODO accommodate universal params (ex. _id, _sort, etc.)
 				if (!paramDefinition) {
 					throw new Error(`Unknown parameter ${param}`);
 				}
