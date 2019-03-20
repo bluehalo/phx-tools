@@ -27,6 +27,7 @@
 		]
 	},
 	"dependencies": {
+		"@asymmetrik/fhir-qb-mongo": "^0.10.0",
 		"@asymmetrik/fhir-sanitize-param": "^1.1.0",
 		"mathjs": "^5.2.3",
 		"moment": "^2.22.2",
