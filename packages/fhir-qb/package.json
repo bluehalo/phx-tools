@@ -1,6 +1,6 @@
 {
 	"name": "@asymmetrik/fhir-qb",
-	"version": "0.9.0",
+	"version": "0.10.0",
 	"description": "FHIR query builder",
 	"main": "index.js",
 	"repository": {
@@ -27,7 +27,7 @@
 		]
 	},
 	"dependencies": {
-		"@asymmetrik/fhir-sanitize-param": "^1.0.0",
+		"@asymmetrik/fhir-sanitize-param": "^1.1.0",
 		"mathjs": "^5.2.3",
 		"moment": "^2.22.2",
 		"xregexp": "^4.2.0"
