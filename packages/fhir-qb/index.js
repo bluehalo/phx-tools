@@ -574,34 +574,13 @@ class QueryBuilder {
 						// using the new information to the list of match requests.
 						rawMatchesToPerform.push({ field, values, type, fhirtype, suffix });
 					} else {
-						// Else, it will require a join. This means that we need to do two things: add a join to the joins list
-						// and add a modified request to the list of Anded Ors.
-						let [referencedResourceAndField, newSuffix] = suffix.split(':');
-						let referencedResource = referencedResourceAndField.split('.')[0];
-						joinsToPerform.push({
-							from: referencedResource,
-							localKey: `${field}.reference`, // TODO make sure this matches the db
-							foreignKey: 'phx_id', // TODO make sure this matches the db
-						});
-
-						// Now construct a match-ish request in order to match on the will-be joined data
-						// We'll need a new param key, type, and suffix.
-						// The new type will be// TODO lookup type of new param. Going to have to get it from somewhere;
-						let newType = 'TODO';
-						let newFhirType = 'TODO';
-
-						// Push a new match request using the new information to the list of match requests
-						rawMatchesToPerform.push({
-							field: referencedResourceAndField,
-							values: values,
-							type: newType,
-							fhirtype: newFhirType,
-							suffix: newSuffix,
-						});
+						// TODO this functionality doesn't work right now. Need to access the parameters.js
+						throw new Error(
+							`Search modifier '${suffix}' is not currently supported`,
+						);
 					}
 				});
 			});
-
 			// For each match to perform, transform them into the appropriate format using the db specific qb;
 			let matchesToPerform = [];
 			for (let matchRequest of rawMatchesToPerform) {

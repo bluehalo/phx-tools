@@ -2,6 +2,10 @@ const QueryBuilder = require('./index');
 const moment = require('moment');
 
 describe('Mongo Tests', () => {
+	beforeAll(() => {
+		// Do this for tests only
+		moment.suppressDeprecationWarnings = true;
+	});
 	const qb = new QueryBuilder('fhir-qb-mongo');
 	describe('Build Date Query Tests', () => {
 		describe('eq Modifier Tests', () => {
@@ -3185,19 +3189,6 @@ describe('Mongo Tests', () => {
 		});
 	});
 
-	describe('Build Lookup Query Tests', () => {
-		test('Should build a... whatever describe me later', () => {
-			const request = {
-				method: 'GET',
-				query: {
-					foo: 'foo',
-				},
-			};
-			const configs = { foo: { type: 'number', xpath: 'Resource.foo' } };
-			let { errors, query } = qb.buildSearchQuery(request, configs);
-		});
-	});
-
 	describe('Error Handling Tests', () => {
 		test('Should throw and catch an error and add it to the errors array if a parameter is invalid.', () => {
 			const request = {
@@ -3287,6 +3278,23 @@ describe('Mongo Tests', () => {
 			let { errors } = qb.buildSearchQuery(request, configs);
 			expect(errors).toHaveLength(1);
 			expect(errors[0].message).toContain("Unsupported request method 'PUT'");
+		});
+	});
+
+	// TODO update this test when lookup funcitonality is added.
+	describe('Build Lookup Query Tests', () => {
+		test('Should throw an error if parameters are supplied in a way that requires building a lookup query', () => {
+			const request = {
+				method: 'GET',
+				query: {
+					'foo:Patient': 'bar',
+				},
+			};
+			const configs = { foo: { type: 'string', xpath: 'Resource.foo' } };
+			let { errors } = qb.buildSearchQuery(request, configs);
+			expect(errors[0].message).toContain(
+				"Search modifier 'Patient' is not currently supported",
+			);
 		});
 	});
 });
