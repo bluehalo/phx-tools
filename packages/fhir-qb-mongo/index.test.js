@@ -1,0 +1,200 @@
+const mongoQB = require('./index');
+
+describe('Mongo Query Builder Tests', () => {
+	describe('buildEqualToQuery Tests', () => {
+		test('Should return mongo equals query given a key and a value', () => {
+			const expectedResult = { foo: 'bar' };
+			let observedResult = mongoQB.buildEqualToQuery({
+				field: 'foo',
+				value: 'bar',
+			});
+			expect(observedResult).toEqual(expectedResult);
+		});
+		test('Should return mongo $ne query given a key, value, and invert = true', () => {
+			const expectedResult = { foo: { $ne: 'bar' } };
+			let observedResult = mongoQB.buildEqualToQuery({
+				field: 'foo',
+				value: 'bar',
+				invert: true,
+			});
+			expect(observedResult).toEqual(expectedResult);
+		});
+	});
+	describe('buildComparatorQuery Tests', () => {
+		test('Should return mongo $gt query given a key, value, and gt', () => {
+			const expectedResult = { foo: { $gt: 'bar' } };
+			let observedResult = mongoQB.buildComparatorQuery({
+				field: 'foo',
+				value: 'bar',
+				comparator: 'gt',
+			});
+			expect(observedResult).toEqual(expectedResult);
+		});
+		test('Should return mongo $gte query given a key, value, and ge', () => {
+			const expectedResult = { foo: { $gte: 'bar' } };
+			let observedResult = mongoQB.buildComparatorQuery({
+				field: 'foo',
+				value: 'bar',
+				comparator: 'ge',
+			});
+			expect(observedResult).toEqual(expectedResult);
+		});
+		test('Should return mongo $lt query given a key, value, and lt', () => {
+			const expectedResult = { foo: { $lt: 'bar' } };
+			let observedResult = mongoQB.buildComparatorQuery({
+				field: 'foo',
+				value: 'bar',
+				comparator: 'lt',
+			});
+			expect(observedResult).toEqual(expectedResult);
+		});
+		test('Should return mongo $lte query given a key, value, and le', () => {
+			const expectedResult = { foo: { $lte: 'bar' } };
+			let observedResult = mongoQB.buildComparatorQuery({
+				field: 'foo',
+				value: 'bar',
+				comparator: 'le',
+			});
+			expect(observedResult).toEqual(expectedResult);
+		});
+		test('Should return mongo $gt query given a key, value, and sa', () => {
+			const expectedResult = { foo: { $gt: 'bar' } };
+			let observedResult = mongoQB.buildComparatorQuery({
+				field: 'foo',
+				value: 'bar',
+				comparator: 'sa',
+			});
+			expect(observedResult).toEqual(expectedResult);
+		});
+		test('Should return mongo $lt query given a key, value, and eb', () => {
+			const expectedResult = { foo: { $lt: 'bar' } };
+			let observedResult = mongoQB.buildComparatorQuery({
+				field: 'foo',
+				value: 'bar',
+				comparator: 'eb',
+			});
+			expect(observedResult).toEqual(expectedResult);
+		});
+		test('Should return mongo $ne query given a key, value, and ne', () => {
+			const expectedResult = { foo: { $ne: 'bar' } };
+			let observedResult = mongoQB.buildComparatorQuery({
+				field: 'foo',
+				value: 'bar',
+				comparator: 'ne',
+			});
+			expect(observedResult).toEqual(expectedResult);
+		});
+	});
+	describe('buildOrQuery Tests', () => {
+		test('Should return $or of given queries', () => {
+			const expectedResult = { $or: [{ foo: 'bar' }, { bar: 'foo' }] };
+			let observedResult = mongoQB.buildOrQuery({
+				queries: [{ foo: 'bar' }, { bar: 'foo' }],
+			});
+			expect(observedResult).toEqual(expectedResult);
+		});
+		test('Should return $nor of given queries if invert option is true', () => {
+			const expectedResult = { $nor: [{ foo: 'bar' }, { bar: 'foo' }] };
+			let observedResult = mongoQB.buildOrQuery({
+				queries: [{ foo: 'bar' }, { bar: 'foo' }],
+				invert: true,
+			});
+			expect(observedResult).toEqual(expectedResult);
+		});
+	});
+	describe('buildContainsQuery Tests', () => {
+		test('Should return case sensitive match regex query', () => {
+			const expectedResult = { foo: { $options: '', $regex: 'bar' } };
+			let observedResult = mongoQB.buildContainsQuery({
+				field: 'foo',
+				value: 'bar',
+				caseSensitive: true,
+			});
+			expect(observedResult).toEqual(expectedResult);
+		});
+		test('Should return case insensitive match regex query', () => {
+			const expectedResult = { foo: { $options: 'i', $regex: 'bar' } };
+			let observedResult = mongoQB.buildContainsQuery({
+				field: 'foo',
+				value: 'bar',
+			});
+			expect(observedResult).toEqual(expectedResult);
+		});
+	});
+	describe('buildStartsWithQuery Tests', () => {
+		test('Should return case sensitive front of word match regex query', () => {
+			const expectedResult = { foo: { $options: '', $regex: '^bar' } };
+			let observedResult = mongoQB.buildStartsWithQuery({
+				field: 'foo',
+				value: 'bar',
+				caseSensitive: true,
+			});
+			expect(observedResult).toEqual(expectedResult);
+		});
+		test('Should return case insensitive front of word match regex query', () => {
+			const expectedResult = { foo: { $options: 'i', $regex: '^bar' } };
+			let observedResult = mongoQB.buildStartsWithQuery({
+				field: 'foo',
+				value: 'bar',
+			});
+			expect(observedResult).toEqual(expectedResult);
+		});
+	});
+	describe('buildEndsWithQuery Tests', () => {
+		test('Should return case sensitive front of word match regex query', () => {
+			const expectedResult = { foo: { $options: '', $regex: 'bar$' } };
+			let observedResult = mongoQB.buildEndsWithQuery({
+				field: 'foo',
+				value: 'bar',
+				caseSensitive: true,
+			});
+			expect(observedResult).toEqual(expectedResult);
+		});
+		test('Should return case insensitive front of word match regex query', () => {
+			const expectedResult = { foo: { $options: 'i', $regex: 'bar$' } };
+			let observedResult = mongoQB.buildEndsWithQuery({
+				field: 'foo',
+				value: 'bar',
+			});
+			expect(observedResult).toEqual(expectedResult);
+		});
+	});
+	describe('assembleSearchQuery Tests', () => {
+		test('Should return empty pipeline if no matches or joins to perform', () => {
+			const expectedResult = [];
+			let observedResult = mongoQB.assembleSearchQuery({
+				joinsToPerform: [],
+				matchesToPerform: [],
+			});
+			expect(observedResult).toEqual(expectedResult);
+		});
+		test('Should push lookups to front of pipeline if they are there', () => {
+			const expectedResult = [
+				{
+					$lookup: {
+						as: 'foo',
+						foreignField: 'baz',
+						from: 'foo',
+						localField: 'bar',
+					},
+				},
+				{ $unwind: '$foo' },
+				{ $match: { $and: [{}] } },
+				{ $project: { foo: 0 } },
+			];
+			let observedResult = mongoQB.assembleSearchQuery({
+				joinsToPerform: [{ from: 'foo', localKey: 'bar', foreignKey: 'baz' }],
+				matchesToPerform: [],
+			});
+			expect(observedResult).toEqual(expectedResult);
+		});
+		test('Should fill in empty matches with empty objects to keep queries valid', () => {
+			const expectedResult = [{ $match: { $and: [{ $or: [{}] }] } }];
+			let observedResult = mongoQB.assembleSearchQuery({
+				joinsToPerform: [],
+				matchesToPerform: [[]],
+			});
+			expect(observedResult).toEqual(expectedResult);
+		});
+	});
+});
