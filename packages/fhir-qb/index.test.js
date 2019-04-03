@@ -38,7 +38,7 @@ describe('Mongo Tests', () => {
 				let { errors, query } = qb.buildSearchQuery(request, configs);
 				const expectedResult = [
 					{
-						$match: { $and: [{ $or: [{ foo: '2018-10-31T17:49:29.000Z' }] }] },
+						$match: { $and: [{ $or: [{ foo: { $gte: '2018-10-31T17:49:29.000Z', $lte: '2018-10-31T17:49:29.999Z'} }] }] },
 					},
 				];
 				expect(errors).toHaveLength(0);
@@ -259,7 +259,14 @@ describe('Mongo Tests', () => {
 				const expectedResult = [
 					{
 						$match: {
-							$and: [{ $or: [{ foo: { $ne: '2018-10-31T17:49:29.000Z' } }] }],
+							$and: [{ $or: [
+									{
+										$or: [
+											{ foo: { $lt: '2018-10-31T17:49:29.000Z' } },
+											{ foo: { $gt: '2018-10-31T17:49:29.999Z' } },
+										],
+									},
+								] }],
 						},
 					},
 				];
@@ -453,7 +460,7 @@ describe('Mongo Tests', () => {
 				const expectedResult = [
 					{
 						$match: {
-							$and: [{ $or: [{ foo: { $gt: '2018-10-31T17:49:29.000Z' } }] }],
+							$and: [{ $or: [{ foo: { $gt: '2018-10-31T17:49:29.999Z' } }] }],
 						},
 					},
 				];
@@ -1001,7 +1008,7 @@ describe('Mongo Tests', () => {
 				const expectedResult = [
 					{
 						$match: {
-							$and: [{ $or: [{ foo: { $gt: '2018-10-31T17:49:29.000Z' } }] }],
+							$and: [{ $or: [{ foo: { $gt: '2018-10-31T17:49:29.999Z' } }] }],
 						},
 					},
 				];

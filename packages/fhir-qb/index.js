@@ -7,17 +7,39 @@ const globalParameters = {
 	_id: {
 		type: 'string',
 		fhirtype: 'string',
-		xpath: 'Patient.id',
+		xpath: 'Resource.id',
 		definition: '',
 		description: 'Document ID',
 		modifier: ''
+	},
+	_lastUpdated: {
+		type: 'date',
+		fhirtype: 'date',
+		xpath: 'Resource.meta.lastUpdated',
+		definition: '',
+		description: 'Date/time of last update to document',
+		modifier: ''
 	}
 };
+
+// const searchResultParameters = {
+// 	SORT: '_sort',
+// 	COUNT: '_count',
+// 	INCLUDE: '_include',
+// 	REV_INCLUDE: '_revinclude',
+// 	SUMMARY: '_summary',
+// 	TOTAL: '_total',
+// 	ELEMENTS: '_elements',
+// 	CONTAINED: '_contained',
+// 	CONTAINED_TYPE: '_containedType'
+// };
 
 const prefixes = {
 	EQUAL: 'eq',
 	NOT_EQUAL: 'ne',
 	APPROXIMATELY: 'ap',
+	GREATER_THAN: 'gt',
+	STARTS_AFTER: 'sa'
 };
 
 const timeUnits = {
@@ -30,15 +52,15 @@ const timeUnits = {
 };
 
 const matchModifiers = {
-	MISSING: 'missing',
-	EXACT: 'exact',
-	CONTAINS: 'contains',
-	TEXT: 'text',
-	ABOVE: 'above',
-	BELOW: 'below',
-	IN: 'in',
-	NOT_IN: 'not-in',
-	NONE: ''
+	missing: 'missing',
+	exact: 'exact',
+	contains: 'contains',
+	text: 'text',
+	above: 'above',
+	below: 'below',
+	in: 'in',
+	not_in: 'not-in',
+	'': ''
 };
 
 
@@ -58,7 +80,7 @@ class QueryBuilder {
 
 	/**
 	 * Gets the number of digits following the decimal point in a number string
-	 * @param value
+	 * @parameter value
 	 * @returns {number}
 	 */
 	static getNumberDecimals(value) {
@@ -77,8 +99,8 @@ class QueryBuilder {
 	/**
 	 * Get the upper and lower bound around a target value. The range is based on the supplied prefix as well as the
 	 * number of significant digits supplied in the original number.
-	 * @param prefix
-	 * @param value
+	 * @parameter prefix
+	 * @parameter value
 	 * @returns {{upperBound: *, lowerBound: number}}
 	 */
 	static getNumericBounds({ prefix, value }) {
@@ -96,8 +118,8 @@ class QueryBuilder {
 
 	/**
 	 * Constructs a query for the 'date' data type
-	 * @param field
-	 * @param value
+	 * @parameter field
+	 * @parameter value
 	 * @returns {{}}
 	 */
 	buildDateQuery({ field, value }) {
@@ -120,6 +142,7 @@ class QueryBuilder {
 			3: timeUnits.DAY,
 			4: timeUnits.HOUR,
 			5: timeUnits.MINUTE,
+			6: timeUnits.SECOND
 		};
 		let levelOfGranularity = value.parsingFlags().parsedDateParts.length;
 		let intervalScale = intervalScales[levelOfGranularity];
@@ -184,12 +207,12 @@ class QueryBuilder {
 
 	/**
 	 * Constructs a query for the 'number' data type
-	 * @param field
-	 * @param value
-	 * @param bounds
+	 * @parameter field
+	 * @parameter value
+	 * @parameter bounds
 	 * @returns {{}}
 	 */
-	// TODO SCIENTIFIC NOTATION AND TESTING OF IT.
+	// TODO SCIENTIFIC NOTATION AND TESTinG OF IT.
 	// TODO revisit having bounds as an argument. with the unification of sanitization, we may not need it.
 	buildNumberQuery({ field, value, bounds }) {
 		// Sanitize the request value
@@ -230,9 +253,9 @@ class QueryBuilder {
 
 	/**
 	 * Constructs a query for the 'string' data type
-	 * @param field
-	 * @param value
-	 * @param modifier
+	 * @parameter field
+	 * @parameter value
+	 * @parameter modifier
 	 * @returns {{}}
 	 */
 	buildStringQuery({ field, value, modifier }) {
@@ -241,7 +264,7 @@ class QueryBuilder {
 		// This regex matches accents, diacritics, etc.
 		const accentRegex = /[\u0300-\u036f]/g;
 		let stringQuery;
-		if (modifier === matchModifiers.EXACT) {
+		if (modifier === matchModifiers.exact) {
 			// If we're looking for an exact match
 			stringQuery = this.qb.buildEqualToQuery({ field, value });
 		} else {
@@ -249,7 +272,7 @@ class QueryBuilder {
 			value = value.normalize('NFD').replace(accentRegex, '');
 			// If the modifier is 'contains', make a contains query. Else make a starts with query
 			stringQuery =
-				modifier === matchModifiers.CONTAINS
+				modifier === matchModifiers.contains
 					? this.qb.buildContainsQuery({ field, value })
 					: this.qb.buildStartsWithQuery({ field, value });
 		}
@@ -258,9 +281,9 @@ class QueryBuilder {
 
 	/**
 	 * Constructs a query for the 'uri' data type
-	 * @param field
-	 * @param value
-	 * @param modifier
+	 * @parameter field
+	 * @parameter value
+	 * @parameter modifier
 	 * @returns {{}}
 	 */
 	buildURIQuery({ field, value, modifier }) {
@@ -271,10 +294,10 @@ class QueryBuilder {
 		const caseSensitive = true;
 
 		let uriQuery;
-		if (modifier === matchModifiers.ABOVE) {
+		if (modifier === matchModifiers.above) {
 			// If the modifier is 'above', construct an ends with query
 			uriQuery = this.qb.buildEndsWithQuery({ field, value, caseSensitive });
-		} else if (modifier === matchModifiers.BELOW) {
+		} else if (modifier === matchModifiers.below) {
 			// If the modifier is 'below', construct a starts with query
 			uriQuery = this.qb.buildStartsWithQuery({ field, value, caseSensitive });
 		} else {
@@ -287,8 +310,8 @@ class QueryBuilder {
 	/**
 	 * Constructs a query for the 'quantity' data type
 	 * TODO add handling for canonical units. User just supplies a number and we just treat it as some default unit.
-	 * @param field
-	 * @param value
+	 * @parameter field
+	 * @parameter value
 	 * @returns {{$and}}
 	 */
 	buildQuantityQuery({ field, value }) {
@@ -337,8 +360,8 @@ class QueryBuilder {
 	 * /**
 	 * Constructs a query for the 'reference' data type
 	 * TODO currently, for urls, just pulling out the last two parts and proceeding from there.
-	 * @param field
-	 * @param value
+	 * @parameter field
+	 * @parameter value
 	 * @returns {{}}
 	 */
 	buildReferenceQuery({ field, value }) {
@@ -374,9 +397,9 @@ class QueryBuilder {
 
 	/**
 	 * Constructs a query for the 'token' data type
-	 * @param field
-	 * @param fhirtype - the type of token (Coding, ContactPoint, string, etc.)
-	 * @param value
+	 * @parameter field
+	 * @parameter fhirtype - the type of token (Coding, ContactPoint, string, etc.)
+	 * @parameter value
 	 * @returns {{$and}|{}|{}}
 	 */
 	buildTokenQuery({ field, fhirtype, value }) {
@@ -456,7 +479,7 @@ class QueryBuilder {
 				tokenQuery = this.buildStringQuery({
 					field,
 					value: code,
-					modifier: matchModifiers.EXACT,
+					modifier: matchModifiers.exact,
 				});
 				break;
 			default:
@@ -470,16 +493,16 @@ class QueryBuilder {
 	/**
 	 * /**
 	 * Creates a piece of the overall search query.
-	 * @param field
-	 * @param type
-	 * @param value
-	 * @param modifier
+	 * @parameter field
+	 * @parameter type
+	 * @parameter value
+	 * @parameter modifier
 	 * @returns {{}}
 	 */
 	getSubSearchQuery({ field, type, fhirtype, value, modifier }) {
 		let subQuery;
 		// If the modifier is 'missing', nothing else matters, we're just checking if the field exists.
-		if (modifier === matchModifiers.MISSING) {
+		if (modifier === matchModifiers.missing) {
 			value = sanitize.sanitizeBoolean({ field, value });
 			subQuery = this.qb.buildExistsQuery({ field, exists: value });
 		} else {
@@ -518,7 +541,7 @@ class QueryBuilder {
 	/**
 	 * @function parseArguments
 	 * @description Parse only arguments needed for this type of request
-	 * @param {Express.req} req - Request from an express server
+	 * @parameter {Express.req} req - Request from an express server
 	 * @return {Object} - Arguments object
 	 */
 	static parseArguments(req) {
@@ -534,28 +557,49 @@ class QueryBuilder {
 				throw new Error(`Unsupported request method '${req.method}'.`);
 		}
 
-		// For all requests, merge request params
-		return Object.assign(args, req.params);
+		// For all requests, merge request parameters
+		return Object.assign(args, req.parameters);
 	}
 
 	/**
 	 * Parse the xpath to the data in the resource
-	 * @param xpath
+	 * @parameter xpath
 	 * @returns {*|string}
 	 */
 	static parseXPath(xpath) {
 		return xpath.split(/\.(.+)/)[1];
 	}
 
+
+	// prepareSortTransformation({value, parameterDefinitions}) {
+	// 	let sortParameters = {};
+	// 	value.split(',').forEach((sortParameter) => {
+	// 		let ascending = true;
+	// 		if (sortParameter.charAt(0) === '-') {
+	// 			sortParameter = sortParameter.substr(1);
+	// 			ascending = false;
+	// 		}
+	// 		let xpath = parameterDefinitions[sortParameter].xpath;
+	// 		if (xpath === undefined) {
+	// 			throw new Error(`Unknown parameter ${sortParameter}`);
+	// 		}
+	// 		sortParameters[QueryBuilder.parseXPath(xpath)] = ascending;
+	// 	});
+	// 	console.log(sortParameters);
+	// 	return sortParameters;
+	// }
+
+
 	/**
 	 * Given an http request and parameter definitions of a resource, construct a search query.
-	 * @param request
-	 * @param paramDefinitions
+	 * @parameter request
+	 * @parameter parameterDefinitions
 	 * @returns {{query: (*|*), errors: Array}}
 	 */
-	buildSearchQuery(request, paramDefinitions) {
+	buildSearchQuery(request, parameterDefinitions) {
 		// This is a list of joins that need to be performed
 		let joinsToPerform = [];
+
 		// This is a list of objects where each object contains a list (potentially of length 1) of values that are joined
 		// with ORs. Each of these OR conditions are joined with ANDs.
 		// We specify raw because later we transform/process them.
@@ -564,43 +608,45 @@ class QueryBuilder {
 		let errors = [];
 		let query;
 		try {
-			let params = QueryBuilder.parseArguments(request);
+			let parameters = QueryBuilder.parseArguments(request);
 
-			Object.keys(params).forEach(rawParam => {
+			Object.keys(parameters).forEach(rawParameter => {
 				// Split field from modifier. Only split once so as to allow for chaining.
-				let [param, modifier = ''] = rawParam.split(':', 2);
-				let paramDefinition = paramDefinitions[param];
+				let [parameter, modifier = ''] = rawParameter.split(':', 2);
+				let parameterValue = parameters[rawParameter];
 
-				// Use global parameter definitions if relevant params (ex. _id, _lastUpdated, etc.)
-				if (Object.keys(globalParameters).includes(param)) {
-					paramDefinition = globalParameters[param];
+				let parameterDefinition = parameterDefinitions[parameter];
+
+				// Use global parameter definitions if given relevant parameters (ex. _id, _lastUpdated, etc.)
+				if (globalParameters[parameter] !== undefined) {
+					parameterDefinition = globalParameters[parameter];
 				}
-				if (!paramDefinition) {
-					throw new Error(`Unknown parameter ${param}`);
+				if (!parameterDefinition) {
+					throw new Error(`Unknown parameter ${parameter}`); // TODO make this into a function for reuse
 				}
-				let paramValue = params[rawParam];
-				let { type, fhirtype, xpath } = paramDefinition;
+
+				let { type, fhirtype, xpath } = parameterDefinition;
 				let field = QueryBuilder.parseXPath(xpath);
 
 				// Handle implicit URI logic before handling explicit modifiers
 				if (type === 'uri') {
-					if (paramValue.endsWith('/') && modifier === '') {
+					if (parameterValue.endsWith('/') && modifier === '') {
 						// Implicitly make any search on a uri that ends with a trailing '/' a 'below' search
-						modifier = matchModifiers.BELOW;
+						modifier = matchModifiers.below;
 					}
-					if (paramValue.startsWith('urn') && modifier) {
+					if (parameterValue.startsWith('urn') && modifier) {
 						// Modifiers cannot be used with URN values. If a modifier was supplied
 						throw new Error(
-							`Search modifiers are not supported for parameter ${param} as a URN of type uri.`,
+							`Search modifiers are not supported for parameter ${parameter} as a URN of type uri.`,
 						);
 					}
 				}
 
-				let valuesToAnd = Array.isArray(paramValue) ? paramValue : [paramValue];
+				let valuesToAnd = Array.isArray(parameterValue) ? parameterValue : [parameterValue];
 				valuesToAnd.forEach(valuesToOr => {
 					let values = valuesToOr.split(',');
 
-					if (Object.keys(matchModifiers).includes(modifier)) {
+					if (matchModifiers[modifier] !== undefined) {
 						// If the modifier indicates that we don't need a join, simply add the request to the push a new match request
 						// using the new information to the list of match requests.
 						rawMatchesToPerform.push({ field, values, type, fhirtype, modifier });
@@ -612,6 +658,7 @@ class QueryBuilder {
 					}
 				});
 			});
+
 			// For each match to perform, transform them into the appropriate format using the db specific qb;
 			let matchesToPerform = [];
 			for (let matchRequest of rawMatchesToPerform) {
@@ -622,7 +669,6 @@ class QueryBuilder {
 				}
 				matchesToPerform.push(orStatements);
 			}
-			// query = this.qb.assembleSearchQuery({joinsToPerform, matchesToPerform, projectionsToPerform});
 			query = this.qb.assembleSearchQuery({ joinsToPerform, matchesToPerform });
 		} catch (err) {
 			errors.push(err);
