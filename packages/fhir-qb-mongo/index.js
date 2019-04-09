@@ -14,6 +14,31 @@
 // 		console.log('we bout to summarize the shit out this b');
 // 	}
 // };
+let supportedSearchTransformations = {
+	// TODO support offsetting
+	_count: function(value) {
+		return {$limit: value};
+	},
+	_summary: function(value) {
+		switch (value){
+			case 'true':
+				// TODO
+				console.log('where do we define summary forms?');
+				break;
+			case 'text':
+				return {$project: {text: 1, id: 1, meta: 1}};
+			case 'data':
+				return {$project: {text: 0}};
+			case 'count':
+				// TODO - How exactly should the return look? This one is not as straightforward as it appears.
+				// return {$count: 'count'};
+				break;
+			case 'false':
+				console.log('Why does this even exist. You return all parts of the resources...');
+				return;
+		}
+	}
+};
 
 
 /**
@@ -131,7 +156,7 @@ let buildEndsWithQuery = function({ field, value, caseSensitive = false }) {
  *
  * Returns a mongo aggregate query.
  */
-let assembleSearchQuery = function({ joinsToPerform, matchesToPerform }) {
+let assembleSearchQuery = function({ joinsToPerform, matchesToPerform, searchResultTransformations }) {
 	let aggregatePipeline = [];
 	// if (joinsToPerform.length === 0 && matchesToPerform.length === 0) {
 	// 	return aggregatePipeline;
@@ -165,9 +190,6 @@ let assembleSearchQuery = function({ joinsToPerform, matchesToPerform }) {
 			}
 			listOfOrs.push(buildOrQuery({queries: match}));
 		}
-		// if (listOfOrs.length === 0) {
-		// 	listOfOrs.push({});
-		// }
 		aggregatePipeline.push({$match: buildAndQuery({queries: listOfOrs})});
 	}
 
@@ -176,12 +198,17 @@ let assembleSearchQuery = function({ joinsToPerform, matchesToPerform }) {
 		aggregatePipeline.push({ $project: toSuppress });
 	}
 
+	// TODO - WORK IN PROGRESS - handling search result transformations
 	// Handle search result parameters
-	// Object.keys(searchResultTransformations).forEach((transformation) => {
-	// 	if (supportedSearchTransformations[transformation] === undefined) {
-	// 		throw new Error('We do not suppor this param');
-	// 	}
-	// });
+	Object.keys(searchResultTransformations).forEach((transformation) => {
+		// This should never really happen, as the main query builder should handle this. Doesn't hurt to be safe though.
+		if (supportedSearchTransformations[transformation] === undefined) {
+			throw new Error(`The supplied search result parameter '${transformation}' is not currently supported.`);
+		}
+		// TODO explain what you're doing here ss.
+		aggregatePipeline.push(supportedSearchTransformations[transformation](searchResultTransformations[transformation]));
+	});
+	console.log(aggregatePipeline);
 	return aggregatePipeline;
 };
 

@@ -22,9 +22,9 @@ const globalParameters = {
 	}
 };
 
-// const searchResultParameters = {
+const searchResultParameters = ['_count', '_summary'];
 // 	SORT: '_sort',
-// 	COUNT: '_count',
+// 	_count: '_count',
 // 	INCLUDE: '_include',
 // 	REV_INCLUDE: '_revinclude',
 // 	SUMMARY: '_summary',
@@ -607,6 +607,9 @@ class QueryBuilder {
 
 		let errors = [];
 		let query;
+		/////////////// todo
+		let searchResultTransformations = {};
+		/////////////// todo
 		try {
 			let parameters = QueryBuilder.parseArguments(request);
 
@@ -615,14 +618,25 @@ class QueryBuilder {
 				let [parameter, modifier = ''] = rawParameter.split(':', 2);
 				let parameterValue = parameters[rawParameter];
 
-				let parameterDefinition = parameterDefinitions[parameter];
-
-				// Use global parameter definitions if given relevant parameters (ex. _id, _lastUpdated, etc.)
+				let parameterDefinition;
+				// Check to see if the parameter is defined as a global parameter or search result parameter.
+				// If not, see if the passed in definitions define this parameter.
 				if (globalParameters[parameter] !== undefined) {
 					parameterDefinition = globalParameters[parameter];
+				} else if (searchResultParameters.includes(parameter)) {
+					// TODO NEED TO SANITIZE VALUE BEFORE USING. Custom sanitizers?
+					parameterValue = sanitize.sanitizeSearchResultParameter({
+						field: parameter,
+						value: parameterValue
+					});
+					searchResultTransformations[parameter] = parameterValue;
+					return;
+				} else {
+					parameterDefinition = parameterDefinitions[parameter];
 				}
+
 				if (!parameterDefinition) {
-					throw new Error(`Unknown parameter ${parameter}`); // TODO make this into a function for reuse
+					throw new Error(`Unknown parameter '${parameter}'`); // TODO make this into a function for reuse
 				}
 
 				let { type, fhirtype, xpath } = parameterDefinition;
@@ -637,7 +651,7 @@ class QueryBuilder {
 					if (parameterValue.startsWith('urn') && modifier) {
 						// Modifiers cannot be used with URN values. If a modifier was supplied
 						throw new Error(
-							`Search modifiers are not supported for parameter ${parameter} as a URN of type uri.`,
+							`Search modifiers are not supported for parameter '${parameter}' as a URN of type uri.`,
 						);
 					}
 				}
@@ -669,7 +683,7 @@ class QueryBuilder {
 				}
 				matchesToPerform.push(orStatements);
 			}
-			query = this.qb.assembleSearchQuery({ joinsToPerform, matchesToPerform });
+			query = this.qb.assembleSearchQuery({ joinsToPerform, matchesToPerform, searchResultTransformations });
 		} catch (err) {
 			errors.push(err);
 		}
