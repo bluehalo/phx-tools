@@ -22,17 +22,7 @@ const globalParameters = {
 	}
 };
 
-const searchResultParameters = ['_count', '_summary'];
-// 	SORT: '_sort',
-// 	_count: '_count',
-// 	INCLUDE: '_include',
-// 	REV_INCLUDE: '_revinclude',
-// 	SUMMARY: '_summary',
-// 	TOTAL: '_total',
-// 	ELEMENTS: '_elements',
-// 	CONTAINED: '_contained',
-// 	CONTAINED_TYPE: '_containedType'
-// };
+const searchResultParameters = ['_count'];
 
 const prefixes = {
 	EQUAL: 'eq',
@@ -571,25 +561,6 @@ class QueryBuilder {
 	}
 
 
-	// prepareSortTransformation({value, parameterDefinitions}) {
-	// 	let sortParameters = {};
-	// 	value.split(',').forEach((sortParameter) => {
-	// 		let ascending = true;
-	// 		if (sortParameter.charAt(0) === '-') {
-	// 			sortParameter = sortParameter.substr(1);
-	// 			ascending = false;
-	// 		}
-	// 		let xpath = parameterDefinitions[sortParameter].xpath;
-	// 		if (xpath === undefined) {
-	// 			throw new Error(`Unknown parameter ${sortParameter}`);
-	// 		}
-	// 		sortParameters[QueryBuilder.parseXPath(xpath)] = ascending;
-	// 	});
-	// 	console.log(sortParameters);
-	// 	return sortParameters;
-	// }
-
-
 	/**
 	 * Given an http request and parameter definitions of a resource, construct a search query.
 	 * @parameter request
@@ -607,9 +578,7 @@ class QueryBuilder {
 
 		let errors = [];
 		let query;
-		/////////////// todo
 		let searchResultTransformations = {};
-		/////////////// todo
 		try {
 			let parameters = QueryBuilder.parseArguments(request);
 
@@ -624,7 +593,6 @@ class QueryBuilder {
 				if (globalParameters[parameter] !== undefined) {
 					parameterDefinition = globalParameters[parameter];
 				} else if (searchResultParameters.includes(parameter)) {
-					// TODO NEED TO SANITIZE VALUE BEFORE USING. Custom sanitizers?
 					parameterValue = sanitize.sanitizeSearchResultParameter({
 						field: parameter,
 						value: parameterValue

@@ -1,45 +1,10 @@
 
-//
-// let supportedSearchResultTransformations = {
-// 	_sort: function(sortParameters) {
-// 		Object.keys(sortParameters).forEach((sortParameter) => {
-// 			sortParameters[sortParameter] = sortParameters[sortParameter] ? 1 : -1;
-// 		});
-// 		console.log({$sort: sortParameters});
-// 		return {$sort: sortParameters};
-// 	}
-// // };
-// let supportedSearchTransformations = {
-// 	_summary: function(value) {
-// 		console.log('we bout to summarize the shit out this b');
-// 	}
-// };
 let supportedSearchTransformations = {
 	// TODO support offsetting
 	_count: function(value) {
 		return {$limit: value};
-	},
-	_summary: function(value) {
-		switch (value){
-			case 'true':
-				// TODO
-				console.log('where do we define summary forms?');
-				break;
-			case 'text':
-				return {$project: {text: 1, id: 1, meta: 1}};
-			case 'data':
-				return {$project: {text: 0}};
-			case 'count':
-				// TODO - How exactly should the return look? This one is not as straightforward as it appears.
-				// return {$count: 'count'};
-				break;
-			case 'false':
-				console.log('Why does this even exist. You return all parts of the resources...');
-				return;
-		}
 	}
 };
-
 
 /**
  * Takes in a list of queries and wraps them in an $and block
@@ -158,9 +123,6 @@ let buildEndsWithQuery = function({ field, value, caseSensitive = false }) {
  */
 let assembleSearchQuery = function({ joinsToPerform, matchesToPerform, searchResultTransformations }) {
 	let aggregatePipeline = [];
-	// if (joinsToPerform.length === 0 && matchesToPerform.length === 0) {
-	// 	return aggregatePipeline;
-	// }
 	let toSuppress = {};
 
 	// Construct the necessary joins and add them to the aggregate pipeline. Also follow each $lookup with an $unwind
@@ -205,7 +167,6 @@ let assembleSearchQuery = function({ joinsToPerform, matchesToPerform, searchRes
 		if (supportedSearchTransformations[transformation] === undefined) {
 			throw new Error(`The supplied search result parameter '${transformation}' is not currently supported.`);
 		}
-		// TODO explain what you're doing here ss.
 		aggregatePipeline.push(supportedSearchTransformations[transformation](searchResultTransformations[transformation]));
 	});
 	console.log(aggregatePipeline);
