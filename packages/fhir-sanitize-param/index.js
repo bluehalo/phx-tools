@@ -210,7 +210,7 @@ let sanitizeQuantity = function({ field, value, type = 'quantity' }) {
 };
 
 /**
- * FIXME this whole method is weird and I don't like it.
+ *
  * @param field
  * @param value
  * @returns {number}
