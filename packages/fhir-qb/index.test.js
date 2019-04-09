@@ -2390,7 +2390,7 @@ describe('Mongo Tests', () => {
 				let { errors } = qb.buildSearchQuery(request, configs);
 				expect(errors).toHaveLength(1);
 				expect(errors[0].message).toContain(
-					'Search modifiers are not supported for parameter foo as a URN of type uri',
+					"Search modifiers are not supported for parameter 'foo' as a URN of type uri",
 				);
 			});
 		});
@@ -3219,7 +3219,7 @@ describe('Mongo Tests', () => {
 			const configs = { bar: { type: 'number', xpath: 'Resource.foo' } };
 			let { errors } = qb.buildSearchQuery(request, configs);
 			expect(errors).toHaveLength(1);
-			expect(errors[0].message).toContain('Unknown parameter foo');
+			expect(errors[0].message).toContain("Unknown parameter 'foo'");
 		});
 		test('Should throw and catch an error and add it to the errors array if a parameter has an invalid type.', () => {
 			const request = {
@@ -3285,6 +3285,55 @@ describe('Mongo Tests', () => {
 			let { errors } = qb.buildSearchQuery(request, configs);
 			expect(errors).toHaveLength(1);
 			expect(errors[0].message).toContain("Unsupported request method 'PUT'");
+		});
+	});
+
+
+	describe('Global Parameter Query Tests', () => {
+		test('Test for global param _id', () => {
+			const request = {
+				method: 'GET',
+				query: {
+					'_id': 'foo',
+				},
+			};
+			const configs = undefined;
+			let { query, errors } = qb.buildSearchQuery(request, configs);
+			const expectedResult = [{$match: {$and: [{$or: [{id: {$options: 'i', $regex: '^foo'}}]}]}}];
+
+			expect(errors).toHaveLength(0);
+			expect(query).toEqual(expectedResult);
+		});
+		test('Test for global param _lastUpdated', () => {
+			const request = {
+				method: 'GET',
+				query: {
+					'_lastUpdated': '2018-10-31T17:49:29.000Z',
+				},
+			};
+			const configs = undefined;
+			let { query, errors } = qb.buildSearchQuery(request, configs);
+			const expectedResult = [{$match: {$and: [{$or: [{'meta.lastUpdated': '2018-10-31T17:49:29.000Z'}]}]}}];
+
+			expect(errors).toHaveLength(0);
+			expect(query).toEqual(expectedResult);
+		});
+	});
+
+	describe('Search Result Parameter Query Tests', () => {
+		test('Test for search param _count', () => {
+			const request = {
+				method: 'GET',
+				query: {
+					'_count': '5',
+				},
+			};
+			const configs = undefined;
+			let { query, errors } = qb.buildSearchQuery(request, configs);
+			const expectedResult = [{$limit: 5}];
+
+			expect(errors).toHaveLength(0);
+			expect(query).toEqual(expectedResult);
 		});
 	});
 
