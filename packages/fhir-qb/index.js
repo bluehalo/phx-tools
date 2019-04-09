@@ -202,7 +202,7 @@ class QueryBuilder {
 	 * @parameter bounds
 	 * @returns {{}}
 	 */
-	// TODO SCIENTIFIC NOTATION AND TESTinG OF IT.
+	// TODO SCIENTIFIC NOTATION AND TESTING OF IT.
 	// TODO revisit having bounds as an argument. with the unification of sanitization, we may not need it.
 	buildNumberQuery({ field, value, bounds }) {
 		// Sanitize the request value
@@ -604,7 +604,7 @@ class QueryBuilder {
 				}
 
 				if (!parameterDefinition) {
-					throw new Error(`Unknown parameter '${parameter}'`); // TODO make this into a function for reuse
+					throw new Error(`Unknown parameter '${parameter}'`);
 				}
 
 				let { type, fhirtype, xpath } = parameterDefinition;

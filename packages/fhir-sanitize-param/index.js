@@ -252,8 +252,6 @@ let sanitizeSearchResultParameter = function({ field, value }) {
 	return sanitizedValue;
 };
 
-//TODO maybe just have one method that takes in a value and type and sanitizes accordingly.
-// TODO main reason NOT to do that is that each of these returns different things.
 module.exports = {
 	sanitizeBoolean,
 	sanitizeDate,
