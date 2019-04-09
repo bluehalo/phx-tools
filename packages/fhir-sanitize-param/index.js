@@ -233,27 +233,21 @@ let sanitizeSearchResultParameter = function({ field, value }) {
 			invariant((Number.isInteger(sanitizedValue) && sanitizedValue > 0), mismatchError({ field, type: 'positive integer'}));
 			break;
 		case '_summary':
-			// TODO default to something
 			sanitizedValue = sanitizeString({field, value});
 			invariant(validSummaryValues.includes(sanitizedValue), mismatchError({field, type: validSummaryValues.toString()}));
 			break;
 		case '_total':
-			// TODO default to something
 			sanitizedValue = sanitizeString({field, value});
 			invariant(validTotalValues.includes(sanitizedValue), mismatchError({field, type: validTotalValues.toString()}));
 			break;
 		case '_contained':
-			// TODO default to false
 			sanitizedValue = sanitizeString({field, value});
 			invariant(validContainedValues.includes(sanitizedValue), mismatchError({field, type: validContainedValues.toString()}));
 			break;
 		case '_containedType':
-			// TODO default to container
 			sanitizedValue = sanitizeString({field, value});
 			invariant(validContainedTypeValues.includes(sanitizedValue), mismatchError({field, type: validContainedTypeValues.toString()}));
 			break;
-		// default:
-		// 	break;
 	}
 	return sanitizedValue;
 };

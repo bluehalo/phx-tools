@@ -169,7 +169,6 @@ let assembleSearchQuery = function({ joinsToPerform, matchesToPerform, searchRes
 		}
 		aggregatePipeline.push(supportedSearchTransformations[transformation](searchResultTransformations[transformation]));
 	});
-	console.log(aggregatePipeline);
 	return aggregatePipeline;
 };
 
