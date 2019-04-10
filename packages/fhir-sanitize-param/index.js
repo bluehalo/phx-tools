@@ -59,6 +59,20 @@ let splitPrefixFromValue = function(value) {
 };
 
 /**
+ * @function sanitizeString
+ * @description Sanitize string values.
+ * @param field
+ * @param value
+ * @param type
+ * @returns {*}
+ */
+let sanitizeString = function({ field, value, type = 'string' }) {
+	invariant(typeof value === 'string', mismatchError({ field, type }));
+	value = validator.stripLow(xss(sanitize(value)));
+	return value;
+};
+
+/**
  * @function sanitizeBoolean
  * @description Sanitize boolean values. Can only be a string saying either 'true' or 'false'.
  * @param field
@@ -67,6 +81,8 @@ let splitPrefixFromValue = function(value) {
  * @returns {*}
  */
 let sanitizeBoolean = function({ field, value, type = 'boolean' }) {
+	// Run the value through the string sanitization to get rid of any risky characters
+	value = sanitizeString({ field, value });
 	value = value.toLowerCase();
 	if (['true', 'false'].includes(value)) {
 		value = validator.toBoolean(value, true);
@@ -84,6 +100,8 @@ let sanitizeBoolean = function({ field, value, type = 'boolean' }) {
  * @returns {*}
  */
 let sanitizeDate = function({ field, value, type = 'date' }) {
+	// Run the value through the string sanitization to get rid of any risky characters
+	value = sanitizeString({ field, value });
 	let prefix;
 	({ prefix, value } = splitPrefixFromValue(value));
 	invariant(moment(value).isValid(), mismatchError({ field, type }));
@@ -97,6 +115,8 @@ let sanitizeDate = function({ field, value, type = 'date' }) {
  */
 let sanitizeId = function(id) {
 	if (id) {
+		// Run the value through the string sanitization to get rid of any risky characters
+		id = sanitizeString({ field: 'id', value: id });
 		id = id.replace(/[^A-Za-z0-9-.]/g, '');
 		id = id.length > 64 ? id.substring(0, 64) : id;
 	}
@@ -112,6 +132,8 @@ let sanitizeId = function(id) {
  * @returns {*}
  */
 let sanitizeNumber = function({ field, value, type = 'number' }) {
+	// Run the value through the string sanitization to get rid of any risky characters
+	value = sanitizeString({ field, value });
 	let prefix;
 	({ prefix, value } = splitPrefixFromValue(value));
 	const coercedVal = validator.toFloat('' + value);
@@ -127,20 +149,6 @@ let sanitizeNumber = function({ field, value, type = 'number' }) {
 };
 
 /**
- * @function sanitizeString
- * @description Sanitize string values.
- * @param field
- * @param value
- * @param type
- * @returns {*}
- */
-let sanitizeString = function({ field, value, type = 'string' }) {
-	value = validator.stripLow(xss(sanitize(value)));
-	invariant(typeof value === 'string', mismatchError({ field, type }));
-	return value;
-};
-
-/**
  * @function sanitizeToken
  * @description Sanitize token values.
  * @param field
@@ -150,8 +158,8 @@ let sanitizeString = function({ field, value, type = 'string' }) {
  * @returns {*}
  */
 let sanitizeToken = function({ field, value, isBoolean, type = 'token' }) {
-	// Throw if the value is not a string, because we will not be able to make a token out of it
-	invariant(typeof value === 'string', mismatchError({ field, type }));
+	// Run the value through the string sanitization to get rid of any risky characters
+	value = sanitizeString({ field, value });
 
 	// Tokens have 1 or 2 parts containing codes and systems that are separated by pipes.
 	let chunks = value.split('|');
@@ -188,6 +196,8 @@ let sanitizeToken = function({ field, value, isBoolean, type = 'token' }) {
  * @returns {*}
  */
 let sanitizeQuantity = function({ field, value, type = 'quantity' }) {
+	// Run the value through the string sanitization to get rid of any risky characters
+	value = sanitizeString({ field, value });
 	let [number, token] = value.split(/\|(.+)/);
 	let prefix;
 	({ prefix, value } = sanitizeNumber({
@@ -210,45 +220,32 @@ let sanitizeQuantity = function({ field, value, type = 'quantity' }) {
 };
 
 /**
- *
+ * sanitizeSearchResultParameter
  * @param field
  * @param value
  * @returns {number}
  */
 let sanitizeSearchResultParameter = function({ field, value }) {
-	const validSummaryValues = ['true', 'text', 'data', 'count', 'false'];
-	const validTotalValues = ['none', 'estimate', 'accurate'];
-	const validContainedValues = ['true', 'false', 'both'];
-	const validContainedTypeValues = ['container', 'contained'];
-	let sanitizedValue;
-	switch (field) {
-		case '_elements':
-		case '_include':
-		case '_revinclude':
-		case '_sort':
-			sanitizedValue = sanitizeString({ field, value });
-			break;
-		case '_count':
-			sanitizedValue = Number(value);
-			invariant((Number.isInteger(sanitizedValue) && sanitizedValue > 0), mismatchError({ field, type: 'positive integer'}));
-			break;
-		case '_summary':
-			sanitizedValue = sanitizeString({field, value});
-			invariant(validSummaryValues.includes(sanitizedValue), mismatchError({field, type: validSummaryValues.toString()}));
-			break;
-		case '_total':
-			sanitizedValue = sanitizeString({field, value});
-			invariant(validTotalValues.includes(sanitizedValue), mismatchError({field, type: validTotalValues.toString()}));
-			break;
-		case '_contained':
-			sanitizedValue = sanitizeString({field, value});
-			invariant(validContainedValues.includes(sanitizedValue), mismatchError({field, type: validContainedValues.toString()}));
-			break;
-		case '_containedType':
-			sanitizedValue = sanitizeString({field, value});
-			invariant(validContainedTypeValues.includes(sanitizedValue), mismatchError({field, type: validContainedTypeValues.toString()}));
-			break;
+	// Run the value through the string sanitization to get rid of any risky characters
+	let sanitizedValue = sanitizeString({ field, value });
+	let validValues = {
+		_summary: ['true', 'text', 'data', 'count', 'false'],
+		_total: ['none', 'estimate', 'accurate'],
+		_contained: ['true', 'false', 'both'],
+		_containedType: ['container', 'contained']
+	};
+
+	// If the parameter is '_count', make sure that it's a positive integer.
+	if (field === '_count') {
+		sanitizedValue = Number(value);
+		invariant((Number.isInteger(sanitizedValue) && sanitizedValue > 0), mismatchError({ field, type: 'positive integer'}));
 	}
+
+	// If it's one of the params with a limited set of valid values, make sure we have one of the valid values.
+	if (validValues[field]) {
+		invariant(validValues[field].includes(sanitizedValue), mismatchError({field, type: validValues[field].toString()}));
+	}
+
 	return sanitizedValue;
 };
 
