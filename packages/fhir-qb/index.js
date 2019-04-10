@@ -3,33 +3,12 @@ const xRegExp = require('xregexp');
 const math = require('mathjs');
 const sanitize = require('@asymmetrik/fhir-sanitize-param');
 
-const globalParameters = {
-	_id: {
-		type: 'string',
-		fhirtype: 'string',
-		xpath: 'Resource.id',
-		definition: '',
-		description: 'Document ID',
-		modifier: ''
-	},
-	_lastUpdated: {
-		type: 'date',
-		fhirtype: 'date',
-		xpath: 'Resource.meta.lastUpdated',
-		definition: '',
-		description: 'Date/time of last update to document',
-		modifier: ''
-	}
-};
-
-const searchResultParameters = ['_count'];
-
 const prefixes = {
 	EQUAL: 'eq',
 	NOT_EQUAL: 'ne',
 	APPROXIMATELY: 'ap',
 	GREATER_THAN: 'gt',
-	STARTS_AFTER: 'sa'
+	STARTS_AFTER: 'sa',
 };
 
 const timeUnits = {
@@ -38,7 +17,7 @@ const timeUnits = {
 	DAY: 'day',
 	HOUR: 'hour',
 	MINUTE: 'minute',
-	SECOND: 'second'
+	SECOND: 'second',
 };
 
 const matchModifiers = {
@@ -50,9 +29,8 @@ const matchModifiers = {
 	below: 'below',
 	in: 'in',
 	not_in: 'not-in',
-	'': ''
+	'': '',
 };
-
 
 /* TODO
  * Need to add ability to get destination field's type for chained queries.
@@ -64,8 +42,9 @@ const matchModifiers = {
  */
 
 class QueryBuilder {
-	constructor(packageName) {
+	constructor(packageName, globalParameters) {
 		this.qb = require(`@asymmetrik/${packageName}`);
+		this.globalParameters = globalParameters;
 	}
 
 	/**
@@ -98,9 +77,10 @@ class QueryBuilder {
 		let numberOfDecimals = QueryBuilder.getNumberDecimals(value);
 		value = Number(value);
 
-		let rangePadding = (prefix === prefixes.EQUAL || prefix === prefixes.NOT_EQUAL)
-			? Math.pow(10, -numberOfDecimals) / 2
-			: Math.abs(value * 0.1);
+		let rangePadding =
+			prefix === prefixes.EQUAL || prefix === prefixes.NOT_EQUAL
+				? Math.pow(10, -numberOfDecimals) / 2
+				: Math.abs(value * 0.1);
 		let lowerBound = value - rangePadding;
 		let upperBound = value + rangePadding;
 		return { lowerBound, upperBound };
@@ -119,7 +99,6 @@ class QueryBuilder {
 		// Create a UTC moment of the supplied date
 		value = moment.utc(value);
 
-
 		// Object of the interval scales associated with how many parsed date parts we had.
 		// Interval scales are used to determine the implicit range of 'equals' queries.
 		// NOTES:
@@ -132,7 +111,7 @@ class QueryBuilder {
 			3: timeUnits.DAY,
 			4: timeUnits.HOUR,
 			5: timeUnits.MINUTE,
-			6: timeUnits.SECOND
+			6: timeUnits.SECOND,
 		};
 		let levelOfGranularity = value.parsingFlags().parsedDateParts.length;
 		let intervalScale = intervalScales[levelOfGranularity];
@@ -143,7 +122,7 @@ class QueryBuilder {
 			// Construct a query for 'equal' or 'not equal'
 
 			// The invert argument will determine whether or not to invert the query
-			let invert = (prefix === prefixes.NOT_EQUAL);
+			let invert = prefix === prefixes.NOT_EQUAL;
 
 			// If we have an interval scale, query the appropriate range
 			if (intervalScale) {
@@ -154,7 +133,7 @@ class QueryBuilder {
 					field,
 					lowerBound,
 					upperBound,
-					invert
+					invert,
 				});
 			} else {
 				// Else, we have an exact datetime, so query it directly
@@ -162,7 +141,7 @@ class QueryBuilder {
 				dateQuery = this.qb.buildEqualToQuery({
 					field,
 					value,
-					invert
+					invert,
 				});
 			}
 		} else if (prefix === prefixes.APPROXIMATELY) {
@@ -182,7 +161,10 @@ class QueryBuilder {
 			// Construct a query for the relevant comparison operator (>, >=, <, <=)
 			// If the modifier is for 'greater than' or 'starts after' and we have an interval scale, change the target
 			// date to be the end of the relevant interval scale.
-			if (intervalScale && (prefix === prefixes.GREATER_THAN || prefix === prefixes.STARTS_AFTER)) {
+			if (
+				intervalScale &&
+				(prefix === prefixes.GREATER_THAN || prefix === prefixes.STARTS_AFTER)
+			) {
 				value.endOf(intervalScale);
 			}
 			value = value.toISOString();
@@ -210,7 +192,11 @@ class QueryBuilder {
 		({ prefix, value } = sanitize.sanitizeNumber({ field, value }));
 
 		let numberQuery;
-		if (prefix === prefixes.EQUAL || prefix === prefixes.NOT_EQUAL || prefix === prefixes.APPROXIMATELY) {
+		if (
+			prefix === prefixes.EQUAL ||
+			prefix === prefixes.NOT_EQUAL ||
+			prefix === prefixes.APPROXIMATELY
+		) {
 			let lowerBound;
 			let upperBound;
 			if (bounds) {
@@ -227,7 +213,7 @@ class QueryBuilder {
 				field,
 				lowerBound,
 				upperBound,
-				invert: prefix === prefixes.NOT_EQUAL
+				invert: prefix === prefixes.NOT_EQUAL,
 			});
 		} else {
 			// Else, it must be a comparator query
@@ -319,7 +305,11 @@ class QueryBuilder {
 		let quantityQuery;
 		field = valueKey;
 		let bounds;
-		if (prefix === prefixes.EQUAL || prefix === prefixes.NOT_EQUAL || prefix === prefixes.APPROXIMATELY) {
+		if (
+			prefix === prefixes.EQUAL ||
+			prefix === prefixes.NOT_EQUAL ||
+			prefix === prefixes.APPROXIMATELY
+		) {
 			// If we need to query a range, get the bounds and convert them to SI
 			let { lowerBound, upperBound } = QueryBuilder.getNumericBounds({
 				prefix,
@@ -472,6 +462,9 @@ class QueryBuilder {
 					modifier: matchModifiers.exact,
 				});
 				break;
+			case 'token':
+				tokenQuery = this.qb.buildEqualToQuery({ field, value });
+				break;
 			default:
 				throw new Error(
 					`Unsupported fhirtype '${fhirtype}' supplied for token parameter '${field}'`,
@@ -560,7 +553,6 @@ class QueryBuilder {
 		return xpath.split(/\.(.+)/)[1];
 	}
 
-
 	/**
 	 * Given an http request and parameter definitions of a resource, construct a search query.
 	 * @parameter request
@@ -590,12 +582,14 @@ class QueryBuilder {
 				let parameterDefinition;
 				// Check to see if the parameter is defined as a global parameter or search result parameter.
 				// If not, see if the passed in definitions define this parameter.
-				if (globalParameters[parameter] !== undefined) {
-					parameterDefinition = globalParameters[parameter];
-				} else if (searchResultParameters.includes(parameter)) {
+				if (this.globalParameters[parameter] !== undefined) {
+					parameterDefinition = this.globalParameters[parameter];
+				} else if (
+					this.qb.supportedSearchTransformations[parameter] !== undefined
+				) {
 					parameterValue = sanitize.sanitizeSearchResultParameter({
 						field: parameter,
-						value: parameterValue
+						value: parameterValue,
 					});
 					searchResultTransformations[parameter] = parameterValue;
 					return;
@@ -624,14 +618,22 @@ class QueryBuilder {
 					}
 				}
 
-				let valuesToAnd = Array.isArray(parameterValue) ? parameterValue : [parameterValue];
+				let valuesToAnd = Array.isArray(parameterValue)
+					? parameterValue
+					: [parameterValue];
 				valuesToAnd.forEach(valuesToOr => {
 					let values = valuesToOr.split(',');
 
 					if (matchModifiers[modifier] !== undefined) {
 						// If the modifier indicates that we don't need a join, simply add the request to the push a new match request
 						// using the new information to the list of match requests.
-						rawMatchesToPerform.push({ field, values, type, fhirtype, modifier });
+						rawMatchesToPerform.push({
+							field,
+							values,
+							type,
+							fhirtype,
+							modifier,
+						});
 					} else {
 						// TODO this functionality doesn't work right now. Need to access the parameters.js
 						throw new Error(
@@ -651,7 +653,11 @@ class QueryBuilder {
 				}
 				matchesToPerform.push(orStatements);
 			}
-			query = this.qb.assembleSearchQuery({ joinsToPerform, matchesToPerform, searchResultTransformations });
+			query = this.qb.assembleSearchQuery({
+				joinsToPerform,
+				matchesToPerform,
+				searchResultTransformations,
+			});
 		} catch (err) {
 			errors.push(err);
 		}

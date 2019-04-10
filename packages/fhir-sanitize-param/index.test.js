@@ -190,9 +190,21 @@ describe('Standard Parameter Sanitization Tests', () => {
 				/expected token for parameter foo/,
 			);
 		});
+		test('Should reject a systemless and codeless token', () => {
+			const callSanitizeToken = () => {
+				sanitizer.sanitizeToken({ field: 'foo', value: '|', isBoolean: true });
+			};
+			expect(callSanitizeToken).toThrowError(
+				/Type mismatch, expected token for parameter foo/,
+			);
+		});
 		test('Should reject an invalid boolean code', () => {
 			const callSanitizeToken = () => {
-				sanitizer.sanitizeToken({ field: 'foo', value: 'notBoolean', isBoolean: true });
+				sanitizer.sanitizeToken({
+					field: 'foo',
+					value: 'notBoolean',
+					isBoolean: true,
+				});
 			};
 			expect(callSanitizeToken).toThrowError(
 				/Type mismatch, expected boolean for parameter foo/,
@@ -376,9 +388,7 @@ describe('Standard Parameter Sanitization Tests', () => {
 					value: 'foo',
 				});
 			};
-			expect(callSanitizeQuantity).toThrowError(
-				/Type mismatch/,
-			);
+			expect(callSanitizeQuantity).toThrowError(/Type mismatch/);
 		});
 		test('Should throw an error if _contained param has an invalid value', () => {
 			const callSanitizeQuantity = () => {
@@ -387,9 +397,7 @@ describe('Standard Parameter Sanitization Tests', () => {
 					value: 'foo',
 				});
 			};
-			expect(callSanitizeQuantity).toThrowError(
-				/Type mismatch/,
-			);
+			expect(callSanitizeQuantity).toThrowError(/Type mismatch/);
 		});
 		test('Should throw an error if _containedType param has an invalid value', () => {
 			const callSanitizeQuantity = () => {
@@ -398,9 +406,7 @@ describe('Standard Parameter Sanitization Tests', () => {
 					value: 'foo',
 				});
 			};
-			expect(callSanitizeQuantity).toThrowError(
-				/Type mismatch/,
-			);
+			expect(callSanitizeQuantity).toThrowError(/Type mismatch/);
 		});
 		test('Should throw an error if _total param has an invalid value', () => {
 			const callSanitizeQuantity = () => {
@@ -409,10 +415,7 @@ describe('Standard Parameter Sanitization Tests', () => {
 					value: 'foo',
 				});
 			};
-			expect(callSanitizeQuantity).toThrowError(
-				/Type mismatch/,
-			);
+			expect(callSanitizeQuantity).toThrowError(/Type mismatch/);
 		});
 	});
 });
-

@@ -1,9 +1,7 @@
-
 let supportedSearchTransformations = {
-	// TODO support offsetting
 	_count: function(value) {
-		return {$limit: value};
-	}
+		return { $limit: value };
+	},
 };
 
 /**
@@ -121,7 +119,11 @@ let buildEndsWithQuery = function({ field, value, caseSensitive = false }) {
  *
  * Returns a mongo aggregate query.
  */
-let assembleSearchQuery = function({ joinsToPerform, matchesToPerform, searchResultTransformations }) {
+let assembleSearchQuery = function({
+	joinsToPerform,
+	matchesToPerform,
+	searchResultTransformations,
+}) {
 	let aggregatePipeline = [];
 	let toSuppress = {};
 
@@ -129,7 +131,7 @@ let assembleSearchQuery = function({ joinsToPerform, matchesToPerform, searchRes
 	// for ease of use.
 	if (joinsToPerform.length > 0) {
 		for (let join of joinsToPerform) {
-			let {from, localKey, foreignKey} = join;
+			let { from, localKey, foreignKey } = join;
 			aggregatePipeline.push({
 				$lookup: {
 					from: from,
@@ -138,7 +140,7 @@ let assembleSearchQuery = function({ joinsToPerform, matchesToPerform, searchRes
 					as: from,
 				},
 			});
-			aggregatePipeline.push({$unwind: `$${from}`});
+			aggregatePipeline.push({ $unwind: `$${from}` });
 			toSuppress[from] = 0;
 		}
 	}
@@ -150,9 +152,9 @@ let assembleSearchQuery = function({ joinsToPerform, matchesToPerform, searchRes
 			if (match.length === 0) {
 				match.push({});
 			}
-			listOfOrs.push(buildOrQuery({queries: match}));
+			listOfOrs.push(buildOrQuery({ queries: match }));
 		}
-		aggregatePipeline.push({$match: buildAndQuery({queries: listOfOrs})});
+		aggregatePipeline.push({ $match: buildAndQuery({ queries: listOfOrs }) });
 	}
 
 	// Suppress the tables that were joined from being displayed in the returned query. TODO might not want to do this.
@@ -162,12 +164,12 @@ let assembleSearchQuery = function({ joinsToPerform, matchesToPerform, searchRes
 
 	// TODO - WORK IN PROGRESS - handling search result transformations
 	// Handle search result parameters
-	Object.keys(searchResultTransformations).forEach((transformation) => {
-		// This should never really happen, as the main query builder should handle this. Doesn't hurt to be safe though.
-		if (supportedSearchTransformations[transformation] === undefined) {
-			throw new Error(`The supplied search result parameter '${transformation}' is not currently supported.`);
-		}
-		aggregatePipeline.push(supportedSearchTransformations[transformation](searchResultTransformations[transformation]));
+	Object.keys(searchResultTransformations).forEach(transformation => {
+		aggregatePipeline.push(
+			supportedSearchTransformations[transformation](
+				searchResultTransformations[transformation],
+			),
+		);
 	});
 	return aggregatePipeline;
 };
@@ -183,4 +185,5 @@ module.exports = {
 	buildOrQuery,
 	buildInRangeQuery,
 	buildStartsWithQuery,
+	supportedSearchTransformations,
 };

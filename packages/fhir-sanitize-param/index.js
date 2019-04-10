@@ -82,8 +82,7 @@ let sanitizeString = function({ field, value, type = 'string' }) {
  */
 let sanitizeBoolean = function({ field, value, type = 'boolean' }) {
 	// Run the value through the string sanitization to get rid of any risky characters
-	value = sanitizeString({ field, value });
-	value = value.toLowerCase();
+	value = sanitizeString({ field, value }).toLowerCase();
 	if (['true', 'false'].includes(value)) {
 		value = validator.toBoolean(value, true);
 	}
@@ -179,7 +178,7 @@ let sanitizeToken = function({ field, value, isBoolean, type = 'token' }) {
 	invariant(code || system, mismatchError({ field, type }));
 
 	if (isBoolean) {
-		code = sanitizeBoolean({ field, value: code });
+		code = sanitizeBoolean({ field, value: code }).toString();
 	} else {
 		code = validator.stripLow(xss(sanitize(code)));
 		system = validator.stripLow(xss(sanitize(system)));
@@ -232,18 +231,24 @@ let sanitizeSearchResultParameter = function({ field, value }) {
 		_summary: ['true', 'text', 'data', 'count', 'false'],
 		_total: ['none', 'estimate', 'accurate'],
 		_contained: ['true', 'false', 'both'],
-		_containedType: ['container', 'contained']
+		_containedType: ['container', 'contained'],
 	};
 
 	// If the parameter is '_count', make sure that it's a positive integer.
 	if (field === '_count') {
 		sanitizedValue = Number(value);
-		invariant((Number.isInteger(sanitizedValue) && sanitizedValue > 0), mismatchError({ field, type: 'positive integer'}));
+		invariant(
+			Number.isInteger(sanitizedValue) && sanitizedValue > 0,
+			mismatchError({ field, type: 'positive integer' }),
+		);
 	}
 
 	// If it's one of the params with a limited set of valid values, make sure we have one of the valid values.
 	if (validValues[field]) {
-		invariant(validValues[field].includes(sanitizedValue), mismatchError({field, type: validValues[field].toString()}));
+		invariant(
+			validValues[field].includes(sanitizedValue),
+			mismatchError({ field, type: validValues[field].toString() }),
+		);
 	}
 
 	return sanitizedValue;
@@ -257,5 +262,5 @@ module.exports = {
 	sanitizeQuantity,
 	sanitizeString,
 	sanitizeToken,
-	sanitizeSearchResultParameter
+	sanitizeSearchResultParameter,
 };

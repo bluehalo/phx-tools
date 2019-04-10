@@ -159,12 +159,46 @@ describe('Mongo Query Builder Tests', () => {
 			expect(observedResult).toEqual(expectedResult);
 		});
 	});
+	describe('buildExistsQuery Tests', () => {
+		test('Should return a range query', () => {
+			const expectedResult = { foo: { $exists: true } };
+			let observedResult = mongoQB.buildExistsQuery({
+				field: 'foo',
+				exists: true,
+			});
+			expect(observedResult).toEqual(expectedResult);
+		});
+	});
+	describe('buildInRangeQuery Tests', () => {
+		test('Should return a range query', () => {
+			const expectedResult = { foo: { $gte: 1, $lte: 10 } };
+			let observedResult = mongoQB.buildInRangeQuery({
+				field: 'foo',
+				lowerBound: 1,
+				upperBound: 10,
+			});
+			expect(observedResult).toEqual(expectedResult);
+		});
+		test('Should return an exclusive range query if given an invert flag', () => {
+			const expectedResult = {
+				$or: [{ foo: { $lt: 1 } }, { foo: { $gt: 10 } }],
+			};
+			let observedResult = mongoQB.buildInRangeQuery({
+				field: 'foo',
+				lowerBound: 1,
+				upperBound: 10,
+				invert: true,
+			});
+			expect(observedResult).toEqual(expectedResult);
+		});
+	});
 	describe('assembleSearchQuery Tests', () => {
 		test('Should return empty pipeline if no matches or joins to perform', () => {
 			const expectedResult = [];
 			let observedResult = mongoQB.assembleSearchQuery({
 				joinsToPerform: [],
 				matchesToPerform: [],
+				searchResultTransformations: {},
 			});
 			expect(observedResult).toEqual(expectedResult);
 		});
@@ -179,12 +213,12 @@ describe('Mongo Query Builder Tests', () => {
 					},
 				},
 				{ $unwind: '$foo' },
-				{ $match: { $and: [{}] } },
 				{ $project: { foo: 0 } },
 			];
 			let observedResult = mongoQB.assembleSearchQuery({
 				joinsToPerform: [{ from: 'foo', localKey: 'bar', foreignKey: 'baz' }],
 				matchesToPerform: [],
+				searchResultTransformations: {},
 			});
 			expect(observedResult).toEqual(expectedResult);
 		});
@@ -193,6 +227,29 @@ describe('Mongo Query Builder Tests', () => {
 			let observedResult = mongoQB.assembleSearchQuery({
 				joinsToPerform: [],
 				matchesToPerform: [[]],
+				searchResultTransformations: {},
+			});
+			expect(observedResult).toEqual(expectedResult);
+		});
+		test('Should handle matches appropriately', () => {
+			const expectedResult = [
+				{ $match: { $and: [{ $or: [{ foo: { $gte: 1, $lte: 10 } }] }] } },
+			];
+			let observedResult = mongoQB.assembleSearchQuery({
+				joinsToPerform: [],
+				matchesToPerform: [[{ foo: { $gte: 1, $lte: 10 } }]],
+				searchResultTransformations: {},
+			});
+			expect(observedResult).toEqual(expectedResult);
+		});
+	});
+	describe('Search Result Transformation Tests', () => {
+		test('Should add $limit to the end of the pipeline when given _count parameter', () => {
+			const expectedResult = [{ $limit: 3 }];
+			let observedResult = mongoQB.assembleSearchQuery({
+				joinsToPerform: [],
+				matchesToPerform: [],
+				searchResultTransformations: { _count: 3 },
 			});
 			expect(observedResult).toEqual(expectedResult);
 		});
