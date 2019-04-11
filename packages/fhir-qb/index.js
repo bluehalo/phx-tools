@@ -42,7 +42,7 @@ const matchModifiers = {
  */
 
 class QueryBuilder {
-	constructor(packageName, globalParameters) {
+	constructor(packageName, globalParameters = {}) {
 		this.qb = require(`@asymmetrik/${packageName}`);
 		this.globalParameters = globalParameters;
 	}
