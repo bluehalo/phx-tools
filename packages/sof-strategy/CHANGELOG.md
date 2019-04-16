@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.1](https://github.com/Asymmetrik/phx-tools/compare/@asymmetrik/sof-strategy@1.0.3...@asymmetrik/sof-strategy@1.1.1) (2019-04-05)
+
+**Note:** Version bump only for package @asymmetrik/sof-strategy
+
+
+
+
+
 # [1.1.0](https://github.com/Asymmetrik/phx-tools/compare/@asymmetrik/sof-strategy@1.0.3...@asymmetrik/sof-strategy@1.1.0) (2019-03-20)
 
 
