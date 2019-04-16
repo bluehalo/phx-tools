@@ -6,7 +6,74 @@ describe('Mongo Tests', () => {
 		// Do this for tests only
 		moment.suppressDeprecationWarnings = true;
 	});
-	const qb = new QueryBuilder('fhir-qb-mongo');
+	const globalParameters = {
+		_content: {
+			type: 'string',
+			fhirtype: 'string',
+			xpath: '',
+			definition: 'http://hl7.org/fhir/SearchParameter/Resource-content',
+			description: 'Search on the entire content of the resource',
+			modifier: 'missing,exact,contains',
+		},
+		_id: {
+			type: 'token',
+			fhirtype: 'token',
+			xpath: 'Resource.id',
+			definition: 'http://hl7.org/fhir/SearchParameter/Resource-id',
+			description: 'Logical id of this artifact',
+			modifier: 'missing,text,not,in,not-in,below,above,ofType',
+		},
+		_lastUpdated: {
+			type: 'date',
+			fhirtype: 'date',
+			xpath: 'Resource.meta.lastUpdated',
+			definition: 'http://hl7.org/fhir/SearchParameter/Resource-lastUpdated',
+			description: 'When the resource version last changed',
+			modifier: 'missing',
+		},
+		_profile: {
+			type: 'reference',
+			fhirtype: 'reference',
+			xpath: 'Resource.meta.profile',
+			definition: 'http://hl7.org/fhir/SearchParameter/Resource-profile',
+			description: 'Profiles this resource claims to conform to',
+			modifier: 'missing,type,identifier',
+		},
+		_query: {
+			type: 'token',
+			fhirtype: 'token',
+			xpath: '',
+			definition: 'http://hl7.org/fhir/SearchParameter/Resource-query',
+			description:
+				'A custom search profile that describes a specific defined query operation',
+			modifier: 'missing,text,not,in,not-in,below,above,ofType',
+		},
+		_security: {
+			type: 'token',
+			fhirtype: 'token',
+			xpath: 'Resource.meta.security',
+			definition: 'http://hl7.org/fhir/SearchParameter/Resource-security',
+			description: 'Security Labels applied to this resource',
+			modifier: 'missing,text,not,in,not-in,below,above,ofType',
+		},
+		_source: {
+			type: 'uri',
+			fhirtype: 'uri',
+			xpath: 'Resource.meta.source',
+			definition: 'http://hl7.org/fhir/SearchParameter/Resource-source',
+			description: 'Identifies where the resource comes from',
+			modifier: 'missing,below,above',
+		},
+		_tag: {
+			type: 'token',
+			fhirtype: 'token',
+			xpath: 'Resource.meta.tag',
+			definition: 'http://hl7.org/fhir/SearchParameter/Resource-tag',
+			description: 'Tags applied to this resource',
+			modifier: 'missing,text,not,in,not-in,below,above,ofType',
+		},
+	};
+	const qb = new QueryBuilder('fhir-qb-mongo', globalParameters);
 	describe('Build Date Query Tests', () => {
 		describe('eq Modifier Tests', () => {
 			// TODO - Should I throw an error in this situation? Providing ms is not allowed according to the spec.
@@ -38,7 +105,20 @@ describe('Mongo Tests', () => {
 				let { errors, query } = qb.buildSearchQuery(request, configs);
 				const expectedResult = [
 					{
-						$match: { $and: [{ $or: [{ foo: '2018-10-31T17:49:29.000Z' }] }] },
+						$match: {
+							$and: [
+								{
+									$or: [
+										{
+											foo: {
+												$gte: '2018-10-31T17:49:29.000Z',
+												$lte: '2018-10-31T17:49:29.999Z',
+											},
+										},
+									],
+								},
+							],
+						},
 					},
 				];
 				expect(errors).toHaveLength(0);
@@ -259,7 +339,18 @@ describe('Mongo Tests', () => {
 				const expectedResult = [
 					{
 						$match: {
-							$and: [{ $or: [{ foo: { $ne: '2018-10-31T17:49:29.000Z' } }] }],
+							$and: [
+								{
+									$or: [
+										{
+											$or: [
+												{ foo: { $lt: '2018-10-31T17:49:29.000Z' } },
+												{ foo: { $gt: '2018-10-31T17:49:29.999Z' } },
+											],
+										},
+									],
+								},
+							],
 						},
 					},
 				];
@@ -453,7 +544,7 @@ describe('Mongo Tests', () => {
 				const expectedResult = [
 					{
 						$match: {
-							$and: [{ $or: [{ foo: { $gt: '2018-10-31T17:49:29.000Z' } }] }],
+							$and: [{ $or: [{ foo: { $gt: '2018-10-31T17:49:29.999Z' } }] }],
 						},
 					},
 				];
@@ -1001,7 +1092,7 @@ describe('Mongo Tests', () => {
 				const expectedResult = [
 					{
 						$match: {
-							$and: [{ $or: [{ foo: { $gt: '2018-10-31T17:49:29.000Z' } }] }],
+							$and: [{ $or: [{ foo: { $gt: '2018-10-31T17:49:29.999Z' } }] }],
 						},
 					},
 				];
@@ -2383,7 +2474,7 @@ describe('Mongo Tests', () => {
 				let { errors } = qb.buildSearchQuery(request, configs);
 				expect(errors).toHaveLength(1);
 				expect(errors[0].message).toContain(
-					'Search modifiers are not supported for parameter foo as a URN of type uri',
+					"Search modifiers are not supported for parameter 'foo' as a URN of type uri",
 				);
 			});
 		});
@@ -3212,7 +3303,7 @@ describe('Mongo Tests', () => {
 			const configs = { bar: { type: 'number', xpath: 'Resource.foo' } };
 			let { errors } = qb.buildSearchQuery(request, configs);
 			expect(errors).toHaveLength(1);
-			expect(errors[0].message).toContain('Unknown parameter foo');
+			expect(errors[0].message).toContain("Unknown parameter 'foo'");
 		});
 		test('Should throw and catch an error and add it to the errors array if a parameter has an invalid type.', () => {
 			const request = {
@@ -3279,22 +3370,79 @@ describe('Mongo Tests', () => {
 			expect(errors).toHaveLength(1);
 			expect(errors[0].message).toContain("Unsupported request method 'PUT'");
 		});
-	});
-
-	// TODO update this test when lookup funcitonality is added.
-	describe('Build Lookup Query Tests', () => {
-		test('Should throw an error if parameters are supplied in a way that requires building a lookup query', () => {
+		test('Should throw an error for unsupported modifiers', () => {
 			const request = {
 				method: 'GET',
 				query: {
-					'foo:Patient': 'bar',
+					'foo:unsupportedModifier': 'bar',
 				},
 			};
 			const configs = { foo: { type: 'string', xpath: 'Resource.foo' } };
 			let { errors } = qb.buildSearchQuery(request, configs);
+			expect(errors).toHaveLength(1);
 			expect(errors[0].message).toContain(
-				"Search modifier 'Patient' is not currently supported",
+				"Search modifier 'unsupportedModifier' is not currently supported",
 			);
+		});
+	});
+
+	describe('Global Parameter Query Tests', () => {
+		test('Test for global param _id', () => {
+			const request = {
+				method: 'GET',
+				query: {
+					_id: 'foo',
+				},
+			};
+			const configs = undefined;
+			let { query, errors } = qb.buildSearchQuery(request, configs);
+			const expectedResult = [{ $match: { $and: [{ $or: [{ id: 'foo' }] }] } }];
+
+			expect(errors).toHaveLength(0);
+			expect(query).toEqual(expectedResult);
+		});
+		test('Test for global param _lastUpdated', () => {
+			const request = {
+				method: 'GET',
+				query: {
+					_lastUpdated: '2018-10-31T17:49:29.000Z',
+				},
+			};
+			const configs = undefined;
+			let { query, errors } = qb.buildSearchQuery(request, configs);
+			const expectedResult = [
+				{
+					$match: {
+						$and: [
+							{ $or: [{ 'meta.lastUpdated': '2018-10-31T17:49:29.000Z' }] },
+						],
+					},
+				},
+			];
+
+			expect(errors).toHaveLength(0);
+			expect(query).toEqual(expectedResult);
+		});
+		test('Should be able to initialize a new qb without supplying global parameters', () => {
+			const noGlobalQB = new QueryBuilder('fhir-qb-mongo');
+			expect(noGlobalQB).toBeDefined();
+		});
+	});
+
+	describe('Search Result Parameter Query Tests', () => {
+		test('Test for search param _count', () => {
+			const request = {
+				method: 'GET',
+				query: {
+					_count: '5',
+				},
+			};
+			const configs = undefined;
+			let { query, errors } = qb.buildSearchQuery(request, configs);
+			const expectedResult = [{ $limit: 5 }];
+
+			expect(errors).toHaveLength(0);
+			expect(query).toEqual(expectedResult);
 		});
 	});
 });

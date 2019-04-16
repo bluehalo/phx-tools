@@ -1,3 +1,9 @@
+let supportedSearchTransformations = {
+	_count: function(value) {
+		return { $limit: value };
+	},
+};
+
 /**
  * Takes in a list of queries and wraps them in an $and block
  */
@@ -113,47 +119,58 @@ let buildEndsWithQuery = function({ field, value, caseSensitive = false }) {
  *
  * Returns a mongo aggregate query.
  */
-let assembleSearchQuery = function({ joinsToPerform, matchesToPerform }) {
+let assembleSearchQuery = function({
+	joinsToPerform,
+	matchesToPerform,
+	searchResultTransformations,
+}) {
 	let aggregatePipeline = [];
-	if (joinsToPerform.length === 0 && matchesToPerform.length === 0) {
-		return aggregatePipeline;
-	}
 	let toSuppress = {};
 
 	// Construct the necessary joins and add them to the aggregate pipeline. Also follow each $lookup with an $unwind
 	// for ease of use.
-	for (let join of joinsToPerform) {
-		let { from, localKey, foreignKey } = join;
-		aggregatePipeline.push({
-			$lookup: {
-				from: from,
-				localField: localKey,
-				foreignField: foreignKey,
-				as: from,
-			},
-		});
-		aggregatePipeline.push({ $unwind: `$${from}` });
-		toSuppress[from] = 0;
+	if (joinsToPerform.length > 0) {
+		for (let join of joinsToPerform) {
+			let { from, localKey, foreignKey } = join;
+			aggregatePipeline.push({
+				$lookup: {
+					from: from,
+					localField: localKey,
+					foreignField: foreignKey,
+					as: from,
+				},
+			});
+			aggregatePipeline.push({ $unwind: `$${from}` });
+			toSuppress[from] = 0;
+		}
 	}
 
 	// Construct the necessary queries for each match and add them the pipeline.
-	let listOfOrs = [];
-	for (let match of matchesToPerform) {
-		if (match.length === 0) {
-			match.push({});
+	if (matchesToPerform.length > 0) {
+		let listOfOrs = [];
+		for (let match of matchesToPerform) {
+			if (match.length === 0) {
+				match.push({});
+			}
+			listOfOrs.push(buildOrQuery({ queries: match }));
 		}
-		listOfOrs.push(buildOrQuery({ queries: match }));
+		aggregatePipeline.push({ $match: buildAndQuery({ queries: listOfOrs }) });
 	}
-	if (listOfOrs.length === 0) {
-		listOfOrs.push({});
-	}
-	aggregatePipeline.push({ $match: buildAndQuery({ queries: listOfOrs }) });
 
 	// Suppress the tables that were joined from being displayed in the returned query. TODO might not want to do this.
 	if (Object.keys(toSuppress).length > 0) {
 		aggregatePipeline.push({ $project: toSuppress });
 	}
 
+	// TODO - WORK IN PROGRESS - handling search result transformations
+	// Handle search result parameters
+	Object.keys(searchResultTransformations).forEach(transformation => {
+		aggregatePipeline.push(
+			supportedSearchTransformations[transformation](
+				searchResultTransformations[transformation],
+			),
+		);
+	});
 	return aggregatePipeline;
 };
 
@@ -168,4 +185,5 @@ module.exports = {
 	buildOrQuery,
 	buildInRangeQuery,
 	buildStartsWithQuery,
+	supportedSearchTransformations,
 };

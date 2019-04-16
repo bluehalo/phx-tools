@@ -1,6 +1,11 @@
 const sanitizer = require('./index.js');
+const moment = require('moment');
 
-describe('Parameter Sanitization Tests', () => {
+describe('Standard Parameter Sanitization Tests', () => {
+	beforeAll(() => {
+		// Do this for tests only
+		moment.suppressDeprecationWarnings = true;
+	});
 	describe('Boolean', () => {
 		test('Should convert true string to a boolean true', () => {
 			let input = {
@@ -185,6 +190,26 @@ describe('Parameter Sanitization Tests', () => {
 				/expected token for parameter foo/,
 			);
 		});
+		test('Should reject a systemless and codeless token', () => {
+			const callSanitizeToken = () => {
+				sanitizer.sanitizeToken({ field: 'foo', value: '|', isBoolean: true });
+			};
+			expect(callSanitizeToken).toThrowError(
+				/Type mismatch, expected token for parameter foo/,
+			);
+		});
+		test('Should reject an invalid boolean code', () => {
+			const callSanitizeToken = () => {
+				sanitizer.sanitizeToken({
+					field: 'foo',
+					value: 'notBoolean',
+					isBoolean: true,
+				});
+			};
+			expect(callSanitizeToken).toThrowError(
+				/Type mismatch, expected boolean for parameter foo/,
+			);
+		});
 	});
 	describe('Quantity', () => {
 		test('Should pass just a number', () => {
@@ -286,7 +311,7 @@ describe('Parameter Sanitization Tests', () => {
 			expect(result).toEqual(undefined);
 		});
 		test('Should strip out invalid characters', () => {
-			let result = sanitizer.sanitizeId('1:2_3!4*5&');
+			let result = sanitizer.sanitizeId('1:2_3!4*5');
 			expect(result).toEqual('12345');
 		});
 		test('Should truncate id to 64 characters', () => {
@@ -296,6 +321,101 @@ describe('Parameter Sanitization Tests', () => {
 			expect(result).toEqual(
 				'1234567890123456789012345678901234567890123456789012345678901234',
 			);
+		});
+	});
+	describe('Search Parameter Sanitization Tests', () => {
+		test('Should sanitize _elements param as string', () => {
+			let input = {
+				field: '_elements',
+				value: '\b\f\nb\r\t\va\0r',
+			};
+			let result = sanitizer.sanitizeSearchResultParameter(input);
+			expect(result).toEqual('bar');
+		});
+		test('Should sanitize _include param as string', () => {
+			let input = {
+				field: '_include',
+				value: '\b\f\nb\r\t\va\0r',
+			};
+			let result = sanitizer.sanitizeSearchResultParameter(input);
+			expect(result).toEqual('bar');
+		});
+		test('Should sanitize _revinclude param as string', () => {
+			let input = {
+				field: '_revinclude',
+				value: '\b\f\nb\r\t\va\0r',
+			};
+			let result = sanitizer.sanitizeSearchResultParameter(input);
+			expect(result).toEqual('bar');
+		});
+		test('Should throw an error if _count param is not a number', () => {
+			const callSanitizeQuantity = () => {
+				sanitizer.sanitizeSearchResultParameter({
+					field: '_count',
+					value: '\b\f\nb\r\t\va\0r',
+				});
+			};
+			expect(callSanitizeQuantity).toThrowError(
+				'Type mismatch, expected positive integer for parameter _count',
+			);
+		});
+		test('Should throw an error if _count param is not positive', () => {
+			const callSanitizeQuantity = () => {
+				sanitizer.sanitizeSearchResultParameter({
+					field: '_count',
+					value: '0',
+				});
+			};
+			expect(callSanitizeQuantity).toThrowError(
+				'Type mismatch, expected positive integer for parameter _count',
+			);
+		});
+		test('Should throw an error if _count param is not an integer', () => {
+			const callSanitizeQuantity = () => {
+				sanitizer.sanitizeSearchResultParameter({
+					field: '_count',
+					value: '2.5',
+				});
+			};
+			expect(callSanitizeQuantity).toThrowError(
+				'Type mismatch, expected positive integer for parameter _count',
+			);
+		});
+		test('Should throw an error if _summary param has an invalid value', () => {
+			const callSanitizeQuantity = () => {
+				sanitizer.sanitizeSearchResultParameter({
+					field: '_summary',
+					value: 'foo',
+				});
+			};
+			expect(callSanitizeQuantity).toThrowError(/Type mismatch/);
+		});
+		test('Should throw an error if _contained param has an invalid value', () => {
+			const callSanitizeQuantity = () => {
+				sanitizer.sanitizeSearchResultParameter({
+					field: '_contained',
+					value: 'foo',
+				});
+			};
+			expect(callSanitizeQuantity).toThrowError(/Type mismatch/);
+		});
+		test('Should throw an error if _containedType param has an invalid value', () => {
+			const callSanitizeQuantity = () => {
+				sanitizer.sanitizeSearchResultParameter({
+					field: '_containedType',
+					value: 'foo',
+				});
+			};
+			expect(callSanitizeQuantity).toThrowError(/Type mismatch/);
+		});
+		test('Should throw an error if _total param has an invalid value', () => {
+			const callSanitizeQuantity = () => {
+				sanitizer.sanitizeSearchResultParameter({
+					field: '_total',
+					value: 'foo',
+				});
+			};
+			expect(callSanitizeQuantity).toThrowError(/Type mismatch/);
 		});
 	});
 });
