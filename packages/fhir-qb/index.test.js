@@ -3370,6 +3370,20 @@ describe('Mongo Tests', () => {
 			expect(errors).toHaveLength(1);
 			expect(errors[0].message).toContain("Unsupported request method 'PUT'");
 		});
+		test('Should throw an error for unsupported modifiers', () => {
+			const request = {
+				method: 'GET',
+				query: {
+					'foo:unsupportedModifier': 'bar',
+				},
+			};
+			const configs = { foo: { type: 'string', xpath: 'Resource.foo' } };
+			let { errors } = qb.buildSearchQuery(request, configs);
+			expect(errors).toHaveLength(1);
+			expect(errors[0].message).toContain(
+				"Search modifier 'unsupportedModifier' is not currently supported",
+			);
+		});
 	});
 
 	describe('Global Parameter Query Tests', () => {
@@ -3409,6 +3423,10 @@ describe('Mongo Tests', () => {
 			expect(errors).toHaveLength(0);
 			expect(query).toEqual(expectedResult);
 		});
+		test('Should be able to initialize a new qb without supplying global parameters', () => {
+			const noGlobalQB = new QueryBuilder('fhir-qb-mongo');
+			expect(noGlobalQB).toBeDefined();
+		});
 	});
 
 	describe('Search Result Parameter Query Tests', () => {
@@ -3425,23 +3443,6 @@ describe('Mongo Tests', () => {
 
 			expect(errors).toHaveLength(0);
 			expect(query).toEqual(expectedResult);
-		});
-	});
-
-	// TODO update this test when lookup funcitonality is added.
-	describe('Build Lookup Query Tests', () => {
-		test('Should throw an error if parameters are supplied in a way that requires building a lookup query', () => {
-			const request = {
-				method: 'GET',
-				query: {
-					'foo:Patient': 'bar',
-				},
-			};
-			const configs = { foo: { type: 'string', xpath: 'Resource.foo' } };
-			let { errors } = qb.buildSearchQuery(request, configs);
-			expect(errors[0].message).toContain(
-				"Search modifier 'Patient' is not currently supported",
-			);
 		});
 	});
 });
