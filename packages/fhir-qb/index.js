@@ -541,7 +541,7 @@ class QueryBuilder {
 		}
 
 		// For all requests, merge request parameters
-		return Object.assign(args, req.parameters);
+		return Object.assign(args, req.params);
 	}
 
 	/**
