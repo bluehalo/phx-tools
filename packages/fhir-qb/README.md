@@ -11,7 +11,7 @@ yarn add @asymmetrik/fhir-qb
 `@asymmetrik/fhir-qb` exports a single class called QueryBuilder. When creating a new QueryBuilder, you must supply the 
 db-specific implementation in phx-tools that you wish the query builder to use. For example:
 ```
-qb = new QueryBuilder('fhir-qb-mongo')
+let qb = new QueryBuilder('fhir-qb-mongo')
 ```
 See [DB Specific Implementations](#db-specific-implementations) below.
 
