@@ -2,12 +2,13 @@ const Ajv = require('ajv');
 const ajv = new Ajv({allErrors: true});
 // To use Ajv with draft-06 schemas you need to explicitly add the meta-schema to the validator instance:
 ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-06.json'));
-const schema = require('./fhir.schema.json');
+const defaultSchema = require('./fhir.schema.json');
 
 
 class JSONSchemaValidator {
-	constructor() {
-		this.validator = ajv.compile(schema);
+	constructor(schema = defaultSchema) {
+		this.schema = schema;
+		this.validator = ajv.compile(this.schema);
 	}
 
 	/**
@@ -15,8 +16,8 @@ class JSONSchemaValidator {
 	 * We do this in order to generate more specific/helpful error messages
 	 * @param resourceType
 	 */
-	static getSubSchema(resourceType) {
-		let subSchema = schema;
+	getSubSchema(resourceType) {
+		let subSchema = this.schema;
 		subSchema.oneOf = [{ $ref: `#/definitions/${resourceType}`}];
 		return subSchema;
 	}
@@ -43,27 +44,28 @@ class JSONSchemaValidator {
 	/**
 	 * Check to see if a resource is valid.
 	 * @param resource - the resource to be validated
-	 * @param conciseErrors - whether or not to compile a resource-specific validator in the case of a failure so we can
-	 * generate better error messages.
+	 * @param verbose - Whether or not to return the full list of errors. This defaults to false, as the full list is
+	 * usually very long and not particularly helpful. When set to false, we try to generate more concise and helpful
+	 * error messages
 	 * @returns {{isValid: boolean, errors: Array}}
 	 */
-	validate(resource, conciseErrors = true) {
+	validate(resource, verbose = false) {
 		let {resourceType} = resource;
 		let errors = [];
 		let isValid = false;
 
 		// If we do not have a mapping for our resource type, add an error to the array of errors and return it
-		if (!schema.discriminator.mapping[resourceType]) {
+		if (!this.schema.discriminator.mapping[resourceType]) {
 			errors.push(`Invalid resourceType '${resourceType}'`);
 		} else {
 			isValid = this.validator(resource);
 			if (!isValid) {
-				if (conciseErrors) {
-					let resourceValidate = ajv.compile(JSONSchemaValidator.getSubSchema(resourceType));
+				if (verbose) {
+					errors = this.validator.errors;
+				} else {
+					let resourceValidate = ajv.compile(this.getSubSchema(resourceType));
 					resourceValidate(resource);
 					errors = resourceValidate.errors;
-				} else {
-					errors = this.validator.errors;
 				}
 				errors = this.formatErrors(errors);
 			}
@@ -73,5 +75,3 @@ class JSONSchemaValidator {
 }
 
 module.exports = JSONSchemaValidator;
-
-
