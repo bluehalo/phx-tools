@@ -43,11 +43,11 @@ class JSONSchemaValidator {
 	/**
 	 * Check to see if a resource is valid.
 	 * @param resource - the resource to be validated
-	 * @param makeGoodErrors - whether or not to compile a resource-specific validator in the case of a failure so we can
+	 * @param conciseErrors - whether or not to compile a resource-specific validator in the case of a failure so we can
 	 * generate better error messages.
 	 * @returns {{isValid: boolean, errors: Array}}
 	 */
-	validate(resource, makeGoodErrors = true) {
+	validate(resource, conciseErrors = true) {
 		let {resourceType} = resource;
 		let errors = [];
 		let isValid = false;
@@ -58,7 +58,7 @@ class JSONSchemaValidator {
 		} else {
 			isValid = this.validator(resource);
 			if (!isValid) {
-				if (makeGoodErrors) {
+				if (conciseErrors) {
 					let resourceValidate = ajv.compile(JSONSchemaValidator.getSubSchema(resourceType));
 					resourceValidate(resource);
 					errors = resourceValidate.errors;
