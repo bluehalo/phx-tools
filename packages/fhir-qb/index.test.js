@@ -3358,6 +3358,24 @@ describe('Mongo Tests', () => {
 			expect(errors).toHaveLength(0);
 			expect(query).toEqual(expectedResult);
 		});
+		test('Should merge the request body with request.params for parameters', () => {
+			const request = {
+				method: 'POST',
+				body: {
+					foo: 'eq2017-10-31T17:49:29.000Z',
+				},
+				params: {
+					bar: 'eq2018-10-31T17:49:29.000Z',
+				}
+			};
+			const configs = { foo: { type: 'date', xpath: 'Resource.foo' }, bar: { type: 'date', xpath: 'Resource.bar' } };
+			let { errors, query } = qb.buildSearchQuery(request, configs);
+			const expectedResult = [
+				{ $match: { $and: [{ $or: [{ foo: '2017-10-31T17:49:29.000Z' }] }, { $or: [{ bar: '2018-10-31T17:49:29.000Z' }] }] } },
+			];
+			expect(errors).toHaveLength(0);
+			expect(query).toEqual(expectedResult);
+		});
 		test('Should throw an error for unsupported request types', () => {
 			const request = {
 				method: 'PUT',
