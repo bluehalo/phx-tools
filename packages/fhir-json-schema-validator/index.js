@@ -23,42 +23,23 @@ class JSONSchemaValidator {
 	}
 
 	/**
-	 * Format the ajv errors into a string.
-	 * @param errors
-	 * @returns {Array}
-	 */
-	formatErrors(errors) {
-		let formattedErrors = [];
-		(Object.values(errors)).forEach((error) => {
-			let { keyword, dataPath, params, message } = error;
-			// The 'oneOf' errors aren't very helpful to the user, in that they don't really tell them what
-			// to fix. They happen as the result of other errors.
-			if (keyword === 'oneOf') {
-				return;
-			}
-			formattedErrors.push(`${dataPath} ${message} (${JSON.stringify(params)})`);
-		});
-		return formattedErrors;
-	}
-
-	/**
 	 * Check to see if a resource is valid.
 	 * @param resource - the resource to be validated
 	 * @param verbose - Whether or not to return the full list of errors. This defaults to false, as the full list is
 	 * usually very long and not particularly helpful. When set to false, we try to generate more concise and helpful
 	 * error messages
-	 * @returns {{isValid: boolean, errors: Array}}
+	 * @returns {Array}
 	 */
 	validate(resource, verbose = false) {
 		let {resourceType} = resource;
 		let errors = [];
-		let isValid = false;
+		// let isValid = false;
 
 		// If we do not have a mapping for our resource type, add an error to the array of errors and return it
 		if (!this.schema.discriminator.mapping[resourceType]) {
 			errors.push(`Invalid resourceType '${resourceType}'`);
 		} else {
-			isValid = this.validator(resource);
+			let isValid = this.validator(resource);
 			if (!isValid) {
 				if (verbose) {
 					errors = this.validator.errors;
@@ -67,10 +48,9 @@ class JSONSchemaValidator {
 					resourceValidate(resource);
 					errors = resourceValidate.errors;
 				}
-				errors = this.formatErrors(errors);
 			}
 		}
-		return { isValid, errors };
+		return errors;
 	}
 }
 

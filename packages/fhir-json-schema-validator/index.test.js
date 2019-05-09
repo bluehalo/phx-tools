@@ -355,24 +355,34 @@ describe('JSON Schema Validator Tests', () => {
 	let invalidResourceType = {resourceType: 'foo'};
 
 	test('Should say resource is valid with 0 errors when given a good resource', () => {
-		let {isValid, errors} = validator.validate(goodPatient);
-		expect(isValid).toBe(true);
+		let errors = validator.validate(goodPatient);
 		expect(errors).toHaveLength(0);
 	});
 	test('Should say resource is invalid with concise errors when given bad resource and default options', () => {
-		let {isValid, errors} = validator.validate(badPatient);
-		expect(isValid).toBe(false);
-		expect(errors).toHaveLength(1);
-		expect(errors[0]).toContain('.address[0].city should be string');
+		let errors = validator.validate(badPatient);
+		expect(errors).toHaveLength(2);
+		expect(errors).toEqual([
+			{
+				dataPath: '.address[0].city',
+				keyword: 'type',
+				message: 'should be string',
+				params: {type: 'string'},
+				schemaPath: '#/definitions/string/type'
+			},
+			{
+				dataPath: '',
+				keyword: 'oneOf',
+				message: 'should match exactly one schema in oneOf',
+				params: {passingSchemas: null},
+				schemaPath: '#/oneOf'
+			}]);
 	});
 	test('Should say resource is invalid with verbose errors when verbose is set to true', () => {
-		let {isValid, errors} = validator.validate(badPatient, true);
-		expect(isValid).toBe(false);
-		expect(errors).toHaveLength(1442);
+		let errors = validator.validate(badPatient, true);
+		expect(errors).toHaveLength(1443);
 	});
 	test('Should say resourceType is invalid when given unknown resourceType', () => {
-		let {isValid, errors} = validator.validate(invalidResourceType);
-		expect(isValid).toBe(false);
+		let errors = validator.validate(invalidResourceType);
 		expect(errors).toHaveLength(1);
 		expect(errors[0]).toContain('Invalid resourceType \'foo\'');
 	});

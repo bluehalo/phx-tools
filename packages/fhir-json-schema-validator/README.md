@@ -31,11 +31,7 @@ condense error messages (false). Defaults to false.  The error messages generate
  are too numerous to be of any use. For any specific resource, we can compile a resource-specific validator and 
  re-validate to get more concise and helpful error messages.
 
-The `validate` method returns an object with two keys:
->#### `isValid`
->Boolean indicating whether or not the resource is valid or not
-
->#### `errors`
->List of errors generated from validation. Will be of 0 length when `isValid === true`
+The `validate` method returns an array that contains any errors generated from validation.
+This list will be of length 0 if no errors were found.
 
 See `index.test.js` for examples of usage
