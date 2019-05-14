@@ -114,17 +114,23 @@ let buildEndsWithQuery = function({ field, value, caseSensitive = false }) {
 };
 
 /**
- * Takes in 2 lists, joinsToPerform and matchesToPerform. Constructs a mongo aggregation query that first performs
+ * Takes in 3 lists, joinsToPerform, matchesToPerform. Constructs a mongo aggregation query that first performs
  * any necessary joins as dictated by joinsToPerform, and then filters the results them down using matchesToPerform.
  *
  * Returns a mongo aggregate query.
  */
+
+/**
+ * Assembles a mongo aggregation pipeline
+ * @param joinsToPerform - List of joins to perform first through lookups
+ * @param matchesToPerform - List of matches to perform
+ * @returns {Array}
+ */
 let assembleSearchQuery = function({
 	joinsToPerform,
 	matchesToPerform,
-	searchResultTransformations,
 }) {
-	let aggregatePipeline = [];
+	let query = [];
 	let toSuppress = {};
 
 	// Construct the necessary joins and add them to the aggregate pipeline. Also follow each $lookup with an $unwind
@@ -132,7 +138,7 @@ let assembleSearchQuery = function({
 	if (joinsToPerform.length > 0) {
 		for (let join of joinsToPerform) {
 			let { from, localKey, foreignKey } = join;
-			aggregatePipeline.push({
+			query.push({
 				$lookup: {
 					from: from,
 					localField: localKey,
@@ -140,7 +146,7 @@ let assembleSearchQuery = function({
 					as: from,
 				},
 			});
-			aggregatePipeline.push({ $unwind: `$${from}` });
+			query.push({ $unwind: `$${from}` });
 			toSuppress[from] = 0;
 		}
 	}
@@ -154,28 +160,61 @@ let assembleSearchQuery = function({
 			}
 			listOfOrs.push(buildOrQuery({ queries: match }));
 		}
-		aggregatePipeline.push({ $match: buildAndQuery({ queries: listOfOrs }) });
+		query.push({ $match: buildAndQuery({ queries: listOfOrs }) });
 	}
 
 	// Suppress the tables that were joined from being displayed in the returned query. TODO might not want to do this.
 	if (Object.keys(toSuppress).length > 0) {
-		aggregatePipeline.push({ $project: toSuppress });
+		query.push({ $project: toSuppress });
 	}
 
-	// TODO - WORK IN PROGRESS - handling search result transformations
-	// Handle search result parameters
+	return query;
+};
+
+/**
+ * TODO - WORK IN PROGRESS
+ * Apply search result transformations
+ * @param query
+ * @param searchResultTransformations
+ */
+let applySearchResultTransformations = function(query, searchResultTransformations) {
 	Object.keys(searchResultTransformations).forEach(transformation => {
-		aggregatePipeline.push(
+		query.push(
 			supportedSearchTransformations[transformation](
 				searchResultTransformations[transformation],
 			),
 		);
 	});
-	return aggregatePipeline;
+	return query;
+};
+
+// TODO - DISCUSS - How do we want to handle it when they ask for page 8/5? Error? Empty? Last actual page?
+let applyPaging = function(query, pageNumber, resultsPerPage) {
+	// If resultsPerPage is defined, skip to the appropriate page and limit the number of results that appear per page.
+	// Otherwise just insert a filler (to keep mongo happy) that skips no entries.
+	let pageSelection = (resultsPerPage) ? [{$skip: (pageNumber - 1) * resultsPerPage}, {$limit: resultsPerPage}] : [{$skip: 0}];
+
+	// If resultsPerPage is defined, calculate the total number of pages as the total number of records
+	// divided by the results per page rounded up to the nearest integer.
+	// Otherwise if resultsPerPage is not defined, all of the results will be on one page.
+	let numberOfPages = (resultsPerPage) ? {$ceil: {$divide: ['$total', resultsPerPage]}} : 1;
+	query.push({
+		$facet: {
+			metadata: [
+				{$count: 'total'},
+				{$addFields: {numberOfPages: numberOfPages}},
+				{$addFields: {page: pageNumber}} // TODO may need some additional validation on this.
+				],
+			data: pageSelection
+		}
+	});
+	return query;
 };
 
 module.exports = {
+	applyPaging,
 	assembleSearchQuery,
+	applySearchResultTransformations,
 	buildAndQuery,
 	buildComparatorQuery,
 	buildContainsQuery,

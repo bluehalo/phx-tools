@@ -42,9 +42,11 @@ const matchModifiers = {
  */
 
 class QueryBuilder {
-	constructor(packageName, globalParameters = {}) {
+	constructor(packageName, globalParameters = {}, pageParam = 'page', resultsPerPage = 10) {
 		this.qb = require(`@asymmetrik/${packageName}`);
 		this.globalParameters = globalParameters;
+		this.pageParam = pageParam;
+		this.resultsPerPage = resultsPerPage; //todo explain behavior
 	}
 
 	/**
@@ -569,8 +571,9 @@ class QueryBuilder {
 		let rawMatchesToPerform = [];
 
 		let errors = [];
-		let query;
 		let searchResultTransformations = {};
+		let pageNumber = 1;
+		let query;
 		try {
 			let parameters = QueryBuilder.parseArguments(req);
 
@@ -579,23 +582,34 @@ class QueryBuilder {
 				let [parameter, modifier = ''] = rawParameter.split(':', 2);
 				let parameterValue = parameters[rawParameter];
 
-				let parameterDefinition;
-				// Check to see if the parameter is defined as a global parameter or search result parameter.
-				// If not, see if the passed in definitions define this parameter.
-				if (this.globalParameters[parameter] !== undefined) {
-					parameterDefinition = this.globalParameters[parameter];
-				} else if (
-					this.qb.supportedSearchTransformations[parameter] !== undefined
-				) {
+				// If the parameter is the paging parameter, sanitize it and save the page number before moving on to the
+				// next parameter.
+				if (parameter === this.pageParam) {
+					if (pageNumber < 1 || !Number.isInteger(pageNumber)) {
+						throw new Error(`Value for page parameter '${this.pageParam}' must be a positive integer.`);
+					}
+					pageNumber = sanitize.sanitizeNumber({
+						field: parameter,
+						value: parameterValue
+					});
+					return;
+				}
+
+				// If the parameter is a search result transformation that we currently support, sanitize the parameter
+				// and add it to the list of search result transformations to perform, then move on to the next parameter
+				if (this.qb.supportedSearchTransformations[parameter] !== undefined) {
 					parameterValue = sanitize.sanitizeSearchResultParameter({
 						field: parameter,
 						value: parameterValue,
 					});
 					searchResultTransformations[parameter] = parameterValue;
 					return;
-				} else {
-					parameterDefinition = parameterDefinitions[parameter];
 				}
+
+				// Check to see if the parameter is defined.
+				// If it's a global parameter, get the the definition from the global parameter definitions,
+				// otherwise use the regular parameter definitions
+				let parameterDefinition = this.globalParameters[parameter] ? this.globalParameters[parameter] : parameterDefinitions[parameter];
 
 				if (!parameterDefinition) {
 					throw new Error(`Unknown parameter '${parameter}'`);
@@ -635,7 +649,6 @@ class QueryBuilder {
 							modifier,
 						});
 					} else {
-						// TODO this functionality doesn't work right now. Need to access the parameters.js
 						throw new Error(
 							`Search modifier '${modifier}' is not currently supported`,
 						);
@@ -653,11 +666,19 @@ class QueryBuilder {
 				}
 				matchesToPerform.push(orStatements);
 			}
+
+			// Assemble the search query
 			query = this.qb.assembleSearchQuery({
 				joinsToPerform,
 				matchesToPerform,
 				searchResultTransformations,
 			});
+
+			// Apply any search result transformations
+			query = this.qb.applySearchResultTransformations(query, searchResultTransformations);
+
+			// Apply paging
+			query = this.qb.applyPaging(query, pageNumber, this.resultsPerPage);
 		} catch (err) {
 			errors.push(err);
 		}
