@@ -33,7 +33,6 @@ class JSONSchemaValidator {
 	validate(resource, verbose = false) {
 		let {resourceType} = resource;
 		let errors = [];
-		// let isValid = false;
 
 		// If we do not have a mapping for our resource type, add an error to the array of errors and return it
 		if (!this.schema.discriminator.mapping[resourceType]) {
