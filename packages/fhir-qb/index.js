@@ -585,13 +585,13 @@ class QueryBuilder {
 				// If the parameter is the paging parameter, sanitize it and save the page number before moving on to the
 				// next parameter.
 				if (parameter === this.pageParam) {
-					if (pageNumber < 1 || !Number.isInteger(pageNumber)) {
-						throw new Error(`Value for page parameter '${this.pageParam}' must be a positive integer.`);
-					}
-					pageNumber = sanitize.sanitizeNumber({
+					pageNumber = parseInt(sanitize.sanitizeNumber({
 						field: parameter,
 						value: parameterValue
-					});
+					}).value);
+					if (pageNumber < 1 || !Number.isInteger(pageNumber)) {
+						throw new Error(`Value for page parameter '${this.pageParam}' must be a positive integer. Received ${JSON.stringify(pageNumber)}`);
+					}
 					return;
 				}
 
@@ -606,6 +606,7 @@ class QueryBuilder {
 					return;
 				}
 
+				// let parameterDefinition;
 				// Check to see if the parameter is defined.
 				// If it's a global parameter, get the the definition from the global parameter definitions,
 				// otherwise use the regular parameter definitions
@@ -649,6 +650,7 @@ class QueryBuilder {
 							modifier,
 						});
 					} else {
+						// TODO this functionality doesn't work right now. Need to access the parameters.js
 						throw new Error(
 							`Search modifier '${modifier}' is not currently supported`,
 						);

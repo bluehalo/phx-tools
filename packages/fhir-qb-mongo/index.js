@@ -46,12 +46,7 @@ let buildComparatorQuery = function({ field, value, comparator }) {
  * Builds query to get records where the value of the field is in the specified range
  * Setting invert to true will get records that are NOT in the specified range.
  */
-let buildInRangeQuery = function({
-	field,
-	lowerBound,
-	upperBound,
-	invert = false,
-}) {
+let buildInRangeQuery = function({field, lowerBound, upperBound, invert = false}) {
 	if (invert) {
 		return buildOrQuery({
 			queries: [
@@ -126,10 +121,7 @@ let buildEndsWithQuery = function({ field, value, caseSensitive = false }) {
  * @param matchesToPerform - List of matches to perform
  * @returns {Array}
  */
-let assembleSearchQuery = function({
-	joinsToPerform,
-	matchesToPerform,
-}) {
+let assembleSearchQuery = function({joinsToPerform, matchesToPerform}) {
 	let query = [];
 	let toSuppress = {};
 
@@ -204,7 +196,7 @@ let applyPaging = function(query, pageNumber, resultsPerPage) {
 				{$count: 'total'},
 				{$addFields: {numberOfPages: numberOfPages}},
 				{$addFields: {page: pageNumber}} // TODO may need some additional validation on this.
-				],
+			],
 			data: pageSelection
 		}
 	});
