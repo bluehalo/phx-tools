@@ -555,11 +555,11 @@ class QueryBuilder {
 
 	/**
 	 * Given an http request and parameter definitions of a resource, construct a search query.
-	 * @parameter request
+	 * @parameter req
 	 * @parameter parameterDefinitions
 	 * @returns {{query: (*|*), errors: Array}}
 	 */
-	buildSearchQuery(request, parameterDefinitions) {
+	buildSearchQuery(req, parameterDefinitions) {
 		// This is a list of joins that need to be performed
 		let joinsToPerform = [];
 
@@ -572,7 +572,7 @@ class QueryBuilder {
 		let query;
 		let searchResultTransformations = {};
 		try {
-			let parameters = QueryBuilder.parseArguments(request);
+			let parameters = QueryBuilder.parseArguments(req);
 
 			Object.keys(parameters).forEach(rawParameter => {
 				// Split field from modifier. Only split once so as to allow for chaining.
@@ -645,11 +645,11 @@ class QueryBuilder {
 
 			// For each match to perform, transform them into the appropriate format using the db specific qb;
 			let matchesToPerform = [];
-			for (let matchRequest of rawMatchesToPerform) {
+			for (let rawMatch of rawMatchesToPerform) {
 				let orStatements = [];
-				for (let value of matchRequest.values) {
-					matchRequest.value = value;
-					orStatements.push(this.getSubSearchQuery(matchRequest));
+				for (let value of rawMatch.values) {
+					rawMatch.value = value;
+					orStatements.push(this.getSubSearchQuery(rawMatch));
 				}
 				matchesToPerform.push(orStatements);
 			}
