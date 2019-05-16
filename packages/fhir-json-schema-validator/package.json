@@ -1,6 +1,6 @@
 {
 	"name": "@asymmetrik/fhir-json-schema-validator",
-	"version": "0.9.0",
+	"version": "0.9.1",
 	"description": "FHIR json schema validator",
 	"main": "index.js",
 	"repository": {
