@@ -7,14 +7,14 @@ let supportedSearchTransformations = {
 /**
  * Takes in a list of queries and wraps them in an $and block
  */
-let buildAndQuery = function({ queries }) {
+let buildAndQuery = function(queries) {
 	return { $and: queries };
 };
 
 /**
  * Takes in a list of queries and wraps them in an $or block
  */
-let buildOrQuery = function({ queries, invert }) {
+let buildOrQuery = function({ queries, invert = false }) {
 	return { [invert ? '$nor' : '$or']: queries };
 };
 
@@ -46,7 +46,12 @@ let buildComparatorQuery = function({ field, value, comparator }) {
  * Builds query to get records where the value of the field is in the specified range
  * Setting invert to true will get records that are NOT in the specified range.
  */
-let buildInRangeQuery = function({field, lowerBound, upperBound, invert = false}) {
+let buildInRangeQuery = function({
+	field,
+	lowerBound,
+	upperBound,
+	invert = false,
+}) {
 	if (invert) {
 		return buildOrQuery({
 			queries: [
@@ -109,19 +114,87 @@ let buildEndsWithQuery = function({ field, value, caseSensitive = false }) {
 };
 
 /**
- * Takes in 3 lists, joinsToPerform, matchesToPerform. Constructs a mongo aggregation query that first performs
- * any necessary joins as dictated by joinsToPerform, and then filters the results them down using matchesToPerform.
- *
- * Returns a mongo aggregate query.
+ * TODO - WORK IN PROGRESS
+ * Apply search result transformations
+ * @param query
+ * @param searchResultTransformations
  */
+let applySearchResultTransformations = function({query, searchResultTransformations}) {
+	Object.keys(searchResultTransformations).forEach(transformation => {
+		query.push(
+			supportedSearchTransformations[transformation](
+				searchResultTransformations[transformation],
+			),
+		);
+	});
+	return query;
+};
+
+/**
+ * If we should not include archived, add a filter to remove them from the results
+ * @param query
+ * @param includeArchived
+ * @returns {*}
+ */
+let applyArchivedFilter = function({query, archivedParamPath, includeArchived}) {
+	if (!includeArchived) {
+		query.push({ $match: { [archivedParamPath]: false } });
+	}
+	return query;
+};
+
+/**
+ * Apply paging
+ * @param query
+ * @param pageNumber
+ * @param resultsPerPage
+ * @returns {*}
+ */
+let applyPaging = function({query, pageNumber, resultsPerPage}) {
+	// If resultsPerPage is defined, skip to the appropriate page and limit the number of results that appear per page.
+	// Otherwise just insert a filler (to keep mongo happy) that skips no entries.
+	let pageSelection = resultsPerPage
+		? [{ $skip: (pageNumber - 1) * resultsPerPage }, { $limit: resultsPerPage }]
+		: [{ $skip: 0 }];
+
+	// If resultsPerPage is defined, calculate the total number of pages as the total number of records
+	// divided by the results per page rounded up to the nearest integer.
+	// Otherwise if resultsPerPage is not defined, all of the results will be on one page.
+	let numberOfPages = resultsPerPage
+		? { $ceil: { $divide: ['$total', resultsPerPage] } }
+		: 1;
+	query.push({
+		$facet: {
+			metadata: [
+				{ $count: 'total' },
+				{ $addFields: { numberOfPages: numberOfPages } },
+				{ $addFields: { page: pageNumber } }, // TODO may need some additional validation on this.
+			],
+			data: pageSelection,
+		},
+	});
+	return query;
+};
 
 /**
  * Assembles a mongo aggregation pipeline
  * @param joinsToPerform - List of joins to perform first through lookups
  * @param matchesToPerform - List of matches to perform
+ * @param searchResultTransformations
+ * @param includeArchived
+ * @param pageNumber
+ * @param resultsPerPage
  * @returns {Array}
  */
-let assembleSearchQuery = function({joinsToPerform, matchesToPerform}) {
+let assembleSearchQuery = function({
+	joinsToPerform,
+	matchesToPerform,
+	searchResultTransformations,
+	archivedParamPath,
+	includeArchived,
+	pageNumber,
+	resultsPerPage,
+}) {
 	let query = [];
 	let toSuppress = {};
 
@@ -152,7 +225,7 @@ let assembleSearchQuery = function({joinsToPerform, matchesToPerform}) {
 			}
 			listOfOrs.push(buildOrQuery({ queries: match }));
 		}
-		query.push({ $match: buildAndQuery({ queries: listOfOrs }) });
+		query.push({ $match: buildAndQuery(listOfOrs) });
 	}
 
 	// Suppress the tables that were joined from being displayed in the returned query. TODO might not want to do this.
@@ -160,53 +233,15 @@ let assembleSearchQuery = function({joinsToPerform, matchesToPerform}) {
 		query.push({ $project: toSuppress });
 	}
 
-	return query;
-};
+	query = applyArchivedFilter({query, archivedParamPath, includeArchived});
+	query = applySearchResultTransformations({query, searchResultTransformations});
+	query = applyPaging({query, pageNumber, resultsPerPage});
 
-/**
- * TODO - WORK IN PROGRESS
- * Apply search result transformations
- * @param query
- * @param searchResultTransformations
- */
-let applySearchResultTransformations = function(query, searchResultTransformations) {
-	Object.keys(searchResultTransformations).forEach(transformation => {
-		query.push(
-			supportedSearchTransformations[transformation](
-				searchResultTransformations[transformation],
-			),
-		);
-	});
-	return query;
-};
-
-// TODO - DISCUSS - How do we want to handle it when they ask for page 8/5? Error? Empty? Last actual page?
-let applyPaging = function(query, pageNumber, resultsPerPage) {
-	// If resultsPerPage is defined, skip to the appropriate page and limit the number of results that appear per page.
-	// Otherwise just insert a filler (to keep mongo happy) that skips no entries.
-	let pageSelection = (resultsPerPage) ? [{$skip: (pageNumber - 1) * resultsPerPage}, {$limit: resultsPerPage}] : [{$skip: 0}];
-
-	// If resultsPerPage is defined, calculate the total number of pages as the total number of records
-	// divided by the results per page rounded up to the nearest integer.
-	// Otherwise if resultsPerPage is not defined, all of the results will be on one page.
-	let numberOfPages = (resultsPerPage) ? {$ceil: {$divide: ['$total', resultsPerPage]}} : 1;
-	query.push({
-		$facet: {
-			metadata: [
-				{$count: 'total'},
-				{$addFields: {numberOfPages: numberOfPages}},
-				{$addFields: {page: pageNumber}} // TODO may need some additional validation on this.
-			],
-			data: pageSelection
-		}
-	});
 	return query;
 };
 
 module.exports = {
-	applyPaging,
 	assembleSearchQuery,
-	applySearchResultTransformations,
 	buildAndQuery,
 	buildComparatorQuery,
 	buildContainsQuery,

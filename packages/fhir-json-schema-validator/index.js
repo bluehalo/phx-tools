@@ -1,9 +1,8 @@
 const Ajv = require('ajv');
-const ajv = new Ajv({allErrors: true});
+const ajv = new Ajv({ allErrors: true });
 // To use Ajv with draft-06 schemas you need to explicitly add the meta-schema to the validator instance:
 ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-06.json'));
 const defaultSchema = require('./fhir.schema.json');
-
 
 class JSONSchemaValidator {
 	constructor(schema = defaultSchema) {
@@ -18,7 +17,7 @@ class JSONSchemaValidator {
 	 */
 	getSubSchema(resourceType) {
 		let subSchema = this.schema;
-		subSchema.oneOf = [{ $ref: `#/definitions/${resourceType}`}];
+		subSchema.oneOf = [{ $ref: `#/definitions/${resourceType}` }];
 		return subSchema;
 	}
 
@@ -31,7 +30,7 @@ class JSONSchemaValidator {
 	 * @returns {Array}
 	 */
 	validate(resource, verbose = false) {
-		let {resourceType} = resource;
+		let { resourceType } = resource;
 		let errors = [];
 
 		// If we do not have a mapping for our resource type, add an error to the array of errors and return it

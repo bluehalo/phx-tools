@@ -42,9 +42,16 @@ const matchModifiers = {
  */
 
 class QueryBuilder {
-	constructor(packageName, globalParameters = {}, pageParam = 'page', resultsPerPage = 10) {
-		this.qb = require(`@asymmetrik/${packageName}`);
-		this.globalParameters = globalParameters;
+	constructor({
+		packageName = '@asymmetrik/fhir-qb-mongo',
+		archivedParamPath = 'meta._isArchived',
+		globalParameterDefinitions = {},
+		pageParam = 'page',
+		resultsPerPage = 10
+	}) {
+		this.qb = require(packageName);
+		this.archivedParamPath = archivedParamPath;
+		this.globalParameterDefinitions = globalParameterDefinitions;
 		this.pageParam = pageParam;
 		this.resultsPerPage = resultsPerPage; //todo explain behavior
 	}
@@ -328,12 +335,10 @@ class QueryBuilder {
 
 		// If a system was provided, make sure that the entry is also using the correct system
 		if (system) {
-			quantityQuery = this.qb.buildAndQuery({
-				queries: [
-					quantityQuery,
-					this.qb.buildEqualToQuery({ field: systemKey, value: system }),
-				],
-			});
+			quantityQuery = this.qb.buildAndQuery([
+				quantityQuery,
+				this.qb.buildEqualToQuery({ field: systemKey, value: system }),
+			]);
 		}
 		return quantityQuery;
 	}
@@ -404,7 +409,7 @@ class QueryBuilder {
 						this.qb.buildEqualToQuery({ field: `${field}.code`, value: code }),
 					);
 				}
-				tokenQuery = this.qb.buildAndQuery({ queries });
+				tokenQuery = this.qb.buildAndQuery(queries);
 				break;
 			case 'CodableConcept':
 				if (system) {
@@ -423,7 +428,7 @@ class QueryBuilder {
 						}),
 					);
 				}
-				tokenQuery = this.qb.buildAndQuery({ queries });
+				tokenQuery = this.qb.buildAndQuery(queries);
 				break;
 			case 'Identifier':
 				if (system) {
@@ -439,7 +444,7 @@ class QueryBuilder {
 						this.qb.buildEqualToQuery({ field: `${field}.value`, value: code }),
 					);
 				}
-				tokenQuery = this.qb.buildAndQuery({ queries });
+				tokenQuery = this.qb.buildAndQuery(queries);
 				break;
 			case 'ContactPoint':
 				['system', 'value', 'use', 'rank', 'period'].forEach(attr => {
@@ -561,7 +566,7 @@ class QueryBuilder {
 	 * @parameter parameterDefinitions
 	 * @returns {{query: (*|*), errors: Array}}
 	 */
-	buildSearchQuery(req, parameterDefinitions) {
+	buildSearchQuery({ req, parameterDefinitions, includeArchived }) {
 		// This is a list of joins that need to be performed
 		let joinsToPerform = [];
 
@@ -585,12 +590,20 @@ class QueryBuilder {
 				// If the parameter is the paging parameter, sanitize it and save the page number before moving on to the
 				// next parameter.
 				if (parameter === this.pageParam) {
-					pageNumber = parseInt(sanitize.sanitizeNumber({
-						field: parameter,
-						value: parameterValue
-					}).value);
+					pageNumber = parseInt(
+						sanitize.sanitizeNumber({
+							field: parameter,
+							value: parameterValue,
+						}).value,
+					);
 					if (pageNumber < 1 || !Number.isInteger(pageNumber)) {
-						throw new Error(`Value for page parameter '${this.pageParam}' must be a positive integer. Received ${JSON.stringify(pageNumber)}`);
+						throw new Error(
+							`Value for page parameter '${
+								this.pageParam
+							}' must be a positive integer. Received ${JSON.stringify(
+								pageNumber,
+							)}`,
+						);
 					}
 					return;
 				}
@@ -610,7 +623,9 @@ class QueryBuilder {
 				// Check to see if the parameter is defined.
 				// If it's a global parameter, get the the definition from the global parameter definitions,
 				// otherwise use the regular parameter definitions
-				let parameterDefinition = this.globalParameters[parameter] ? this.globalParameters[parameter] : parameterDefinitions[parameter];
+				let parameterDefinition = this.globalParameterDefinitions[parameter]
+					? this.globalParameterDefinitions[parameter]
+					: parameterDefinitions[parameter];
 
 				if (!parameterDefinition) {
 					throw new Error(`Unknown parameter '${parameter}'`);
@@ -674,13 +689,11 @@ class QueryBuilder {
 				joinsToPerform,
 				matchesToPerform,
 				searchResultTransformations,
+				archivedParamPath: this.archivedParamPath,
+				includeArchived,
+				pageNumber,
+				resultsPerPage: this.resultsPerPage,
 			});
-
-			// Apply any search result transformations
-			query = this.qb.applySearchResultTransformations(query, searchResultTransformations);
-
-			// Apply paging
-			query = this.qb.applyPaging(query, pageNumber, this.resultsPerPage);
 		} catch (err) {
 			errors.push(err);
 		}
