@@ -411,7 +411,7 @@ describe('Mongo Query Builder Tests', () => {
 			}
 			expect(error.message).toContain('Missing required implementation parameter \'archivedParamPath\'');
 		});
-		test('Should return the input query as is if we are not filtering out archived results', () => {
+		test('Should return input query as is if we are not filtering out archived results', () => {
 			const expectedResult = [
 				{
 					$facet: {
