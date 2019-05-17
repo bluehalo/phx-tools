@@ -4,6 +4,7 @@ const ajv = new Ajv({ allErrors: true });
 ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-06.json'));
 const defaultSchema = require('./fhir.schema.json');
 
+
 class JSONSchemaValidator {
 	constructor(schema = defaultSchema) {
 		this.schema = schema;
