@@ -136,6 +136,7 @@ let applySearchResultTransformations = function({
 /**
  * If we should not include archived, add a filter to remove them from the results
  * @param query
+ * @param archivedParamPath
  * @param includeArchived
  * @returns {*}
  */
@@ -188,6 +189,7 @@ let applyPaging = function({ query, pageNumber, resultsPerPage }) {
  * @param joinsToPerform - List of joins to perform first through lookups
  * @param matchesToPerform - List of matches to perform
  * @param searchResultTransformations
+ * @param implementationParameters
  * @param includeArchived
  * @param pageNumber
  * @param resultsPerPage
@@ -197,13 +199,19 @@ let assembleSearchQuery = function({
 	joinsToPerform,
 	matchesToPerform,
 	searchResultTransformations,
-	archivedParamPath,
+	implementationParameters,
 	includeArchived,
 	pageNumber,
 	resultsPerPage,
 }) {
 	let query = [];
 	let toSuppress = {};
+
+	// Check that the necessary implementation parameters were passed through
+	let {archivedParamPath} = implementationParameters;
+	if (!archivedParamPath) {
+		throw new Error('Missing required implementation parameter \'archivedParamPath\'');
+	}
 
 	// Construct the necessary joins and add them to the aggregate pipeline. Also follow each $lookup with an $unwind
 	// for ease of use.

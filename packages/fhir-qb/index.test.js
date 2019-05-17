@@ -75,6 +75,7 @@ describe('Mongo Tests', () => {
 	};
 	const qb = new QueryBuilder({
 		globalParameterDefinitions,
+		implementationParameters: {archivedParamPath: 'meta._isArchived'}
 	});
 	describe('Build Date Query Tests', () => {
 		describe('eq Modifier Tests', () => {

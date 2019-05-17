@@ -8,11 +8,26 @@ yarn add @asymmetrik/fhir-qb
 
 ## Arguments
 
-`@asymmetrik/fhir-qb` exports a single class called QueryBuilder. When creating a new QueryBuilder, you must supply the 
-db-specific implementation in phx-tools that you wish the query builder to use. For example:
-```
-let qb = new QueryBuilder('fhir-qb-mongo')
-```
+`@asymmetrik/fhir-qb` exports a single class called QueryBuilder. The QueryBuilder constructor takes 4 arguments:
+
+#### `packageName`
+Query builder implementation package to be required. Default: `@asymmetrik/fhir-qb-mongo`
+
+#### `globalParameterDefinitions`
+Parameter definitions for global parameters that apply to all resources. Defined by the fhir 'resource' resource 
+parameters. Default: `{}`
+
+#### `pageParam`
+Query parameter used to indicate which page of results is being requested. Default: `page`
+
+#### `resultsPerPage`
+How many results should be returned per page. Default: `10`
+
+#### `implementationParameters`
+Object to be passed through to the DB-specific implementation with whatever information from the server the implementation
+may need. Default: `{}`
+
+
 See [DB Specific Implementations](#db-specific-implementations) below.
 
 

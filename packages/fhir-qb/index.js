@@ -44,16 +44,16 @@ const matchModifiers = {
 class QueryBuilder {
 	constructor({
 		packageName = '@asymmetrik/fhir-qb-mongo',
-		archivedParamPath = 'meta._isArchived',
 		globalParameterDefinitions = {},
 		pageParam = 'page',
 		resultsPerPage = 10,
+		implementationParameters = {}
 	}) {
 		this.qb = require(packageName);
-		this.archivedParamPath = archivedParamPath;
 		this.globalParameterDefinitions = globalParameterDefinitions;
 		this.pageParam = pageParam;
-		this.resultsPerPage = resultsPerPage; //todo explain behavior
+		this.resultsPerPage = resultsPerPage;
+		this.implementationParameters = implementationParameters;
 	}
 
 	/**
@@ -689,7 +689,7 @@ class QueryBuilder {
 				joinsToPerform,
 				matchesToPerform,
 				searchResultTransformations,
-				archivedParamPath: this.archivedParamPath,
+				implementationParameters: this.implementationParameters,
 				includeArchived,
 				pageNumber,
 				resultsPerPage: this.resultsPerPage,
