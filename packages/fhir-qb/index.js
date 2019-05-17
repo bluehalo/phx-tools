@@ -665,7 +665,6 @@ class QueryBuilder {
 							modifier,
 						});
 					} else {
-						// TODO this functionality doesn't work right now. Need to access the parameters.js
 						throw new Error(
 							`Search modifier '${modifier}' is not currently supported`,
 						);
