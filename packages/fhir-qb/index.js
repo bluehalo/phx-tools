@@ -47,7 +47,7 @@ class QueryBuilder {
 		archivedParamPath = 'meta._isArchived',
 		globalParameterDefinitions = {},
 		pageParam = 'page',
-		resultsPerPage = 10
+		resultsPerPage = 10,
 	}) {
 		this.qb = require(packageName);
 		this.archivedParamPath = archivedParamPath;

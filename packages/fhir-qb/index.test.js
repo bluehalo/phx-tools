@@ -74,7 +74,7 @@ describe('Mongo Tests', () => {
 		},
 	};
 	const qb = new QueryBuilder({
-		globalParameterDefinitions
+		globalParameterDefinitions,
 	});
 	describe('Build Date Query Tests', () => {
 		describe('eq Modifier Tests', () => {
@@ -6536,7 +6536,9 @@ describe('Mongo Tests', () => {
 			});
 
 			expect(errors).toHaveLength(1);
-			expect(errors[0].message).toContain('Value for page parameter \'page\' must be a positive integer. Received -1');
+			expect(errors[0].message).toContain(
+				"Value for page parameter 'page' must be a positive integer. Received -1",
+			);
 		});
 	});
 });

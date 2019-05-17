@@ -119,7 +119,10 @@ let buildEndsWithQuery = function({ field, value, caseSensitive = false }) {
  * @param query
  * @param searchResultTransformations
  */
-let applySearchResultTransformations = function({query, searchResultTransformations}) {
+let applySearchResultTransformations = function({
+	query,
+	searchResultTransformations,
+}) {
 	Object.keys(searchResultTransformations).forEach(transformation => {
 		query.push(
 			supportedSearchTransformations[transformation](
@@ -136,7 +139,11 @@ let applySearchResultTransformations = function({query, searchResultTransformati
  * @param includeArchived
  * @returns {*}
  */
-let applyArchivedFilter = function({query, archivedParamPath, includeArchived}) {
+let applyArchivedFilter = function({
+	query,
+	archivedParamPath,
+	includeArchived,
+}) {
 	if (!includeArchived) {
 		query.push({ $match: { [archivedParamPath]: false } });
 	}
@@ -150,7 +157,7 @@ let applyArchivedFilter = function({query, archivedParamPath, includeArchived}) 
  * @param resultsPerPage
  * @returns {*}
  */
-let applyPaging = function({query, pageNumber, resultsPerPage}) {
+let applyPaging = function({ query, pageNumber, resultsPerPage }) {
 	// If resultsPerPage is defined, skip to the appropriate page and limit the number of results that appear per page.
 	// Otherwise just insert a filler (to keep mongo happy) that skips no entries.
 	let pageSelection = resultsPerPage
@@ -233,9 +240,12 @@ let assembleSearchQuery = function({
 		query.push({ $project: toSuppress });
 	}
 
-	query = applyArchivedFilter({query, archivedParamPath, includeArchived});
-	query = applySearchResultTransformations({query, searchResultTransformations});
-	query = applyPaging({query, pageNumber, resultsPerPage});
+	query = applyArchivedFilter({ query, archivedParamPath, includeArchived });
+	query = applySearchResultTransformations({
+		query,
+		searchResultTransformations,
+	});
+	query = applyPaging({ query, pageNumber, resultsPerPage });
 
 	return query;
 };
