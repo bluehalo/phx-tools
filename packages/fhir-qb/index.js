@@ -619,7 +619,6 @@ class QueryBuilder {
 					return;
 				}
 
-				// let parameterDefinition;
 				// Check to see if the parameter is defined.
 				// If it's a global parameter, get the the definition from the global parameter definitions,
 				// otherwise use the regular parameter definitions
