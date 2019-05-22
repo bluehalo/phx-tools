@@ -20,5 +20,4 @@ This module is meant to be imported and used by the fhir-qb. Included are implem
 	buildInRangeQuery,
 	buildStartsWithQuery,
 ```
-These are used by the fhir-qb to build a query that will work in the mongo
-aggregation pipeline.
+These are used by the fhir-qb to build a query that will work in the mongo aggregation pipeline.

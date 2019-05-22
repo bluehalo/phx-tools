@@ -42,9 +42,18 @@ const matchModifiers = {
  */
 
 class QueryBuilder {
-	constructor(packageName, globalParameters = {}) {
-		this.qb = require(`@asymmetrik/${packageName}`);
-		this.globalParameters = globalParameters;
+	constructor({
+		packageName = '@asymmetrik/fhir-qb-mongo',
+		globalParameterDefinitions = {},
+		pageParam = 'page',
+		resultsPerPage = 10,
+		implementationParameters = {}
+	}) {
+		this.qb = require(packageName);
+		this.globalParameterDefinitions = globalParameterDefinitions;
+		this.pageParam = pageParam;
+		this.resultsPerPage = resultsPerPage;
+		this.implementationParameters = implementationParameters;
 	}
 
 	/**
@@ -326,12 +335,10 @@ class QueryBuilder {
 
 		// If a system was provided, make sure that the entry is also using the correct system
 		if (system) {
-			quantityQuery = this.qb.buildAndQuery({
-				queries: [
-					quantityQuery,
-					this.qb.buildEqualToQuery({ field: systemKey, value: system }),
-				],
-			});
+			quantityQuery = this.qb.buildAndQuery([
+				quantityQuery,
+				this.qb.buildEqualToQuery({ field: systemKey, value: system }),
+			]);
 		}
 		return quantityQuery;
 	}
@@ -402,7 +409,7 @@ class QueryBuilder {
 						this.qb.buildEqualToQuery({ field: `${field}.code`, value: code }),
 					);
 				}
-				tokenQuery = this.qb.buildAndQuery({ queries });
+				tokenQuery = this.qb.buildAndQuery(queries);
 				break;
 			case 'CodableConcept':
 				if (system) {
@@ -421,7 +428,7 @@ class QueryBuilder {
 						}),
 					);
 				}
-				tokenQuery = this.qb.buildAndQuery({ queries });
+				tokenQuery = this.qb.buildAndQuery(queries);
 				break;
 			case 'Identifier':
 				if (system) {
@@ -437,7 +444,7 @@ class QueryBuilder {
 						this.qb.buildEqualToQuery({ field: `${field}.value`, value: code }),
 					);
 				}
-				tokenQuery = this.qb.buildAndQuery({ queries });
+				tokenQuery = this.qb.buildAndQuery(queries);
 				break;
 			case 'ContactPoint':
 				['system', 'value', 'use', 'rank', 'period'].forEach(attr => {
@@ -559,7 +566,7 @@ class QueryBuilder {
 	 * @parameter parameterDefinitions
 	 * @returns {{query: (*|*), errors: Array}}
 	 */
-	buildSearchQuery(req, parameterDefinitions) {
+	buildSearchQuery({ req, parameterDefinitions, includeArchived }) {
 		// This is a list of joins that need to be performed
 		let joinsToPerform = [];
 
@@ -569,8 +576,9 @@ class QueryBuilder {
 		let rawMatchesToPerform = [];
 
 		let errors = [];
-		let query;
 		let searchResultTransformations = {};
+		let pageNumber = 1;
+		let query;
 		try {
 			let parameters = QueryBuilder.parseArguments(req);
 
@@ -579,23 +587,44 @@ class QueryBuilder {
 				let [parameter, modifier = ''] = rawParameter.split(':', 2);
 				let parameterValue = parameters[rawParameter];
 
-				let parameterDefinition;
-				// Check to see if the parameter is defined as a global parameter or search result parameter.
-				// If not, see if the passed in definitions define this parameter.
-				if (this.globalParameters[parameter] !== undefined) {
-					parameterDefinition = this.globalParameters[parameter];
-				} else if (
-					this.qb.supportedSearchTransformations[parameter] !== undefined
-				) {
+				// If the parameter is the paging parameter, sanitize it and save the page number before moving on to the
+				// next parameter.
+				if (parameter === this.pageParam) {
+					pageNumber = parseInt(
+						sanitize.sanitizeNumber({
+							field: parameter,
+							value: parameterValue,
+						}).value,
+					);
+					if (pageNumber < 1 || !Number.isInteger(pageNumber)) {
+						throw new Error(
+							`Value for page parameter '${
+								this.pageParam
+							}' must be a positive integer. Received ${JSON.stringify(
+								pageNumber,
+							)}`,
+						);
+					}
+					return;
+				}
+
+				// If the parameter is a search result transformation that we currently support, sanitize the parameter
+				// and add it to the list of search result transformations to perform, then move on to the next parameter
+				if (this.qb.supportedSearchTransformations[parameter] !== undefined) {
 					parameterValue = sanitize.sanitizeSearchResultParameter({
 						field: parameter,
 						value: parameterValue,
 					});
 					searchResultTransformations[parameter] = parameterValue;
 					return;
-				} else {
-					parameterDefinition = parameterDefinitions[parameter];
 				}
+
+				// Check to see if the parameter is defined.
+				// If it's a global parameter, get the the definition from the global parameter definitions,
+				// otherwise use the regular parameter definitions
+				let parameterDefinition = this.globalParameterDefinitions[parameter]
+					? this.globalParameterDefinitions[parameter]
+					: parameterDefinitions[parameter];
 
 				if (!parameterDefinition) {
 					throw new Error(`Unknown parameter '${parameter}'`);
@@ -635,7 +664,6 @@ class QueryBuilder {
 							modifier,
 						});
 					} else {
-						// TODO this functionality doesn't work right now. Need to access the parameters.js
 						throw new Error(
 							`Search modifier '${modifier}' is not currently supported`,
 						);
@@ -653,10 +681,16 @@ class QueryBuilder {
 				}
 				matchesToPerform.push(orStatements);
 			}
+
+			// Assemble the search query
 			query = this.qb.assembleSearchQuery({
 				joinsToPerform,
 				matchesToPerform,
 				searchResultTransformations,
+				implementationParameters: this.implementationParameters,
+				includeArchived,
+				pageNumber,
+				resultsPerPage: this.resultsPerPage,
 			});
 		} catch (err) {
 			errors.push(err);

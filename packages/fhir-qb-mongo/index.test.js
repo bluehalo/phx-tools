@@ -193,12 +193,32 @@ describe('Mongo Query Builder Tests', () => {
 		});
 	});
 	describe('assembleSearchQuery Tests', () => {
-		test('Should return empty pipeline if no matches or joins to perform', () => {
-			const expectedResult = [];
+		test('Should return empty pipeline (except for archival and paging) if no matches or joins to perform', () => {
+			const expectedResult = [
+				{ $match: { 'meta._isArchived': false } },
+				{
+					$facet: {
+						data: [{ $skip: 0 }, { $limit: 10 }],
+						metadata: [
+							{ $count: 'total' },
+							{
+								$addFields: {
+									numberOfPages: { $ceil: { $divide: ['$total', 10] } },
+								},
+							},
+							{ $addFields: { page: 1 } },
+						],
+					},
+				},
+			];
 			let observedResult = mongoQB.assembleSearchQuery({
 				joinsToPerform: [],
 				matchesToPerform: [],
 				searchResultTransformations: {},
+				implementationParameters: {archivedParamPath: 'meta._isArchived'},
+				includeArchived: false,
+				pageNumber: 1,
+				resultsPerPage: 10,
 			});
 			expect(observedResult).toEqual(expectedResult);
 		});
@@ -214,42 +234,214 @@ describe('Mongo Query Builder Tests', () => {
 				},
 				{ $unwind: '$foo' },
 				{ $project: { foo: 0 } },
+				{ $match: { 'meta._isArchived': false } },
+				{
+					$facet: {
+						data: [{ $skip: 0 }, { $limit: 10 }],
+						metadata: [
+							{ $count: 'total' },
+							{
+								$addFields: {
+									numberOfPages: { $ceil: { $divide: ['$total', 10] } },
+								},
+							},
+							{ $addFields: { page: 1 } },
+						],
+					},
+				},
 			];
 			let observedResult = mongoQB.assembleSearchQuery({
 				joinsToPerform: [{ from: 'foo', localKey: 'bar', foreignKey: 'baz' }],
 				matchesToPerform: [],
 				searchResultTransformations: {},
+				implementationParameters: {archivedParamPath: 'meta._isArchived'},
+				includeArchived: false,
+				pageNumber: 1,
+				resultsPerPage: 10,
 			});
 			expect(observedResult).toEqual(expectedResult);
 		});
 		test('Should fill in empty matches with empty objects to keep queries valid', () => {
-			const expectedResult = [{ $match: { $and: [{ $or: [{}] }] } }];
+			const expectedResult = [
+				{ $match: { $and: [{ $or: [{}] }] } },
+				{ $match: { 'meta._isArchived': false } },
+				{
+					$facet: {
+						data: [{ $skip: 0 }, { $limit: 10 }],
+						metadata: [
+							{ $count: 'total' },
+							{
+								$addFields: {
+									numberOfPages: { $ceil: { $divide: ['$total', 10] } },
+								},
+							},
+							{ $addFields: { page: 1 } },
+						],
+					},
+				},
+			];
 			let observedResult = mongoQB.assembleSearchQuery({
 				joinsToPerform: [],
 				matchesToPerform: [[]],
 				searchResultTransformations: {},
+				implementationParameters: {archivedParamPath: 'meta._isArchived'},
+				includeArchived: false,
+				pageNumber: 1,
+				resultsPerPage: 10,
 			});
 			expect(observedResult).toEqual(expectedResult);
 		});
 		test('Should handle matches appropriately', () => {
 			const expectedResult = [
 				{ $match: { $and: [{ $or: [{ foo: { $gte: 1, $lte: 10 } }] }] } },
+				{ $match: { 'meta._isArchived': false } },
+				{
+					$facet: {
+						data: [{ $skip: 0 }, { $limit: 10 }],
+						metadata: [
+							{ $count: 'total' },
+							{
+								$addFields: {
+									numberOfPages: { $ceil: { $divide: ['$total', 10] } },
+								},
+							},
+							{ $addFields: { page: 1 } },
+						],
+					},
+				},
 			];
 			let observedResult = mongoQB.assembleSearchQuery({
 				joinsToPerform: [],
 				matchesToPerform: [[{ foo: { $gte: 1, $lte: 10 } }]],
 				searchResultTransformations: {},
+				implementationParameters: {archivedParamPath: 'meta._isArchived'},
+				includeArchived: false,
+				pageNumber: 1,
+				resultsPerPage: 10,
 			});
 			expect(observedResult).toEqual(expectedResult);
 		});
 	});
 	describe('Search Result Transformation Tests', () => {
 		test('Should add $limit to the end of the pipeline when given _count parameter', () => {
-			const expectedResult = [{ $limit: 3 }];
+			const expectedResult = [
+				{ $match: { 'meta._isArchived': false } },
+				{ $limit: 3 },
+				{
+					$facet: {
+						data: [{ $skip: 0 }, { $limit: 10 }],
+						metadata: [
+							{ $count: 'total' },
+							{
+								$addFields: {
+									numberOfPages: { $ceil: { $divide: ['$total', 10] } },
+								},
+							},
+							{ $addFields: { page: 1 } },
+						],
+					},
+				},
+			];
 			let observedResult = mongoQB.assembleSearchQuery({
 				joinsToPerform: [],
 				matchesToPerform: [],
 				searchResultTransformations: { _count: 3 },
+				implementationParameters: {archivedParamPath: 'meta._isArchived'},
+				includeArchived: false,
+				pageNumber: 1,
+				resultsPerPage: 10,
+			});
+			expect(observedResult).toEqual(expectedResult);
+		});
+	});
+	describe('Paging Tests', () => {
+		test('Should default to page 1 with no limits if resultsPerPage is undefined', () => {
+			const expectedResult = [
+				{
+					$match: {
+						'meta._isArchived': false,
+					},
+				},
+				{
+					$facet: {
+						data: [{ $skip: 0 }],
+						metadata: [
+							{
+								$count: 'total',
+							},
+							{
+								$addFields: {
+									numberOfPages: 1,
+								},
+							},
+							{
+								$addFields: {
+									page: 1,
+								},
+							},
+						],
+					},
+				},
+			];
+			let observedResult = mongoQB.assembleSearchQuery({
+				joinsToPerform: [],
+				matchesToPerform: [],
+				searchResultTransformations: {},
+				implementationParameters: {archivedParamPath: 'meta._isArchived'},
+				includeArchived: false,
+				pageNumber: 1,
+			});
+			expect(observedResult).toEqual(expectedResult);
+		});
+	});
+	describe('Apply Archived Filter Tests', () => {
+		test('Should throw an error if missing the required archivedParamPath from the implementation parameters', () => {
+			let error;
+			try {
+				mongoQB.assembleSearchQuery({
+					joinsToPerform: [],
+					matchesToPerform: [],
+					searchResultTransformations: {},
+					implementationParameters: {},
+					includeArchived: false,
+					pageNumber: 1,
+				});
+			} catch (err) {
+				error = err;
+			}
+			expect(error.message).toContain('Missing required implementation parameter \'archivedParamPath\'');
+		});
+		test('Should return input query as is if we are not filtering out archived results', () => {
+			const expectedResult = [
+				{
+					$facet: {
+						data: [{ $skip: 0 }, {$limit: 10}],
+						metadata: [
+							{
+								$count: 'total',
+							},
+							{
+								$addFields: {
+									numberOfPages: {$ceil: {$divide:['$total',10]}},
+								},
+							},
+							{
+								$addFields: {
+									page: 1,
+								},
+							},
+						],
+					},
+				},
+			];
+			let observedResult = mongoQB.assembleSearchQuery({
+				joinsToPerform: [],
+				matchesToPerform: [],
+				searchResultTransformations: {},
+				implementationParameters: {archivedParamPath: 'meta._isArchived'},
+				includeArchived: true,
+				pageNumber: 1,
+				resultsPerPage: 10
 			});
 			expect(observedResult).toEqual(expectedResult);
 		});
