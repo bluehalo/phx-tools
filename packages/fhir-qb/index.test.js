@@ -4641,7 +4641,7 @@ describe('Mongo Tests', () => {
 				includeArchived,
 			});
 			const expectedResult = [
-				{ $match: { $and: [{ $or: [{ foo: { $exists: true } }] }] } },
+				{ $match: { $and: [{ $or: [{ foo: { $exists: false } }] }] } },
 				{ $match: { 'meta._isArchived': false } },
 				{
 					$facet: {
@@ -4678,7 +4678,7 @@ describe('Mongo Tests', () => {
 				includeArchived,
 			});
 			const expectedResult = [
-				{ $match: { $and: [{ $or: [{ foo: { $exists: false } }] }] } },
+				{ $match: { $and: [{ $or: [{ foo: { $exists: true } }] }] } },
 				{ $match: { 'meta._isArchived': false } },
 				{
 					$facet: {

@@ -494,7 +494,7 @@ class QueryBuilder {
 		// If the modifier is 'missing', nothing else matters, we're just checking if the field exists.
 		if (modifier === matchModifiers.missing) {
 			value = sanitize.sanitizeBoolean({ field, value });
-			subQuery = this.qb.buildExistsQuery({ field, exists: value });
+			subQuery = this.qb.buildExistsQuery({ field, exists: !value });
 		} else {
 			// Otherwise, construct a query based on data type
 			switch (type) {
