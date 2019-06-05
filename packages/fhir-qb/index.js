@@ -365,7 +365,7 @@ class QueryBuilder {
 		// 1. [id]	2. [type]/[id]	3. [url]
 		if (value.match(/^http/)) {
 			// If the requestValue begins with "http", it's a url.
-			// The reference type will be the second to last value, with the id being the last value. TODO do we need to clean trailing slashes?
+			// The reference type will be the second to last value, with the id being the last value.
 			targetReference = [
 				referenceParts[referenceParts.length - 2],
 				referenceParts[referenceParts.length - 1],
@@ -556,8 +556,13 @@ class QueryBuilder {
 	 * @parameter xpath
 	 * @returns {*|string}
 	 */
-	static parseXPath(xpath) {
-		return xpath.split(/\.(.+)/)[1];
+	static parseXPath(xpaths) {
+		xpaths = Array.isArray(xpaths) ? xpaths : [xpaths];
+		let parsedXPaths = [];
+		xpaths.forEach((xpath) => {
+			parsedXPaths.push(xpath.split(/\.(.+)/)[1]);
+		});
+		return parsedXPaths;
 	}
 
 	/**
@@ -673,14 +678,22 @@ class QueryBuilder {
 
 			// For each match to perform, transform them into the appropriate format using the db specific qb;
 			let matchesToPerform = [];
-			for (let rawMatch of rawMatchesToPerform) {
+			rawMatchesToPerform.forEach((rawMatch) =>{
 				let orStatements = [];
-				for (let value of rawMatch.values) {
-					rawMatch.value = value;
-					orStatements.push(this.getSubSearchQuery(rawMatch));
-				}
+				// Because there can be multiple fields to check for a given parameter, account for all of them in the
+				// or statement being constructed.
+				rawMatch.field.forEach((field) => {
+					// Make a copy of the rawMatch that's only specific to one of the possible fields
+					let fieldRawMatch = Object.assign({}, rawMatch);
+					fieldRawMatch.field = field;
+					// For each value, add to the or statement for the given field
+					rawMatch.values.forEach((value) => {
+						fieldRawMatch.value = value;
+						orStatements.push(this.getSubSearchQuery(fieldRawMatch));
+					});
+				});
 				matchesToPerform.push(orStatements);
-			}
+			});
 
 			// Assemble the search query
 			query = this.qb.assembleSearchQuery({

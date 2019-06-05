@@ -3092,7 +3092,7 @@ describe('Mongo Tests', () => {
 					foo: { type: 'number', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let { errors, query } = qb.buildSearchQuery({
+				let { query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
@@ -6540,6 +6540,101 @@ describe('Mongo Tests', () => {
 			expect(errors[0].message).toContain(
 				"Value for page parameter 'page' must be a positive integer. Received -1",
 			);
+		});
+	});
+
+	describe('Parameter Definition Tests', () => {
+		test('TODO - test multiple xpaths', () => {
+			const req = {
+				method: 'GET',
+				query: {
+					foo: 'Evé',
+				},
+			};
+			const parameterDefinitions = {
+				foo: { type: 'string', xpath: ['Resource.foo', 'Resource.bar'] },
+			};
+			const includeArchived = false;
+			let { errors, query } = qb.buildSearchQuery({
+				req,
+				parameterDefinitions,
+				includeArchived,
+			});
+			const expectedResult = [
+				{
+					$match: {
+						$and: [{ $or: [{ foo: { $regex: '^Eve', $options: 'i' } }, { bar: { $regex: '^Eve', $options: 'i' } }] }],
+					},
+				},
+				{ $match: { 'meta._isArchived': false } },
+				{
+					$facet: {
+						data: [{ $skip: 0 }, { $limit: 10 }],
+						metadata: [
+							{ $count: 'total' },
+							{
+								$addFields: {
+									numberOfPages: { $ceil: { $divide: ['$total', 10] } },
+								},
+							},
+							{ $addFields: { page: 1 } },
+						],
+					},
+				},
+			];
+			expect(errors).toHaveLength(0);
+			expect(query).toEqual(expectedResult);
+		});
+		test('Should return a query that matches foo AND (bar OR baz) in field foo or qux', () => {
+			const req = {
+				method: 'GET',
+				query: {
+					foo: ['foo', 'bar,baz'],
+				},
+			};
+			const parameterDefinitions = {
+				foo: { type: 'string', xpath: ['Resource.foo', 'Resource.qux'] },
+			};
+			const includeArchived = false;
+			let { errors, query } = qb.buildSearchQuery({
+				req,
+				parameterDefinitions,
+				includeArchived,
+			});
+			const expectedResult = [
+				{
+					$match: {
+						$and: [
+							{ $or: [{ foo: { $options: 'i', $regex: '^foo' } }, { qux: { $options: 'i', $regex: '^foo' } }] },
+							{
+								$or: [
+									{ foo: { $options: 'i', $regex: '^bar' } },
+									{ foo: { $options: 'i', $regex: '^baz' } },
+									{ qux: { $options: 'i', $regex: '^bar' } },
+									{ qux: { $options: 'i', $regex: '^baz' } }
+								],
+							},
+						],
+					},
+				},
+				{ $match: { 'meta._isArchived': false } },
+				{
+					$facet: {
+						data: [{ $skip: 0 }, { $limit: 10 }],
+						metadata: [
+							{ $count: 'total' },
+							{
+								$addFields: {
+									numberOfPages: { $ceil: { $divide: ['$total', 10] } },
+								},
+							},
+							{ $addFields: { page: 1 } },
+						],
+					},
+				},
+			];
+			expect(errors).toHaveLength(0);
+			expect(query).toEqual(expectedResult);
 		});
 	});
 });
