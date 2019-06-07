@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.11.0](https://github.com/Asymmetrik/phx-tools/compare/@asymmetrik/fhir-qb@0.10.4...@asymmetrik/fhir-qb@0.11.0) (2019-06-07)
+
+
+### Bug Fixes
+
+* missing modifier queries were inverted ([#20](https://github.com/Asymmetrik/phx-tools/issues/20)) ([ba6eba7](https://github.com/Asymmetrik/phx-tools/commit/ba6eba7))
+
+
+### Features
+
+* support list of xpaths in search parameter xpath ([#22](https://github.com/Asymmetrik/phx-tools/issues/22)) ([84ccfd6](https://github.com/Asymmetrik/phx-tools/commit/84ccfd6))
+
+
+
+
+
 ## [0.10.3](https://github.com/Asymmetrik/phx-tools/compare/@asymmetrik/fhir-qb@0.10.2...@asymmetrik/fhir-qb@0.10.3) (2019-05-16)
 
 **Note:** Version bump only for package @asymmetrik/fhir-qb
