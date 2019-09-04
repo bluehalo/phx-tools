@@ -1,14 +1,22 @@
 const Ajv = require('ajv');
-const ajv = new Ajv({ allErrors: true });
-// To use Ajv with draft-06 schemas you need to explicitly add the meta-schema to the validator instance:
-ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-06.json'));
+
+// Default FHIR schema to validate against
 const defaultSchema = require('./fhir.schema.json');
 
+// Default AJV Settings suppress log and warn messages, but not error messages.
+const defaultAJVSettings = { logger: false };
 
 class JSONSchemaValidator {
-	constructor(schema = defaultSchema) {
+	constructor(schema, ajvSettings) {
+		// Used default values if arguments not supplied
+		schema = schema || defaultSchema;
+		ajvSettings = ajvSettings || defaultAJVSettings;
+
+		this.ajv = new Ajv(ajvSettings);
+		// To use Ajv with draft-06 schemas you need to explicitly add the meta-schema to the validator instance:
+		this.ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-06.json'));
 		this.schema = schema;
-		this.validator = ajv.compile(this.schema);
+		this.validator = this.ajv.compile(this.schema);
 	}
 
 	/**
@@ -43,7 +51,7 @@ class JSONSchemaValidator {
 				if (verbose) {
 					errors = this.validator.errors;
 				} else {
-					let resourceValidate = ajv.compile(this.getSubSchema(resourceType));
+					let resourceValidate = this.ajv.compile(this.getSubSchema(resourceType));
 					resourceValidate(resource);
 					errors = resourceValidate.errors;
 				}
