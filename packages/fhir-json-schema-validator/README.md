@@ -8,15 +8,24 @@ yarn add @asymmetrik/fhir-json-schema-validator
 
 ## Arguments
 
-`@asymmetrik/fhir-json-schema-validator` exports a single class called JSONSchemaValidator. This class takes one optional
-argument for initialization:
+`@asymmetrik/fhir-json-schema-validator` exports a single class called JSONSchemaValidator. This class takes two optional
+arguments for initialization:
 
 >#### `schema`
 This is the path to the JSON schema that you would like to validate against. It defaults to the `fhir.schema.json` file
 included in this package.
 
+#### `ajvSettings`
+This is an object with the settings to pass on to AJV. It defaults to a custom logger that suppresses `schema id ignored`
+warnings that are thrown when compiling a schema. For a full list of AJV options see the README on the AJV GitHub page at
+https://github.com/epoberezkin/ajv.
+
 ```
-let validator = new JSONSchemaValidator(schema)
+// Default initialization:
+let defaultValidator = new JSONSchemaValidator();
+
+// Custom initialization
+let defaultValidator = new JSONSchemaValidator(schema, ajvSettings);
 ```
 
 ## Usage
