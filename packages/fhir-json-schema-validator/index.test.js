@@ -384,7 +384,7 @@ describe('JSON Schema Validator Tests', () => {
 	});
 	test('Should say resource is invalid with verbose errors when verbose is set to true', () => {
 		let errors = validator.validate(badPatient, true);
-		expect(errors).toHaveLength(1443);
+		expect(errors).toHaveLength(147);
 	});
 	test('Should say resourceType is invalid when given unknown resourceType', () => {
 		let errors = validator.validate(invalidResourceType);

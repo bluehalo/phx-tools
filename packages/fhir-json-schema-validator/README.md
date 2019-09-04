@@ -16,9 +16,8 @@ This is the path to the JSON schema that you would like to validate against. It 
 included in this package.
 
 #### `ajvSettings`
-This is an object with the settings to pass on to AJV. It defaults to a custom logger that suppresses `schema id ignored`
-warnings that are thrown when compiling a schema. For a full list of AJV options see the README on the AJV GitHub page at
-https://github.com/epoberezkin/ajv.
+This is an object with the settings to pass on to AJV. It defaults to suppresses `log` and `warn` messages, but logs `error`
+messages. For a full list of AJV options see the README on the AJV GitHub page athttps://github.com/epoberezkin/ajv.
 
 ```
 // Default initialization:

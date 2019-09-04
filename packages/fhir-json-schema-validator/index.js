@@ -3,19 +3,8 @@ const Ajv = require('ajv');
 // Default FHIR schema to validate against
 const defaultSchema = require('./fhir.schema.json');
 
-// Default AJV Settings
-const defaultAJVSettings = {
-	// Custom logger suppresses 'schema id ignored' warnings that occur during schema compilation
-	logger: {
-		log: (message) => console.log(message),
-		warn: (message) => {
-			if (!message.startsWith('schema id ignored')) {
-				console.warn(message);
-			}
-		},
-		error: (message) => console.error(message)
-	}
-}
+// Default AJV Settings suppress log and warn messages, but not error messages.
+const defaultAJVSettings = { logger: false };
 
 class JSONSchemaValidator {
 	constructor(schema, ajvSettings) {
@@ -23,11 +12,11 @@ class JSONSchemaValidator {
 		schema = schema || defaultSchema;
 		ajvSettings = ajvSettings || defaultAJVSettings;
 
-		let ajv = new Ajv(ajvSettings);
+		this.ajv = new Ajv(ajvSettings);
 		// To use Ajv with draft-06 schemas you need to explicitly add the meta-schema to the validator instance:
-		ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-06.json'));
+		this.ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-06.json'));
 		this.schema = schema;
-		this.validator = ajv.compile(this.schema);
+		this.validator = this.ajv.compile(this.schema);
 	}
 
 	/**
@@ -62,7 +51,7 @@ class JSONSchemaValidator {
 				if (verbose) {
 					errors = this.validator.errors;
 				} else {
-					let resourceValidate = ajv.compile(this.getSubSchema(resourceType));
+					let resourceValidate = this.ajv.compile(this.getSubSchema(resourceType));
 					resourceValidate(resource);
 					errors = resourceValidate.errors;
 				}
