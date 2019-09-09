@@ -11,14 +11,20 @@ let supportedSearchTransformations = {
  * Takes in a list of queries and wraps them in an $and block
  */
 let buildAndQuery = function(queries) {
-	return { $and: queries };
+	return { [Op.and]: queries };
 };
 
 /**
  * Takes in a list of queries and wraps them in an $or block
  */
 let buildOrQuery = function({ queries, invert = false }) {
-	return { [invert ? '$nor' : '$or']: queries };
+
+	if (invert) {
+		return { [Op.not]: { [Op.or]: queries} };
+	}
+	else {
+		return { [Op.or]: queries };
+	}
 };
 
 /**
@@ -54,23 +60,21 @@ let buildInRangeQuery = function({
 	lowerBound,
 	upperBound,
 	invert = false,
-}) {
-	if (invert) {
-		return buildOrQuery({
-			queries: [
-				buildComparatorQuery({ field, value: lowerBound, comparator: 'lt' }),
-				buildComparatorQuery({ field, value: upperBound, comparator: 'gt' }),
-			],
-		});
-	}
-	return { [field]: { $gte: lowerBound, $lte: upperBound } };
+	}) {
+		if (invert) {
+			return { [field]: { [Op.notBetween]: [lowerBound, upperBound] } };
+		}
+		else {
+			return { [field]: { [Op.between]: [lowerBound, upperBound] } };
+		}
 };
 
 /**
  * Builds query to retrieve records where the field exists (or not).
  */
+// TODO: Need to figure out how to do exist check.
 let buildExistsQuery = function({ field, exists }) {
-	return { [field]: { $exists: exists } };
+	return 'NOT IMPLEMENTED';
 };
 
 /**
@@ -85,11 +89,13 @@ let buildRegexQuery = function({ field, pattern, options }) {
  * Setting caseSensitive to true will cause the regex to be case insensitive
  */
 let buildContainsQuery = function({ field, value, caseSensitive = false }) {
-	return buildRegexQuery({
-		field,
-		pattern: value,
-		options: caseSensitive ? '' : 'i',
-	});
+	// TODO: contains is not working as expected, like is for string matching - doublecheck this
+	if (caseSensitive) {
+		return { [field]: { [Op.like]: value }};
+	}
+	else {
+		return { [field]: { [Op.iLike]: value }};
+	}
 };
 
 /**
@@ -97,11 +103,12 @@ let buildContainsQuery = function({ field, value, caseSensitive = false }) {
  * Setting caseSensitive to true will cause the regex to be case insensitive
  */
 let buildStartsWithQuery = function({ field, value, caseSensitive = false }) {
-	return buildRegexQuery({
-		field,
-		pattern: `^${value}`,
-		options: caseSensitive ? '' : 'i',
-	});
+	if (caseSensitive) {
+		return { [field]: {[Op.startsWith]: value }};
+	}
+	else {
+		return { [field]: {[Op.iRegexp]: `^${value}` }};
+	}
 };
 
 /**
@@ -109,11 +116,12 @@ let buildStartsWithQuery = function({ field, value, caseSensitive = false }) {
  * Setting caseSensitive to true will cause the regex to be case insensitive
  */
 let buildEndsWithQuery = function({ field, value, caseSensitive = false }) {
-	return buildRegexQuery({
-		field,
-		pattern: `${value}$`,
-		options: caseSensitive ? '' : 'i',
-	});
+	if (caseSensitive) {
+		return { [field]: {[Op.endsWith]: value }};
+	}
+	else {
+		return { [field]: {[Op.iRegexp]: `${value}$` }};
+	}
 };
 
 /**
