@@ -196,23 +196,7 @@ describe('SQL Query Builder Tests', () => {
 	});
 	describe('assembleSearchQuery Tests', () => {
 		test('Should return empty pipeline (except for archival and paging) if no matches or joins to perform', () => {
-			const expectedResult = [
-				{ $match: { 'meta._isArchived': false } },
-				{
-					$facet: {
-						data: [{ $skip: 0 }, { $limit: 10 }],
-						metadata: [
-							{ $count: 'total' },
-							{
-								$addFields: {
-									numberOfPages: { $ceil: { $divide: ['$total', 10] } },
-								},
-							},
-							{ $addFields: { page: 1 } },
-						],
-					},
-				},
-			];
+			const expectedResult = [];
 			let observedResult = sqlQB.assembleSearchQuery({
 				joinsToPerform: [],
 				matchesToPerform: [],
@@ -225,33 +209,7 @@ describe('SQL Query Builder Tests', () => {
 			expect(observedResult).toEqual(expectedResult);
 		});
 		test('Should push lookups to front of pipeline if they are there', () => {
-			const expectedResult = [
-				{
-					$lookup: {
-						as: 'foo',
-						foreignField: 'baz',
-						from: 'foo',
-						localField: 'bar',
-					},
-				},
-				{ $unwind: '$foo' },
-				{ $project: { foo: 0 } },
-				{ $match: { 'meta._isArchived': false } },
-				{
-					$facet: {
-						data: [{ $skip: 0 }, { $limit: 10 }],
-						metadata: [
-							{ $count: 'total' },
-							{
-								$addFields: {
-									numberOfPages: { $ceil: { $divide: ['$total', 10] } },
-								},
-							},
-							{ $addFields: { page: 1 } },
-						],
-					},
-				},
-			];
+			const expectedResult = [];
 			let observedResult = sqlQB.assembleSearchQuery({
 				joinsToPerform: [{ from: 'foo', localKey: 'bar', foreignKey: 'baz' }],
 				matchesToPerform: [],
@@ -265,22 +223,7 @@ describe('SQL Query Builder Tests', () => {
 		});
 		test('Should fill in empty matches with empty objects to keep queries valid', () => {
 			const expectedResult = [
-				{ $match: { $and: [{ $or: [{}] }] } },
-				{ $match: { 'meta._isArchived': false } },
-				{
-					$facet: {
-						data: [{ $skip: 0 }, { $limit: 10 }],
-						metadata: [
-							{ $count: 'total' },
-							{
-								$addFields: {
-									numberOfPages: { $ceil: { $divide: ['$total', 10] } },
-								},
-							},
-							{ $addFields: { page: 1 } },
-						],
-					},
-				},
+				{ where: { [Op.and]: [{ [Op.or]: [{}] }] } },
 			];
 			let observedResult = sqlQB.assembleSearchQuery({
 				joinsToPerform: [],
@@ -295,26 +238,11 @@ describe('SQL Query Builder Tests', () => {
 		});
 		test('Should handle matches appropriately', () => {
 			const expectedResult = [
-				{ $match: { $and: [{ $or: [{ foo: { $gte: 1, $lte: 10 } }] }] } },
-				{ $match: { 'meta._isArchived': false } },
-				{
-					$facet: {
-						data: [{ $skip: 0 }, { $limit: 10 }],
-						metadata: [
-							{ $count: 'total' },
-							{
-								$addFields: {
-									numberOfPages: { $ceil: { $divide: ['$total', 10] } },
-								},
-							},
-							{ $addFields: { page: 1 } },
-						],
-					},
-				},
+				{ where: { [Op.and]: [{ [Op.or]: [{ foo: { [Op.gte]: 1, [Op.lte]: 10 } }] }] } }
 			];
 			let observedResult = sqlQB.assembleSearchQuery({
 				joinsToPerform: [],
-				matchesToPerform: [[{ foo: { $gte: 1, $lte: 10 } }]],
+				matchesToPerform: [[{ foo: { [Op.gte]: 1, [Op.lte]: 10 } }]],
 				searchResultTransformations: {},
 				implementationParameters: {archivedParamPath: 'meta._isArchived'},
 				includeArchived: false,

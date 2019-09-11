@@ -124,76 +124,76 @@ let buildEndsWithQuery = function({ field, value, caseSensitive = false }) {
 	}
 };
 
-/**
- * TODO - WORK IN PROGRESS
- * Apply search result transformations
- * @param query
- * @param searchResultTransformations
- */
-let applySearchResultTransformations = function({
-	query,
-	searchResultTransformations,
-}) {
-	Object.keys(searchResultTransformations).forEach(transformation => {
-		query.push(
-			supportedSearchTransformations[transformation](
-				searchResultTransformations[transformation],
-			),
-		);
-	});
-	return query;
-};
+// /**
+//  * TODO - WORK IN PROGRESS
+//  * Apply search result transformations
+//  * @param query
+//  * @param searchResultTransformations
+//  */
+// let applySearchResultTransformations = function({
+// 	query,
+// 	searchResultTransformations,
+// }) {
+// 	Object.keys(searchResultTransformations).forEach(transformation => {
+// 		query.push(
+// 			supportedSearchTransformations[transformation](
+// 				searchResultTransformations[transformation],
+// 			),
+// 		);
+// 	});
+// 	return query;
+// };
 
-/**
- * If we should not include archived, add a filter to remove them from the results
- * @param query
- * @param archivedParamPath
- * @param includeArchived
- * @returns {*}
- */
-let applyArchivedFilter = function({
-	query,
-	archivedParamPath,
-	includeArchived,
-}) {
-	if (!includeArchived) {
-		query.push({ $match: { [archivedParamPath]: false } });
-	}
-	return query;
-};
+// /**
+//  * If we should not include archived, add a filter to remove them from the results
+//  * @param query
+//  * @param archivedParamPath
+//  * @param includeArchived
+//  * @returns {*}
+//  */
+// let applyArchivedFilter = function({
+// 	query,
+// 	archivedParamPath,
+// 	includeArchived,
+// }) {
+// 	if (!includeArchived) {
+// 		query.push({ $match: { [archivedParamPath]: false } });
+// 	}
+// 	return query;
+// };
 
-/**
- * Apply paging
- * @param query
- * @param pageNumber
- * @param resultsPerPage
- * @returns {*}
- */
-let applyPaging = function({ query, pageNumber, resultsPerPage }) {
-	// If resultsPerPage is defined, skip to the appropriate page and limit the number of results that appear per page.
-	// Otherwise just insert a filler (to keep mongo happy) that skips no entries.
-	let pageSelection = resultsPerPage
-		? [{ $skip: (pageNumber - 1) * resultsPerPage }, { $limit: resultsPerPage }]
-		: [{ $skip: 0 }];
-
-	// If resultsPerPage is defined, calculate the total number of pages as the total number of records
-	// divided by the results per page rounded up to the nearest integer.
-	// Otherwise if resultsPerPage is not defined, all of the results will be on one page.
-	let numberOfPages = resultsPerPage
-		? { $ceil: { $divide: ['$total', resultsPerPage] } }
-		: 1;
-	query.push({
-		$facet: {
-			metadata: [
-				{ $count: 'total' },
-				{ $addFields: { numberOfPages: numberOfPages } },
-				{ $addFields: { page: pageNumber } }, // TODO may need some additional validation on this.
-			],
-			data: pageSelection,
-		},
-	});
-	return query;
-};
+// /**
+//  * Apply paging
+//  * @param query
+//  * @param pageNumber
+//  * @param resultsPerPage
+//  * @returns {*}
+//  */
+// let applyPaging = function({ query, pageNumber, resultsPerPage }) {
+// 	// If resultsPerPage is defined, skip to the appropriate page and limit the number of results that appear per page.
+// 	// Otherwise just insert a filler (to keep mongo happy) that skips no entries.
+// 	let pageSelection = resultsPerPage
+// 		? [{ $skip: (pageNumber - 1) * resultsPerPage }, { $limit: resultsPerPage }]
+// 		: [{ $skip: 0 }];
+//
+// 	// If resultsPerPage is defined, calculate the total number of pages as the total number of records
+// 	// divided by the results per page rounded up to the nearest integer.
+// 	// Otherwise if resultsPerPage is not defined, all of the results will be on one page.
+// 	let numberOfPages = resultsPerPage
+// 		? { $ceil: { $divide: ['$total', resultsPerPage] } }
+// 		: 1;
+// 	query.push({
+// 		$facet: {
+// 			metadata: [
+// 				{ $count: 'total' },
+// 				{ $addFields: { numberOfPages: numberOfPages } },
+// 				{ $addFields: { page: pageNumber } }, // TODO may need some additional validation on this.
+// 			],
+// 			data: pageSelection,
+// 		},
+// 	});
+// 	return query;
+// };
 
 /**
  * Assembles a mongo aggregation pipeline
@@ -224,23 +224,23 @@ let assembleSearchQuery = function({
 		throw new Error('Missing required implementation parameter \'archivedParamPath\'');
 	}
 
-	// Construct the necessary joins and add them to the aggregate pipeline. Also follow each $lookup with an $unwind
-	// for ease of use.
-	if (joinsToPerform.length > 0) {
-		for (let join of joinsToPerform) {
-			let { from, localKey, foreignKey } = join;
-			query.push({
-				$lookup: {
-					from: from,
-					localField: localKey,
-					foreignField: foreignKey,
-					as: from,
-				},
-			});
-			query.push({ $unwind: `$${from}` });
-			toSuppress[from] = 0;
-		}
-	}
+	// // Construct the necessary joins and add them to the aggregate pipeline. Also follow each $lookup with an $unwind
+	// // for ease of use.
+	// if (joinsToPerform.length > 0) {
+	// 	for (let join of joinsToPerform) {
+	// 		let { from, localKey, foreignKey } = join;
+	// 		query.push({
+	// 			$lookup: {
+	// 				from: from,
+	// 				localField: localKey,
+	// 				foreignField: foreignKey,
+	// 				as: from,
+	// 			},
+	// 		});
+	// 		query.push({ $unwind: `$${from}` });
+	// 		toSuppress[from] = 0;
+	// 	}
+	// }
 
 	// Construct the necessary queries for each match and add them the pipeline.
 	if (matchesToPerform.length > 0) {
@@ -251,21 +251,20 @@ let assembleSearchQuery = function({
 			}
 			listOfOrs.push(buildOrQuery({ queries: match }));
 		}
-		query.push({ $match: buildAndQuery(listOfOrs) });
+		query.push({ where: buildAndQuery(listOfOrs) });
 	}
 
-	// Suppress the tables that were joined from being displayed in the returned query. TODO might not want to do this.
-	if (Object.keys(toSuppress).length > 0) {
-		query.push({ $project: toSuppress });
-	}
+	// // Suppress the tables that were joined from being displayed in the returned query. TODO might not want to do this.
+	// if (Object.keys(toSuppress).length > 0) {
+	// 	query.push({ $project: toSuppress });
+	// }
 
-	query = applyArchivedFilter({ query, archivedParamPath, includeArchived });
-	query = applySearchResultTransformations({
-		query,
-		searchResultTransformations,
-	});
-	query = applyPaging({ query, pageNumber, resultsPerPage });
-
+	// query = applyArchivedFilter({ query, archivedParamPath, includeArchived });
+	// query = applySearchResultTransformations({
+	// 	query,
+	// 	searchResultTransformations,
+	// });
+	// query = applyPaging({ query, pageNumber, resultsPerPage });
 	return query;
 };
 
