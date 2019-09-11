@@ -7186,7 +7186,6 @@ describe('SQL Tests', () => {
 				expect(query).toEqual(expectedResult);
 			});
 		});
-
 		describe('gt Modifier Tests', () => {
 			// TODO - Should I throw an error in this situation? Providing ms is not allowed.
 			test("Should return $gt ISO String if given a full ISO String 'yyyy-mm-ddThh:mm:ss.###Z'", () => {
@@ -8387,408 +8386,865 @@ describe('SQL Tests', () => {
 				expect(query).toEqual(expectedResult);
 			});
 		});
-		// describe('ap Modifier Tests', () => {
-		// 	// TODO - Should I throw an error in this situation? Providing ms is not allowed.
-		// 	test(
-		// 		'Should return range with upper lower bounds equal to the target date +/- 0.1 * the amount of time ' +
-		// 		"between now and the target date if given a full ISO String 'yyyy-mm-ddThh:mm:ss.###Z'",
-		// 		() => {
-		// 			const testDate = '2018-10-31T17:49:29.000Z';
-		// 			const req = {
-		// 				method: 'GET',
-		// 				query: {
-		// 					foo: 'ap' + testDate,
-		// 				},
-		// 			};
-		// 			const parameterDefinitions = {
-		// 				foo: {type: 'date', xpath: 'Resource.foo'},
-		// 			};
-		// 			const targetDate = moment.utc(testDate);
-		// 			const rangePadding = 0.1;
-		// 			const currentDateTime = moment.utc();
-		// 			let difference =
-		// 				moment.duration(currentDateTime.diff(targetDate)).asSeconds() *
-		// 				rangePadding;
-		// 			let expectedLowerBound = moment(targetDate).subtract(
-		// 				difference,
-		// 				'seconds',
-		// 			);
-		// 			let expectedUpperBound = moment(targetDate).add(
-		// 				difference,
-		// 				'seconds',
-		// 			);
-		//
-		// 			const includeArchived = false;
-		// 			let {query, errors} = qb.buildSearchQuery({
-		// 				req,
-		// 				parameterDefinitions,
-		// 				includeArchived,
-		// 			});
-		// 			let observedLowerBound = moment(
-		// 				query[0].$match.$and[0].$or[0].foo.$gte,
-		// 			);
-		// 			let observedUpperBound = moment(
-		// 				query[0].$match.$and[0].$or[0].foo.$lte,
-		// 			);
-		//
-		// 			let lowerBoundDifference = moment
-		// 				.duration(observedLowerBound.diff(expectedLowerBound))
-		// 				.asSeconds();
-		// 			let upperBoundDifference = moment
-		// 				.duration(observedUpperBound.diff(expectedUpperBound))
-		// 				.asSeconds();
-		//
-		// 			// Fail if the observed upper or lower bounds are more than a hundredth of a second off the expected
-		// 			let correctLowerBound = Math.abs(lowerBoundDifference) <= 0.01;
-		// 			let correctUpperBound = Math.abs(upperBoundDifference) <= 0.01;
-		// 			expect(correctLowerBound).toBe(true);
-		// 			expect(correctUpperBound).toBe(true);
-		// 			expect(errors).toHaveLength(0);
-		// 		},
-		// 	);
-		// 	test(
-		// 		'Should return range with upper lower bounds equal to the target date +/- 0.1 * the amount of time ' +
-		// 		"between now and the target date if given a partial ISO String of format 'yyyy-mm-ddThh:mm:ss'",
-		// 		() => {
-		// 			const testDate = '2018-10-31T17:49:29';
-		// 			const req = {
-		// 				method: 'GET',
-		// 				query: {
-		// 					foo: 'ap' + testDate,
-		// 				},
-		// 			};
-		// 			const parameterDefinitions = {
-		// 				foo: {type: 'date', xpath: 'Resource.foo'},
-		// 			};
-		// 			const targetDate = moment.utc(testDate);
-		// 			const rangePadding = 0.1;
-		// 			const currentDateTime = moment.utc();
-		// 			let difference =
-		// 				moment.duration(currentDateTime.diff(targetDate)).asSeconds() *
-		// 				rangePadding;
-		// 			let expectedLowerBound = moment(targetDate).subtract(
-		// 				difference,
-		// 				'seconds',
-		// 			);
-		// 			let expectedUpperBound = moment(targetDate).add(
-		// 				difference,
-		// 				'seconds',
-		// 			);
-		//
-		// 			const includeArchived = false;
-		// 			let {query, errors} = qb.buildSearchQuery({
-		// 				req,
-		// 				parameterDefinitions,
-		// 				includeArchived,
-		// 			});
-		// 			let observedLowerBound = moment(
-		// 				query[0].$match.$and[0].$or[0].foo.$gte,
-		// 			);
-		// 			let observedUpperBound = moment(
-		// 				query[0].$match.$and[0].$or[0].foo.$lte,
-		// 			);
-		//
-		// 			let lowerBoundDifference = moment
-		// 				.duration(observedLowerBound.diff(expectedLowerBound))
-		// 				.asSeconds();
-		// 			let upperBoundDifference = moment
-		// 				.duration(observedUpperBound.diff(expectedUpperBound))
-		// 				.asSeconds();
-		//
-		// 			// Fail if the observed upper or lower bounds are more than a hundredth of a second off the expected
-		// 			let correctLowerBound = Math.abs(lowerBoundDifference) <= 0.01;
-		// 			let correctUpperBound = Math.abs(upperBoundDifference) <= 0.01;
-		// 			expect(correctLowerBound).toBe(true);
-		// 			expect(correctUpperBound).toBe(true);
-		// 			expect(errors).toHaveLength(0);
-		// 		},
-		// 	);
-		// 	test(
-		// 		'Should return range with upper lower bounds equal to the target date +/- 0.1 * the amount of time ' +
-		// 		"between now and the start of the specified minute if given a partial ISO String of format 'yyyy-mm-ddThh:mm'",
-		// 		() => {
-		// 			const testDate = '2018-10-31T17:49';
-		// 			const req = {
-		// 				method: 'GET',
-		// 				query: {
-		// 					foo: 'ap' + testDate,
-		// 				},
-		// 			};
-		// 			const parameterDefinitions = {
-		// 				foo: {type: 'date', xpath: 'Resource.foo'},
-		// 			};
-		// 			const targetDate = moment.utc(testDate);
-		// 			const rangePadding = 0.1;
-		// 			const currentDateTime = moment.utc();
-		// 			let difference =
-		// 				moment.duration(currentDateTime.diff(targetDate)).asSeconds() *
-		// 				rangePadding;
-		// 			let expectedLowerBound = moment(targetDate).subtract(
-		// 				difference,
-		// 				'seconds',
-		// 			);
-		// 			let expectedUpperBound = moment(targetDate).add(
-		// 				difference,
-		// 				'seconds',
-		// 			);
-		//
-		// 			const includeArchived = false;
-		// 			let {query, errors} = qb.buildSearchQuery({
-		// 				req,
-		// 				parameterDefinitions,
-		// 				includeArchived,
-		// 			});
-		// 			let observedLowerBound = moment(
-		// 				query[0].$match.$and[0].$or[0].foo.$gte,
-		// 			);
-		// 			let observedUpperBound = moment(
-		// 				query[0].$match.$and[0].$or[0].foo.$lte,
-		// 			);
-		//
-		// 			let lowerBoundDifference = moment
-		// 				.duration(observedLowerBound.diff(expectedLowerBound))
-		// 				.asSeconds();
-		// 			let upperBoundDifference = moment
-		// 				.duration(observedUpperBound.diff(expectedUpperBound))
-		// 				.asSeconds();
-		//
-		// 			// Fail if the observed upper or lower bounds are more than a hundredth of a second off the expected
-		// 			let correctLowerBound = Math.abs(lowerBoundDifference) <= 0.01;
-		// 			let correctUpperBound = Math.abs(upperBoundDifference) <= 0.01;
-		// 			expect(correctLowerBound).toBe(true);
-		// 			expect(correctUpperBound).toBe(true);
-		// 			expect(errors).toHaveLength(0);
-		// 		},
-		// 	);
-		// 	// TODO - Should I throw an error in this situation? Hours without minutes is not allowed.
-		// 	test(
-		// 		'Should return range with upper lower bounds equal to the target date +/- 0.1 * the amount of time ' +
-		// 		"between currentDateTimeOverride and the start of the specified hour if given a partial ISO String of format 'yyyy-mm-ddThh'",
-		// 		() => {
-		// 			const testDate = '2018-10-31T17';
-		// 			const req = {
-		// 				method: 'GET',
-		// 				query: {
-		// 					foo: 'ap' + testDate,
-		// 				},
-		// 			};
-		// 			const parameterDefinitions = {
-		// 				foo: {type: 'date', xpath: 'Resource.foo'},
-		// 			};
-		// 			const targetDate = moment.utc(testDate);
-		// 			const rangePadding = 0.1;
-		// 			const currentDateTime = moment.utc();
-		// 			let difference =
-		// 				moment.duration(currentDateTime.diff(targetDate)).asSeconds() *
-		// 				rangePadding;
-		// 			let expectedLowerBound = moment(targetDate).subtract(
-		// 				difference,
-		// 				'seconds',
-		// 			);
-		// 			let expectedUpperBound = moment(targetDate).add(
-		// 				difference,
-		// 				'seconds',
-		// 			);
-		//
-		// 			const includeArchived = false;
-		// 			let {query, errors} = qb.buildSearchQuery({
-		// 				req,
-		// 				parameterDefinitions,
-		// 				includeArchived,
-		// 			});
-		// 			let observedLowerBound = moment(
-		// 				query[0].$match.$and[0].$or[0].foo.$gte,
-		// 			);
-		// 			let observedUpperBound = moment(
-		// 				query[0].$match.$and[0].$or[0].foo.$lte,
-		// 			);
-		//
-		// 			let lowerBoundDifference = moment
-		// 				.duration(observedLowerBound.diff(expectedLowerBound))
-		// 				.asSeconds();
-		// 			let upperBoundDifference = moment
-		// 				.duration(observedUpperBound.diff(expectedUpperBound))
-		// 				.asSeconds();
-		//
-		// 			// Fail if the observed upper or lower bounds are more than a hundredth of a second off the expected
-		// 			let correctLowerBound = Math.abs(lowerBoundDifference) <= 0.01;
-		// 			let correctUpperBound = Math.abs(upperBoundDifference) <= 0.01;
-		// 			expect(correctLowerBound).toBe(true);
-		// 			expect(correctUpperBound).toBe(true);
-		// 			expect(errors).toHaveLength(0);
-		// 		},
-		// 	);
-		// 	test(
-		// 		'Should return range with upper lower bounds equal to the target date +/- 0.1 * the amount of time ' +
-		// 		"between currentDateTimeOverride and the start of the specified day if given a partial ISO String of format 'yyyy-mm-dd'",
-		// 		() => {
-		// 			const testDate = '2018-10-31';
-		// 			const req = {
-		// 				method: 'GET',
-		// 				query: {
-		// 					foo: 'ap' + testDate,
-		// 				},
-		// 			};
-		// 			const parameterDefinitions = {
-		// 				foo: {type: 'date', xpath: 'Resource.foo'},
-		// 			};
-		// 			const targetDate = moment.utc(testDate);
-		// 			const rangePadding = 0.1;
-		// 			const currentDateTime = moment.utc();
-		// 			let difference =
-		// 				moment.duration(currentDateTime.diff(targetDate)).asSeconds() *
-		// 				rangePadding;
-		// 			let expectedLowerBound = moment(targetDate).subtract(
-		// 				difference,
-		// 				'seconds',
-		// 			);
-		// 			let expectedUpperBound = moment(targetDate).add(
-		// 				difference,
-		// 				'seconds',
-		// 			);
-		//
-		// 			const includeArchived = false;
-		// 			let {query, errors} = qb.buildSearchQuery({
-		// 				req,
-		// 				parameterDefinitions,
-		// 				includeArchived,
-		// 			});
-		// 			let observedLowerBound = moment(
-		// 				query[0].$match.$and[0].$or[0].foo.$gte,
-		// 			);
-		// 			let observedUpperBound = moment(
-		// 				query[0].$match.$and[0].$or[0].foo.$lte,
-		// 			);
-		//
-		// 			let lowerBoundDifference = moment
-		// 				.duration(observedLowerBound.diff(expectedLowerBound))
-		// 				.asSeconds();
-		// 			let upperBoundDifference = moment
-		// 				.duration(observedUpperBound.diff(expectedUpperBound))
-		// 				.asSeconds();
-		//
-		// 			// Fail if the observed upper or lower bounds are more than a hundredth of a second off the expected
-		// 			let correctLowerBound = Math.abs(lowerBoundDifference) <= 0.01;
-		// 			let correctUpperBound = Math.abs(upperBoundDifference) <= 0.01;
-		// 			expect(correctLowerBound).toBe(true);
-		// 			expect(correctUpperBound).toBe(true);
-		// 			expect(errors).toHaveLength(0);
-		// 		},
-		// 	);
-		// 	test(
-		// 		'Should return range with upper lower bounds equal to the target date +/- 0.1 * the amount of time ' +
-		// 		"between currentDateTimeOverride and the start of the specified month if given a partial ISO String of format 'yyyy-mm'",
-		// 		() => {
-		// 			const testDate = '2018-10';
-		// 			const req = {
-		// 				method: 'GET',
-		// 				query: {
-		// 					foo: 'ap' + testDate,
-		// 				},
-		// 			};
-		// 			const parameterDefinitions = {
-		// 				foo: {type: 'date', xpath: 'Resource.foo'},
-		// 			};
-		// 			const targetDate = moment.utc(testDate);
-		// 			const rangePadding = 0.1;
-		// 			const currentDateTime = moment.utc();
-		// 			let difference =
-		// 				moment.duration(currentDateTime.diff(targetDate)).asSeconds() *
-		// 				rangePadding;
-		// 			let expectedLowerBound = moment(targetDate).subtract(
-		// 				difference,
-		// 				'seconds',
-		// 			);
-		// 			let expectedUpperBound = moment(targetDate).add(
-		// 				difference,
-		// 				'seconds',
-		// 			);
-		//
-		// 			const includeArchived = false;
-		// 			let {query, errors} = qb.buildSearchQuery({
-		// 				req,
-		// 				parameterDefinitions,
-		// 				includeArchived,
-		// 			});
-		// 			let observedLowerBound = moment(
-		// 				query[0].$match.$and[0].$or[0].foo.$gte,
-		// 			);
-		// 			let observedUpperBound = moment(
-		// 				query[0].$match.$and[0].$or[0].foo.$lte,
-		// 			);
-		//
-		// 			let lowerBoundDifference = moment
-		// 				.duration(observedLowerBound.diff(expectedLowerBound))
-		// 				.asSeconds();
-		// 			let upperBoundDifference = moment
-		// 				.duration(observedUpperBound.diff(expectedUpperBound))
-		// 				.asSeconds();
-		//
-		// 			// Fail if the observed upper or lower bounds are more than a hundredth of a second off the expected
-		// 			let correctLowerBound = Math.abs(lowerBoundDifference) <= 0.01;
-		// 			let correctUpperBound = Math.abs(upperBoundDifference) <= 0.01;
-		// 			expect(correctLowerBound).toBe(true);
-		// 			expect(correctUpperBound).toBe(true);
-		// 			expect(errors).toHaveLength(0);
-		// 		},
-		// 	);
-		// 	test(
-		// 		'Should return range with upper lower bounds equal to the target date +/- 0.1 * the amount of time ' +
-		// 		"between currentDateTime and the start of the specified year if given a partial ISO String of format 'yyyy'",
-		// 		() => {
-		// 			const testDate = '2018';
-		// 			const req = {
-		// 				method: 'GET',
-		// 				query: {
-		// 					foo: 'ap' + testDate,
-		// 				},
-		// 			};
-		// 			const parameterDefinitions = {
-		// 				foo: {type: 'date', xpath: 'Resource.foo'},
-		// 			};
-		// 			const targetDate = moment.utc(testDate);
-		// 			const rangePadding = 0.1;
-		// 			const currentDateTime = moment.utc();
-		// 			let difference =
-		// 				moment.duration(currentDateTime.diff(targetDate)).asSeconds() *
-		// 				rangePadding;
-		// 			let expectedLowerBound = moment(targetDate).subtract(
-		// 				difference,
-		// 				'seconds',
-		// 			);
-		// 			let expectedUpperBound = moment(targetDate).add(
-		// 				difference,
-		// 				'seconds',
-		// 			);
-		//
-		// 			const includeArchived = false;
-		// 			let {query, errors} = qb.buildSearchQuery({
-		// 				req,
-		// 				parameterDefinitions,
-		// 				includeArchived,
-		// 			});
-		// 			let observedLowerBound = moment(
-		// 				query[0].$match.$and[0].$or[0].foo.$gte,
-		// 			);
-		// 			let observedUpperBound = moment(
-		// 				query[0].$match.$and[0].$or[0].foo.$lte,
-		// 			);
-		//
-		// 			let lowerBoundDifference = moment
-		// 				.duration(observedLowerBound.diff(expectedLowerBound))
-		// 				.asSeconds();
-		// 			let upperBoundDifference = moment
-		// 				.duration(observedUpperBound.diff(expectedUpperBound))
-		// 				.asSeconds();
-		//
-		// 			// Fail if the observed upper or lower bounds are more than a hundredth of a second off the expected
-		// 			let correctLowerBound = Math.abs(lowerBoundDifference) <= 0.01;
-		// 			let correctUpperBound = Math.abs(upperBoundDifference) <= 0.01;
-		// 			expect(correctLowerBound).toBe(true);
-		// 			expect(correctUpperBound).toBe(true);
-		// 			expect(errors).toHaveLength(0);
-		// 		},
-		// 	);
-		// });
+		describe('ap Modifier Tests', () => {
+			// TODO - Should I throw an error in this situation? Providing ms is not allowed.
+			test(
+				'Should return range with upper lower bounds equal to the target date +/- 0.1 * the amount of time ' +
+				"between now and the target date if given a full ISO String 'yyyy-mm-ddThh:mm:ss.###Z'",
+				() => {
+					const testDate = '2018-10-31T17:49:29.000Z';
+					const req = {
+						method: 'GET',
+						query: {
+							foo: 'ap' + testDate,
+						},
+					};
+					const parameterDefinitions = {
+						foo: {type: 'date', xpath: 'Resource.foo'},
+					};
+					const targetDate = moment.utc(testDate);
+					const rangePadding = 0.1;
+					const currentDateTime = moment.utc();
+					let difference =
+						moment.duration(currentDateTime.diff(targetDate)).asSeconds() *
+						rangePadding;
+					let expectedLowerBound = moment(targetDate).subtract(
+						difference,
+						'seconds',
+					);
+					let expectedUpperBound = moment(targetDate).add(
+						difference,
+						'seconds',
+					);
+
+					const includeArchived = false;
+					let {query, errors} = qb.buildSearchQuery({
+						req,
+						parameterDefinitions,
+						includeArchived,
+					});
+
+					let observedLowerBound = moment(
+						query[0].where[Op.and][0][Op.or][0].foo[Op.between][0]
+					);
+					let observedUpperBound = moment(
+						query[0].where[Op.and][0][Op.or][0].foo[Op.between][1]
+					);
+
+					let lowerBoundDifference = moment
+						.duration(observedLowerBound.diff(expectedLowerBound))
+						.asSeconds();
+					let upperBoundDifference = moment
+						.duration(observedUpperBound.diff(expectedUpperBound))
+						.asSeconds();
+
+					// Fail if the observed upper or lower bounds are more than a hundredth of a second off the expected
+					let correctLowerBound = Math.abs(lowerBoundDifference) <= 0.01;
+					let correctUpperBound = Math.abs(upperBoundDifference) <= 0.01;
+					expect(correctLowerBound).toBe(true);
+					expect(correctUpperBound).toBe(true);
+					expect(errors).toHaveLength(0);
+				},
+			);
+			test(
+				'Should return range with upper lower bounds equal to the target date +/- 0.1 * the amount of time ' +
+				"between now and the target date if given a partial ISO String of format 'yyyy-mm-ddThh:mm:ss'",
+				() => {
+					const testDate = '2018-10-31T17:49:29';
+					const req = {
+						method: 'GET',
+						query: {
+							foo: 'ap' + testDate,
+						},
+					};
+					const parameterDefinitions = {
+						foo: {type: 'date', xpath: 'Resource.foo'},
+					};
+					const targetDate = moment.utc(testDate);
+					const rangePadding = 0.1;
+					const currentDateTime = moment.utc();
+					let difference =
+						moment.duration(currentDateTime.diff(targetDate)).asSeconds() *
+						rangePadding;
+					let expectedLowerBound = moment(targetDate).subtract(
+						difference,
+						'seconds',
+					);
+					let expectedUpperBound = moment(targetDate).add(
+						difference,
+						'seconds',
+					);
+
+					const includeArchived = false;
+					let {query, errors} = qb.buildSearchQuery({
+						req,
+						parameterDefinitions,
+						includeArchived,
+					});
+
+					let observedLowerBound = moment(
+						query[0].where[Op.and][0][Op.or][0].foo[Op.between][0]
+					);
+					let observedUpperBound = moment(
+						query[0].where[Op.and][0][Op.or][0].foo[Op.between][1]
+					);
+
+					let lowerBoundDifference = moment
+						.duration(observedLowerBound.diff(expectedLowerBound))
+						.asSeconds();
+					let upperBoundDifference = moment
+						.duration(observedUpperBound.diff(expectedUpperBound))
+						.asSeconds();
+
+					// Fail if the observed upper or lower bounds are more than a hundredth of a second off the expected
+					let correctLowerBound = Math.abs(lowerBoundDifference) <= 0.01;
+					let correctUpperBound = Math.abs(upperBoundDifference) <= 0.01;
+					expect(correctLowerBound).toBe(true);
+					expect(correctUpperBound).toBe(true);
+					expect(errors).toHaveLength(0);
+				},
+			);
+			test(
+				'Should return range with upper lower bounds equal to the target date +/- 0.1 * the amount of time ' +
+				"between now and the start of the specified minute if given a partial ISO String of format 'yyyy-mm-ddThh:mm'",
+				() => {
+					const testDate = '2018-10-31T17:49';
+					const req = {
+						method: 'GET',
+						query: {
+							foo: 'ap' + testDate,
+						},
+					};
+					const parameterDefinitions = {
+						foo: {type: 'date', xpath: 'Resource.foo'},
+					};
+					const targetDate = moment.utc(testDate);
+					const rangePadding = 0.1;
+					const currentDateTime = moment.utc();
+					let difference =
+						moment.duration(currentDateTime.diff(targetDate)).asSeconds() *
+						rangePadding;
+					let expectedLowerBound = moment(targetDate).subtract(
+						difference,
+						'seconds',
+					);
+					let expectedUpperBound = moment(targetDate).add(
+						difference,
+						'seconds',
+					);
+
+					const includeArchived = false;
+					let {query, errors} = qb.buildSearchQuery({
+						req,
+						parameterDefinitions,
+						includeArchived,
+					});
+
+					let observedLowerBound = moment(
+						query[0].where[Op.and][0][Op.or][0].foo[Op.between][0]
+					);
+					let observedUpperBound = moment(
+						query[0].where[Op.and][0][Op.or][0].foo[Op.between][1]
+					);
+
+					let lowerBoundDifference = moment
+						.duration(observedLowerBound.diff(expectedLowerBound))
+						.asSeconds();
+					let upperBoundDifference = moment
+						.duration(observedUpperBound.diff(expectedUpperBound))
+						.asSeconds();
+
+					// Fail if the observed upper or lower bounds are more than a hundredth of a second off the expected
+					let correctLowerBound = Math.abs(lowerBoundDifference) <= 0.01;
+					let correctUpperBound = Math.abs(upperBoundDifference) <= 0.01;
+					expect(correctLowerBound).toBe(true);
+					expect(correctUpperBound).toBe(true);
+					expect(errors).toHaveLength(0);
+				},
+			);
+			// TODO - Should I throw an error in this situation? Hours without minutes is not allowed.
+			test(
+				'Should return range with upper lower bounds equal to the target date +/- 0.1 * the amount of time ' +
+				"between currentDateTimeOverride and the start of the specified hour if given a partial ISO String of format 'yyyy-mm-ddThh'",
+				() => {
+					const testDate = '2018-10-31T17';
+					const req = {
+						method: 'GET',
+						query: {
+							foo: 'ap' + testDate,
+						},
+					};
+					const parameterDefinitions = {
+						foo: {type: 'date', xpath: 'Resource.foo'},
+					};
+					const targetDate = moment.utc(testDate);
+					const rangePadding = 0.1;
+					const currentDateTime = moment.utc();
+					let difference =
+						moment.duration(currentDateTime.diff(targetDate)).asSeconds() *
+						rangePadding;
+					let expectedLowerBound = moment(targetDate).subtract(
+						difference,
+						'seconds',
+					);
+					let expectedUpperBound = moment(targetDate).add(
+						difference,
+						'seconds',
+					);
+
+					const includeArchived = false;
+					let {query, errors} = qb.buildSearchQuery({
+						req,
+						parameterDefinitions,
+						includeArchived,
+					});
+
+					let observedLowerBound = moment(
+						query[0].where[Op.and][0][Op.or][0].foo[Op.between][0]
+					);
+					let observedUpperBound = moment(
+						query[0].where[Op.and][0][Op.or][0].foo[Op.between][1]
+					);
+
+					let lowerBoundDifference = moment
+						.duration(observedLowerBound.diff(expectedLowerBound))
+						.asSeconds();
+					let upperBoundDifference = moment
+						.duration(observedUpperBound.diff(expectedUpperBound))
+						.asSeconds();
+
+					// Fail if the observed upper or lower bounds are more than a hundredth of a second off the expected
+					let correctLowerBound = Math.abs(lowerBoundDifference) <= 0.01;
+					let correctUpperBound = Math.abs(upperBoundDifference) <= 0.01;
+					expect(correctLowerBound).toBe(true);
+					expect(correctUpperBound).toBe(true);
+					expect(errors).toHaveLength(0);
+				},
+			);
+			test(
+				'Should return range with upper lower bounds equal to the target date +/- 0.1 * the amount of time ' +
+				"between currentDateTimeOverride and the start of the specified day if given a partial ISO String of format 'yyyy-mm-dd'",
+				() => {
+					const testDate = '2018-10-31';
+					const req = {
+						method: 'GET',
+						query: {
+							foo: 'ap' + testDate,
+						},
+					};
+					const parameterDefinitions = {
+						foo: {type: 'date', xpath: 'Resource.foo'},
+					};
+					const targetDate = moment.utc(testDate);
+					const rangePadding = 0.1;
+					const currentDateTime = moment.utc();
+					let difference =
+						moment.duration(currentDateTime.diff(targetDate)).asSeconds() *
+						rangePadding;
+					let expectedLowerBound = moment(targetDate).subtract(
+						difference,
+						'seconds',
+					);
+					let expectedUpperBound = moment(targetDate).add(
+						difference,
+						'seconds',
+					);
+
+					const includeArchived = false;
+					let {query, errors} = qb.buildSearchQuery({
+						req,
+						parameterDefinitions,
+						includeArchived,
+					});
+
+					let observedLowerBound = moment(
+						query[0].where[Op.and][0][Op.or][0].foo[Op.between][0]
+					);
+					let observedUpperBound = moment(
+						query[0].where[Op.and][0][Op.or][0].foo[Op.between][1]
+					);
+
+					let lowerBoundDifference = moment
+						.duration(observedLowerBound.diff(expectedLowerBound))
+						.asSeconds();
+					let upperBoundDifference = moment
+						.duration(observedUpperBound.diff(expectedUpperBound))
+						.asSeconds();
+
+					// Fail if the observed upper or lower bounds are more than a hundredth of a second off the expected
+					let correctLowerBound = Math.abs(lowerBoundDifference) <= 0.01;
+					let correctUpperBound = Math.abs(upperBoundDifference) <= 0.01;
+					expect(correctLowerBound).toBe(true);
+					expect(correctUpperBound).toBe(true);
+					expect(errors).toHaveLength(0);
+				},
+			);
+			test(
+				'Should return range with upper lower bounds equal to the target date +/- 0.1 * the amount of time ' +
+				"between currentDateTimeOverride and the start of the specified month if given a partial ISO String of format 'yyyy-mm'",
+				() => {
+					const testDate = '2018-10';
+					const req = {
+						method: 'GET',
+						query: {
+							foo: 'ap' + testDate,
+						},
+					};
+					const parameterDefinitions = {
+						foo: {type: 'date', xpath: 'Resource.foo'},
+					};
+					const targetDate = moment.utc(testDate);
+					const rangePadding = 0.1;
+					const currentDateTime = moment.utc();
+					let difference =
+						moment.duration(currentDateTime.diff(targetDate)).asSeconds() *
+						rangePadding;
+					let expectedLowerBound = moment(targetDate).subtract(
+						difference,
+						'seconds',
+					);
+					let expectedUpperBound = moment(targetDate).add(
+						difference,
+						'seconds',
+					);
+
+					const includeArchived = false;
+					let {query, errors} = qb.buildSearchQuery({
+						req,
+						parameterDefinitions,
+						includeArchived,
+					});
+
+					let observedLowerBound = moment(
+						query[0].where[Op.and][0][Op.or][0].foo[Op.between][0]
+					);
+					let observedUpperBound = moment(
+						query[0].where[Op.and][0][Op.or][0].foo[Op.between][1]
+					);
+
+					let lowerBoundDifference = moment
+						.duration(observedLowerBound.diff(expectedLowerBound))
+						.asSeconds();
+					let upperBoundDifference = moment
+						.duration(observedUpperBound.diff(expectedUpperBound))
+						.asSeconds();
+
+					// Fail if the observed upper or lower bounds are more than a hundredth of a second off the expected
+					let correctLowerBound = Math.abs(lowerBoundDifference) <= 0.01;
+					let correctUpperBound = Math.abs(upperBoundDifference) <= 0.01;
+					expect(correctLowerBound).toBe(true);
+					expect(correctUpperBound).toBe(true);
+					expect(errors).toHaveLength(0);
+				},
+			);
+			test(
+				'Should return range with upper lower bounds equal to the target date +/- 0.1 * the amount of time ' +
+				"between currentDateTime and the start of the specified year if given a partial ISO String of format 'yyyy'",
+				() => {
+					const testDate = '2018';
+					const req = {
+						method: 'GET',
+						query: {
+							foo: 'ap' + testDate,
+						},
+					};
+					const parameterDefinitions = {
+						foo: {type: 'date', xpath: 'Resource.foo'},
+					};
+					const targetDate = moment.utc(testDate);
+					const rangePadding = 0.1;
+					const currentDateTime = moment.utc();
+					let difference =
+						moment.duration(currentDateTime.diff(targetDate)).asSeconds() *
+						rangePadding;
+					let expectedLowerBound = moment(targetDate).subtract(
+						difference,
+						'seconds',
+					);
+					let expectedUpperBound = moment(targetDate).add(
+						difference,
+						'seconds',
+					);
+
+					const includeArchived = false;
+					let {query, errors} = qb.buildSearchQuery({
+						req,
+						parameterDefinitions,
+						includeArchived,
+					});
+
+					let observedLowerBound = moment(
+						query[0].where[Op.and][0][Op.or][0].foo[Op.between][0]
+					);
+					let observedUpperBound = moment(
+						query[0].where[Op.and][0][Op.or][0].foo[Op.between][1]
+					);
+
+					let lowerBoundDifference = moment
+						.duration(observedLowerBound.diff(expectedLowerBound))
+						.asSeconds();
+					let upperBoundDifference = moment
+						.duration(observedUpperBound.diff(expectedUpperBound))
+						.asSeconds();
+
+					// Fail if the observed upper or lower bounds are more than a hundredth of a second off the expected
+					let correctLowerBound = Math.abs(lowerBoundDifference) <= 0.01;
+					let correctUpperBound = Math.abs(upperBoundDifference) <= 0.01;
+					expect(correctLowerBound).toBe(true);
+					expect(correctUpperBound).toBe(true);
+					expect(errors).toHaveLength(0);
+				},
+			);
+		});
+	});
+
+	describe('Build Number Query Tests', () => {
+		describe('eq Modifier Tests', () => {
+			test('Should return range with upper lower bounds equal to +/- 0.5 given an integer', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'eq100',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'number', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.between]: [99.5, 100.5]}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test(
+				'Should return range with upper lower bounds equal to +/- 0.5 * the most significant digit given a number with' +
+				'significant decimal places.',
+				() => {
+					const req = {
+						method: 'GET',
+						query: {
+							foo: 'eq100.000',
+						},
+					};
+					const parameterDefinitions = {
+						foo: { type: 'number', xpath: 'Resource.foo' },
+					};
+					const includeArchived = false;
+					let { errors, query } = qb.buildSearchQuery({
+						req,
+						parameterDefinitions,
+						includeArchived,
+					});
+					const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.between]: [99.9995, 100.0005]}
+							}]
+						}]
+					}
+				}];
+					expect(errors).toHaveLength(0);
+					expect(query).toEqual(expectedResult);
+				},
+			);
+			test("Should default to 'eq' prefix.", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: '100',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'number', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.between]: [99.5, 100.5]}
+							}]
+						}]
+					}
+				}];
+				expect(query).toEqual(expectedResult);
+			});
+		});
+		describe('ne Modifier Tests', () => {
+			test('Should return $or that fully excludes range with upper lower bounds equal to +/- 0.5 given an integer', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'ne100',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'number', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.notBetween]: [99.5, 100.5]}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test(
+				'Should return $or that fully excludes range with upper lower bounds equal to +/- 0.5 * the most significant ' +
+				'digit given a number with significant decimal places.',
+				() => {
+					const req = {
+						method: 'GET',
+						query: {
+							foo: 'ne100.000',
+						},
+					};
+					const parameterDefinitions = {
+						foo: { type: 'number', xpath: 'Resource.foo' },
+					};
+					const includeArchived = false;
+					let { errors, query } = qb.buildSearchQuery({
+						req,
+						parameterDefinitions,
+						includeArchived,
+					});
+					const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.notBetween]: [99.9995, 100.0005]}
+							}]
+						}]
+					}
+				}];
+					expect(errors).toHaveLength(0);
+					expect(query).toEqual(expectedResult);
+				},
+			);
+		});
+		describe('lt, le, gt, ge Modifier Tests', () => {
+			test('Should return $lt a given target value', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'lt100.0000001',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'number', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.lt]: 100.0000001}
+							}]
+						}]
+					}
+				}];
+
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test('Should return $lte a given target value', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'le100.0000001',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'number', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.lte]: 100.0000001}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test('Should return $gt a given target value', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'gt100.0000001',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'number', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.gt]: 100.0000001}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test('Should return $gte a given target value', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'ge100.0000001',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'number', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.gte]: 100.0000001}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+		});
+		describe('ap Prefix Tests', () => {
+			test('Should return range with upper lower bounds equal to +/- 0.1 * a given input', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'ap-10',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'number', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.between]: [-11, -9]}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+		});
+		describe('Signed Number Tests', () => {
+			test('Should return range with upper lower bounds equal to +/- 0.5 given a negative number', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'eq-10',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'number', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.between]: [-10.5, -9.5]}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test('Should return range with upper lower bounds equal to +/- 0.5 given a signed positive number', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'eq+10',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'number', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.between]: [9.5, 10.5]}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+		});
+	});
+
+	describe('Build String Query Tests', () => {
+		describe('No Modifier Tests', () => {
+			test('Should return case and accent insensitive regex matching start of string for input target value', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'Evé',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'string', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.iRegexp]: '^Eve'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+		});
+		describe('contains Modifier Tests', () => {
+			test('Should return case and accent insensitive regex matching any part of string for input target value', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						'foo:contains': 'Evê',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'string', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.iLike]: 'Eve'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+		});
+		describe('exact Modifier Tests', () => {
+			test('Should return case and accent sensitive regex exactly matching input target value', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						'foo:exact': 'Evë',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'string', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: 'Evë'
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+		});
 	});
 });
