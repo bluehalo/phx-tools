@@ -6831,39 +6831,18 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						$match: {
-							$and: [
-								{
-									$or: [
-										{
-											foo: {
-												$gte: '2018-10-31T17:00:00.000Z',
-												$lte: '2018-10-31T17:59:59.999Z',
-											},
-										},
-									],
-								},
-							],
-						},
-					},
-					{$match: {'meta._isArchived': false}},
-					{
-						$facet: {
-							data: [{$skip: 0}, {$limit: 10}],
-							metadata: [
-								{$count: 'total'},
-								{
-									$addFields: {
-										numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-									},
-								},
-								{$addFields: {page: 1}},
-							],
-						},
-					},
-				];
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.between]: [
+										'2018-10-31T17:00:00.000Z',
+										'2018-10-31T17:59:59.999Z',
+									]}
+							}]
+						}]
+					}
+				}];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -6883,39 +6862,18 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						$match: {
-							$and: [
-								{
-									$or: [
-										{
-											foo: {
-												$gte: '2018-10-31T00:00:00.000Z',
-												$lte: '2018-10-31T23:59:59.999Z',
-											},
-										},
-									],
-								},
-							],
-						},
-					},
-					{$match: {'meta._isArchived': false}},
-					{
-						$facet: {
-							data: [{$skip: 0}, {$limit: 10}],
-							metadata: [
-								{$count: 'total'},
-								{
-									$addFields: {
-										numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-									},
-								},
-								{$addFields: {page: 1}},
-							],
-						},
-					},
-				];
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.between]: [
+										'2018-10-31T00:00:00.000Z',
+										'2018-10-31T23:59:59.999Z',
+									]}
+							}]
+						}]
+					}
+				}];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -6935,39 +6893,18 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						$match: {
-							$and: [
-								{
-									$or: [
-										{
-											foo: {
-												$gte: '2018-10-01T00:00:00.000Z',
-												$lte: '2018-10-31T23:59:59.999Z',
-											},
-										},
-									],
-								},
-							],
-						},
-					},
-					{$match: {'meta._isArchived': false}},
-					{
-						$facet: {
-							data: [{$skip: 0}, {$limit: 10}],
-							metadata: [
-								{$count: 'total'},
-								{
-									$addFields: {
-										numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-									},
-								},
-								{$addFields: {page: 1}},
-							],
-						},
-					},
-				];
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.between]: [
+										'2018-10-01T00:00:00.000Z',
+										'2018-10-31T23:59:59.999Z',
+									]}
+							}]
+						}]
+					}
+				}];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -6987,39 +6924,18 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						$match: {
-							$and: [
-								{
-									$or: [
-										{
-											foo: {
-												$gte: '2018-01-01T00:00:00.000Z',
-												$lte: '2018-12-31T23:59:59.999Z',
-											},
-										},
-									],
-								},
-							],
-						},
-					},
-					{$match: {'meta._isArchived': false}},
-					{
-						$facet: {
-							data: [{$skip: 0}, {$limit: 10}],
-							metadata: [
-								{$count: 'total'},
-								{
-									$addFields: {
-										numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-									},
-								},
-								{$addFields: {page: 1}},
-							],
-						},
-					},
-				];
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.between]: [
+										'2018-01-01T00:00:00.000Z',
+										'2018-12-31T23:59:59.999Z',
+									]}
+							}]
+						}]
+					}
+				}];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7039,2148 +6955,1438 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						$match: {
-							$and: [
-								{
-									$or: [
-										{
-											foo: {
-												$gte: '2018-01-01T00:00:00.000Z',
-												$lte: '2018-12-31T23:59:59.999Z',
-											},
-										},
-									],
-								},
-							],
-						},
-					},
-					{$match: {'meta._isArchived': false}},
-					{
-						$facet: {
-							data: [{$skip: 0}, {$limit: 10}],
-							metadata: [
-								{$count: 'total'},
-								{
-									$addFields: {
-										numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-									},
-								},
-								{$addFields: {page: 1}},
-							],
-						},
-					},
-				];
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.between]: [
+										'2018-01-01T00:00:00.000Z',
+										'2018-12-31T23:59:59.999Z',
+									]}
+							}]
+						}]
+					}
+				}];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
 		});
-		// describe('ne Modifier Tests', () => {
-		// 	// TODO - Should I throw an error in this situation? Providing ms is not allowed.
-		// 	test("Should return a $ne of the given full ISO String 'yyyy-mm-ddThh:mm:ss.###Z'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'ne2018-10-31T17:49:29.000Z',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [{$or: [{foo: {$ne: '2018-10-31T17:49:29.000Z'}}]}],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// 	test("Should return a $ne of the given partial ISO String of format 'yyyy-mm-ddThh:mm:ss'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'ne2018-10-31T17:49:29',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [
-		// 						{
-		// 							$or: [
-		// 								{
-		// 									$or: [
-		// 										{foo: {$lt: '2018-10-31T17:49:29.000Z'}},
-		// 										{foo: {$gt: '2018-10-31T17:49:29.999Z'}},
-		// 									],
-		// 								},
-		// 							],
-		// 						},
-		// 					],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// 	test("Should return an $or that fully excludes the specified minute in given partial ISO String of format 'yyyy-mm-ddThh:mm'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'ne2018-10-31T17:49',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		//
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [
-		// 						{
-		// 							$or: [
-		// 								{
-		// 									$or: [
-		// 										{foo: {$lt: '2018-10-31T17:49:00.000Z'}},
-		// 										{foo: {$gt: '2018-10-31T17:49:59.999Z'}},
-		// 									],
-		// 								},
-		// 							],
-		// 						},
-		// 					],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// 	// TODO - Should I throw an error in this situation? Hours without minutes is not allowed.
-		// 	test("Should return an $or that fully excludes the specified hour in given partial ISO String of format 'yyyy-mm-ddThh'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'ne2018-10-31T17',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [
-		// 						{
-		// 							$or: [
-		// 								{
-		// 									$or: [
-		// 										{foo: {$lt: '2018-10-31T17:00:00.000Z'}},
-		// 										{foo: {$gt: '2018-10-31T17:59:59.999Z'}},
-		// 									],
-		// 								},
-		// 							],
-		// 						},
-		// 					],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// 	test("Should return an $or that fully excludes the specified day in given partial ISO String of format 'yyyy-mm-dd'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'ne2018-10-31',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [
-		// 						{
-		// 							$or: [
-		// 								{
-		// 									$or: [
-		// 										{foo: {$lt: '2018-10-31T00:00:00.000Z'}},
-		// 										{foo: {$gt: '2018-10-31T23:59:59.999Z'}},
-		// 									],
-		// 								},
-		// 							],
-		// 						},
-		// 					],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// 	test("Should return an $or that fully excludes the specified month in given partial ISO String of format 'yyyy-mm'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'ne2018-10',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [
-		// 						{
-		// 							$or: [
-		// 								{
-		// 									$or: [
-		// 										{foo: {$lt: '2018-10-01T00:00:00.000Z'}},
-		// 										{foo: {$gt: '2018-10-31T23:59:59.999Z'}},
-		// 									],
-		// 								},
-		// 							],
-		// 						},
-		// 					],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// 	test("Should return an $or that fully excludes the specified year in given partial ISO String of format 'yyyy'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'ne2018',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [
-		// 						{
-		// 							$or: [
-		// 								{
-		// 									$or: [
-		// 										{foo: {$lt: '2018-01-01T00:00:00.000Z'}},
-		// 										{foo: {$gt: '2018-12-31T23:59:59.999Z'}},
-		// 									],
-		// 								},
-		// 							],
-		// 						},
-		// 					],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// });
-		//
-		// describe('gt Modifier Tests', () => {
-		// 	// TODO - Should I throw an error in this situation? Providing ms is not allowed.
-		// 	test("Should return $gt ISO String if given a full ISO String 'yyyy-mm-ddThh:mm:ss.###Z'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'gt2018-10-31T17:49:29.000Z',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [{$or: [{foo: {$gt: '2018-10-31T17:49:29.000Z'}}]}],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// 	test("Should return $gt ISO String if given a partial ISO String of format 'yyyy-mm-ddThh:mm:ss'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'gt2018-10-31T17:49:29',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [{$or: [{foo: {$gt: '2018-10-31T17:49:29.999Z'}}]}],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// 	test("Should return $gt end of minute if given a partial ISO String 'yyyy-mm-ddThh:mm'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'gt2018-10-31T17:49',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [{$or: [{foo: {$gt: '2018-10-31T17:49:59.999Z'}}]}],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// 	// TODO - Should I throw an error in this situation? Hours without minutes is not allowed.
-		// 	test("Should return $gt end of hour if given a partial ISO String 'yyyy-mm-ddThh'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'gt2018-10-31T17',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [{$or: [{foo: {$gt: '2018-10-31T17:59:59.999Z'}}]}],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// 	test("Should return $gt end of day if given a partial ISO String 'yyyy-mm-dd'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'gt2018-10-31',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [{$or: [{foo: {$gt: '2018-10-31T23:59:59.999Z'}}]}],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// 	test("Should return $gt end of month if given a partial ISO String 'yyyy-mm'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'gt2018-10',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [{$or: [{foo: {$gt: '2018-10-31T23:59:59.999Z'}}]}],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// 	test("Should return $gt end of year if given a partial ISO String 'yyyy'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'gt2018',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [{$or: [{foo: {$gt: '2018-12-31T23:59:59.999Z'}}]}],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// });
-		// describe('ge Modifier Tests', () => {
-		// 	// TODO - Should I throw an error in this situation? Providing ms is not allowed.
-		// 	test("Should return $gte ISO String if given a full ISO String 'yyyy-mm-ddThh:mm:ss.###Z'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'ge2018-10-31T17:49:29.000Z',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [{$or: [{foo: {$gte: '2018-10-31T17:49:29.000Z'}}]}],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// 	test("Should return $gte ISO String if given a partial ISO String of format 'yyyy-mm-ddThh:mm:ss'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'ge2018-10-31T17:49:29',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [{$or: [{foo: {$gte: '2018-10-31T17:49:29.000Z'}}]}],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// 	test("Should return $gte start of minute if given a partial ISO String 'yyyy-mm-ddThh:mm'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'ge2018-10-31T17:49',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [{$or: [{foo: {$gte: '2018-10-31T17:49:00.000Z'}}]}],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// 	// TODO - Should I throw an error in this situation? Hours without minutes is not allowed.
-		// 	test("Should return $gte start of hour if given a partial ISO String 'yyyy-mm-ddThh'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'ge2018-10-31T17',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [{$or: [{foo: {$gte: '2018-10-31T17:00:00.000Z'}}]}],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// 	test("Should return $gte start of day if given a partial ISO String 'yyyy-mm-dd'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'ge2018-10-31',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [{$or: [{foo: {$gte: '2018-10-31T00:00:00.000Z'}}]}],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// 	test("Should return $gte start of month if given a partial ISO String 'yyyy-mm'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'ge2018-10',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [{$or: [{foo: {$gte: '2018-10-01T00:00:00.000Z'}}]}],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// 	test("Should return $gte start of year if given a partial ISO String 'yyyy'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'ge2018',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [{$or: [{foo: {$gte: '2018-01-01T00:00:00.000Z'}}]}],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// });
-		// describe('lt Modifier Tests', () => {
-		// 	// TODO - Note that the sanitizer should stop this situation from ever occurring, as providing milliseconds is not allowed.
-		// 	test("Should return $lt ISO String if given a full ISO String 'yyyy-mm-ddThh:mm:ss.###Z'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'lt2018-10-31T17:49:29.000Z',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [{$or: [{foo: {$lt: '2018-10-31T17:49:29.000Z'}}]}],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// 	test("Should return $lt ISO String if given a partial ISO String of format 'yyyy-mm-ddThh:mm:ss'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'lt2018-10-31T17:49:29',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [{$or: [{foo: {$lt: '2018-10-31T17:49:29.000Z'}}]}],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// 	test("Should return $lt start of minute if given a partial ISO String 'yyyy-mm-ddThh:mm'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'lt2018-10-31T17:49',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [{$or: [{foo: {$lt: '2018-10-31T17:49:00.000Z'}}]}],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// 	// TODO - Should I throw an error in this situation? Hours without minutes is not allowed.
-		// 	test("Should return $lt start of hour if given a partial ISO String 'yyyy-mm-ddThh'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'lt2018-10-31T17',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [{$or: [{foo: {$lt: '2018-10-31T17:00:00.000Z'}}]}],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// 	test("Should return $lt start of day if given a partial ISO String 'yyyy-mm-dd'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'lt2018-10-31',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [{$or: [{foo: {$lt: '2018-10-31T00:00:00.000Z'}}]}],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// 	test("Should return $lt start of month if given a partial ISO String 'yyyy-mm'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'lt2018-10',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [{$or: [{foo: {$lt: '2018-10-01T00:00:00.000Z'}}]}],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// 	test("Should return $lt start of year if given a partial ISO String 'yyyy'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'lt2018',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [{$or: [{foo: {$lt: '2018-01-01T00:00:00.000Z'}}]}],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// });
-		// describe('le Modifier Tests', () => {
-		// 	// TODO - Should I throw an error in this situation? Providing ms is not allowed.
-		// 	test("Should return $lte ISO String if given a full ISO String 'yyyy-mm-ddThh:mm:ss.###Z'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'le2018-10-31T17:49:29.000Z',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [{$or: [{foo: {$lte: '2018-10-31T17:49:29.000Z'}}]}],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// 	test("Should return $lte ISO String if given a partial ISO String of format 'yyyy-mm-ddThh:mm:ss'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'le2018-10-31T17:49:29',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [{$or: [{foo: {$lte: '2018-10-31T17:49:29.000Z'}}]}],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// 	test("Should return $lte start of minute if given a partial ISO String 'yyyy-mm-ddThh:mm'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'le2018-10-31T17:49',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [{$or: [{foo: {$lte: '2018-10-31T17:49:00.000Z'}}]}],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// 	// TODO - Should I throw an error in this situation? Hours without minutes is not allowed.
-		// 	test("Should return $lte start of hour if given a partial ISO String 'yyyy-mm-ddThh'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'le2018-10-31T17',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [{$or: [{foo: {$lte: '2018-10-31T17:00:00.000Z'}}]}],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// 	test("Should return $lte start of day if given a partial ISO String 'yyyy-mm-dd'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'le2018-10-31',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [{$or: [{foo: {$lte: '2018-10-31T00:00:00.000Z'}}]}],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// 	test("Should return $lte start of month if given a partial ISO String 'yyyy-mm'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'le2018-10',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [{$or: [{foo: {$lte: '2018-10-01T00:00:00.000Z'}}]}],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// 	test("Should return $lte start of year if given a partial ISO String 'yyyy'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'le2018',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [{$or: [{foo: {$lte: '2018-01-01T00:00:00.000Z'}}]}],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// });
-		// describe('sa Modifier Tests', () => {
-		// 	// TODO - Should I throw an error in this situation? Providing ms is not allowed.
-		// 	test("Should return $gt ISO String if given a full ISO String 'yyyy-mm-ddThh:mm:ss.###Z'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'sa2018-10-31T17:49:29.000Z',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [{$or: [{foo: {$gt: '2018-10-31T17:49:29.000Z'}}]}],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// 	test("Should return $gt ISO String if given a partial ISO String of format 'yyyy-mm-ddThh:mm:ss'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'sa2018-10-31T17:49:29',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [{$or: [{foo: {$gt: '2018-10-31T17:49:29.999Z'}}]}],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// 	test("Should return $gt end of minute if given a partial ISO String 'yyyy-mm-ddThh:mm'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'sa2018-10-31T17:49',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [{$or: [{foo: {$gt: '2018-10-31T17:49:59.999Z'}}]}],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// 	// TODO - Should I throw an error in this situation? Hours without minutes is not allowed.
-		// 	test("Should return $gt end of hour if given a partial ISO String 'yyyy-mm-ddThh'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'sa2018-10-31T17',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [{$or: [{foo: {$gt: '2018-10-31T17:59:59.999Z'}}]}],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// 	test("Should return $gt end of day if given a partial ISO String 'yyyy-mm-dd'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'sa2018-10-31',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [{$or: [{foo: {$gt: '2018-10-31T23:59:59.999Z'}}]}],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// 	test("Should return $gt end of month if given a partial ISO String 'yyyy-mm'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'sa2018-10',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [{$or: [{foo: {$gt: '2018-10-31T23:59:59.999Z'}}]}],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// 	test("Should return $gt end of year if given a partial ISO String 'yyyy'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'sa2018',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [{$or: [{foo: {$gt: '2018-12-31T23:59:59.999Z'}}]}],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// });
-		// describe('eb Modifier Tests', () => {
-		// 	// TODO - Should I throw an error in this situation? Providing ms is not allowed.
-		// 	test("Should return $lt ISO String if given a full ISO String 'yyyy-mm-ddThh:mm:ss.###Z'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'eb2018-10-31T17:49:29.000Z',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [{$or: [{foo: {$lt: '2018-10-31T17:49:29.000Z'}}]}],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// 	test("Should return $lt ISO String if given a partial ISO String of format 'yyyy-mm-ddThh:mm:ss'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'eb2018-10-31T17:49:29',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [{$or: [{foo: {$lt: '2018-10-31T17:49:29.000Z'}}]}],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// 	test("Should return $lt start of minute if given a partial ISO String 'yyyy-mm-ddThh:mm'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'eb2018-10-31T17:49',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [{$or: [{foo: {$lt: '2018-10-31T17:49:00.000Z'}}]}],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// 	// TODO - Should I throw an error in this situation? Hours without minutes is not allowed.
-		// 	test("Should return $lt start of hour if given a partial ISO String 'yyyy-mm-ddThh'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'eb2018-10-31T17',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [{$or: [{foo: {$lt: '2018-10-31T17:00:00.000Z'}}]}],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// 	test("Should return $lt start of day if given a partial ISO String 'yyyy-mm-dd'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'eb2018-10-31',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [{$or: [{foo: {$lt: '2018-10-31T00:00:00.000Z'}}]}],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// 	test("Should return $lt start of month if given a partial ISO String 'yyyy-mm'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'eb2018-10',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [{$or: [{foo: {$lt: '2018-10-01T00:00:00.000Z'}}]}],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// 	test("Should return $lt start of year if given a partial ISO String 'yyyy'", () => {
-		// 		const req = {
-		// 			method: 'GET',
-		// 			query: {
-		// 				foo: 'eb2018',
-		// 			},
-		// 		};
-		// 		const parameterDefinitions = {
-		// 			foo: {type: 'date', xpath: 'Resource.foo'},
-		// 		};
-		// 		const includeArchived = false;
-		// 		let {errors, query} = qb.buildSearchQuery({
-		// 			req,
-		// 			parameterDefinitions,
-		// 			includeArchived,
-		// 		});
-		// 		const expectedResult = [
-		// 			{
-		// 				$match: {
-		// 					$and: [{$or: [{foo: {$lt: '2018-01-01T00:00:00.000Z'}}]}],
-		// 				},
-		// 			},
-		// 			{$match: {'meta._isArchived': false}},
-		// 			{
-		// 				$facet: {
-		// 					data: [{$skip: 0}, {$limit: 10}],
-		// 					metadata: [
-		// 						{$count: 'total'},
-		// 						{
-		// 							$addFields: {
-		// 								numberOfPages: {$ceil: {$divide: ['$total', 10]}},
-		// 							},
-		// 						},
-		// 						{$addFields: {page: 1}},
-		// 					],
-		// 				},
-		// 			},
-		// 		];
-		// 		expect(errors).toHaveLength(0);
-		// 		expect(query).toEqual(expectedResult);
-		// 	});
-		// });
+		describe('ne Modifier Tests', () => {
+			// TODO - Should I throw an error in this situation? Providing ms is not allowed.
+			test("Should return a $ne of the given full ISO String 'yyyy-mm-ddThh:mm:ss.###Z'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'ne2018-10-31T17:49:29.000Z',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {
+									[Op.ne]: '2018-10-31T17:49:29.000Z'
+								}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test("Should return a $ne of the given partial ISO String of format 'yyyy-mm-ddThh:mm:ss'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'ne2018-10-31T17:49:29',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {
+									[Op.notBetween]: ['2018-10-31T17:49:29.000Z', '2018-10-31T17:49:29.999Z']
+								}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test("Should return an $or that fully excludes the specified minute in given partial ISO String of format 'yyyy-mm-ddThh:mm'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'ne2018-10-31T17:49',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {
+									[Op.notBetween]: ['2018-10-31T17:49:00.000Z', '2018-10-31T17:49:59.999Z']
+								}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			// TODO - Should I throw an error in this situation? Hours without minutes is not allowed.
+			test("Should return an $or that fully excludes the specified hour in given partial ISO String of format 'yyyy-mm-ddThh'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'ne2018-10-31T17',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {
+									[Op.notBetween]: ['2018-10-31T17:00:00.000Z', '2018-10-31T17:59:59.999Z']
+								}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test("Should return an $or that fully excludes the specified day in given partial ISO String of format 'yyyy-mm-dd'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'ne2018-10-31',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {
+									[Op.notBetween]: ['2018-10-31T00:00:00.000Z', '2018-10-31T23:59:59.999Z']
+								}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test("Should return an $or that fully excludes the specified month in given partial ISO String of format 'yyyy-mm'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'ne2018-10',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {
+									[Op.notBetween]: ['2018-10-01T00:00:00.000Z', '2018-10-31T23:59:59.999Z']
+								}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test("Should return an $or that fully excludes the specified year in given partial ISO String of format 'yyyy'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'ne2018',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {
+									[Op.notBetween]: ['2018-01-01T00:00:00.000Z', '2018-12-31T23:59:59.999Z']
+								}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+		});
+
+		describe('gt Modifier Tests', () => {
+			// TODO - Should I throw an error in this situation? Providing ms is not allowed.
+			test("Should return $gt ISO String if given a full ISO String 'yyyy-mm-ddThh:mm:ss.###Z'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'gt2018-10-31T17:49:29.000Z',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.gt]: '2018-10-31T17:49:29.000Z'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test("Should return $gt ISO String if given a partial ISO String of format 'yyyy-mm-ddThh:mm:ss'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'gt2018-10-31T17:49:29',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.gt]: '2018-10-31T17:49:29.999Z'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test("Should return $gt end of minute if given a partial ISO String 'yyyy-mm-ddThh:mm'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'gt2018-10-31T17:49',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.gt]: '2018-10-31T17:49:59.999Z'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			// TODO - Should I throw an error in this situation? Hours without minutes is not allowed.
+			test("Should return $gt end of hour if given a partial ISO String 'yyyy-mm-ddThh'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'gt2018-10-31T17',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.gt]: '2018-10-31T17:59:59.999Z'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test("Should return $gt end of day if given a partial ISO String 'yyyy-mm-dd'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'gt2018-10-31',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.gt]: '2018-10-31T23:59:59.999Z'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test("Should return $gt end of month if given a partial ISO String 'yyyy-mm'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'gt2018-10',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.gt]: '2018-10-31T23:59:59.999Z'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test("Should return $gt end of year if given a partial ISO String 'yyyy'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'gt2018',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.gt]: '2018-12-31T23:59:59.999Z'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+		});
+		describe('ge Modifier Tests', () => {
+			// TODO - Should I throw an error in this situation? Providing ms is not allowed.
+			test("Should return $gte ISO String if given a full ISO String 'yyyy-mm-ddThh:mm:ss.###Z'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'ge2018-10-31T17:49:29.000Z',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.gte]: '2018-10-31T17:49:29.000Z'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test("Should return $gte ISO String if given a partial ISO String of format 'yyyy-mm-ddThh:mm:ss'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'ge2018-10-31T17:49:29',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.gte]: '2018-10-31T17:49:29.000Z'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test("Should return $gte start of minute if given a partial ISO String 'yyyy-mm-ddThh:mm'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'ge2018-10-31T17:49',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.gte]: '2018-10-31T17:49:00.000Z'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			// TODO - Should I throw an error in this situation? Hours without minutes is not allowed.
+			test("Should return $gte start of hour if given a partial ISO String 'yyyy-mm-ddThh'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'ge2018-10-31T17',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.gte]: '2018-10-31T17:00:00.000Z'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test("Should return $gte start of day if given a partial ISO String 'yyyy-mm-dd'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'ge2018-10-31',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.gte]: '2018-10-31T00:00:00.000Z'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test("Should return $gte start of month if given a partial ISO String 'yyyy-mm'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'ge2018-10',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.gte]: '2018-10-01T00:00:00.000Z'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test("Should return $gte start of year if given a partial ISO String 'yyyy'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'ge2018',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.gte]: '2018-01-01T00:00:00.000Z'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+		});
+		describe('lt Modifier Tests', () => {
+			// TODO - Note that the sanitizer should stop this situation from ever occurring, as providing milliseconds is not allowed.
+			test("Should return $lt ISO String if given a full ISO String 'yyyy-mm-ddThh:mm:ss.###Z'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'lt2018-10-31T17:49:29.000Z',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.lt]: '2018-10-31T17:49:29.000Z'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test("Should return $lt ISO String if given a partial ISO String of format 'yyyy-mm-ddThh:mm:ss'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'lt2018-10-31T17:49:29',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.lt]: '2018-10-31T17:49:29.000Z'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test("Should return $lt start of minute if given a partial ISO String 'yyyy-mm-ddThh:mm'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'lt2018-10-31T17:49',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.lt]: '2018-10-31T17:49:00.000Z'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			// TODO - Should I throw an error in this situation? Hours without minutes is not allowed.
+			test("Should return $lt start of hour if given a partial ISO String 'yyyy-mm-ddThh'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'lt2018-10-31T17',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.lt]: '2018-10-31T17:00:00.000Z'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test("Should return $lt start of day if given a partial ISO String 'yyyy-mm-dd'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'lt2018-10-31',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.lt]: '2018-10-31T00:00:00.000Z'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test("Should return $lt start of month if given a partial ISO String 'yyyy-mm'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'lt2018-10',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.lt]: '2018-10-01T00:00:00.000Z'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test("Should return $lt start of year if given a partial ISO String 'yyyy'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'lt2018',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.lt]: '2018-01-01T00:00:00.000Z'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+		});
+		describe('le Modifier Tests', () => {
+			// TODO - Should I throw an error in this situation? Providing ms is not allowed.
+			test("Should return $lte ISO String if given a full ISO String 'yyyy-mm-ddThh:mm:ss.###Z'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'le2018-10-31T17:49:29.000Z',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.lte]: '2018-10-31T17:49:29.000Z'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test("Should return $lte ISO String if given a partial ISO String of format 'yyyy-mm-ddThh:mm:ss'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'le2018-10-31T17:49:29',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.lte]: '2018-10-31T17:49:29.000Z'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test("Should return $lte start of minute if given a partial ISO String 'yyyy-mm-ddThh:mm'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'le2018-10-31T17:49',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.lte]: '2018-10-31T17:49:00.000Z'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			// TODO - Should I throw an error in this situation? Hours without minutes is not allowed.
+			test("Should return $lte start of hour if given a partial ISO String 'yyyy-mm-ddThh'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'le2018-10-31T17',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.lte]: '2018-10-31T17:00:00.000Z'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test("Should return $lte start of day if given a partial ISO String 'yyyy-mm-dd'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'le2018-10-31',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.lte]: '2018-10-31T00:00:00.000Z'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test("Should return $lte start of month if given a partial ISO String 'yyyy-mm'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'le2018-10',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.lte]: '2018-10-01T00:00:00.000Z'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test("Should return $lte start of year if given a partial ISO String 'yyyy'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'le2018',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.lte]: '2018-01-01T00:00:00.000Z'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+		});
+		describe('sa Modifier Tests', () => {
+			// TODO - Should I throw an error in this situation? Providing ms is not allowed.
+			test("Should return $gt ISO String if given a full ISO String 'yyyy-mm-ddThh:mm:ss.###Z'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'sa2018-10-31T17:49:29.000Z',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.gt]: '2018-10-31T17:49:29.000Z'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test("Should return $gt ISO String if given a partial ISO String of format 'yyyy-mm-ddThh:mm:ss'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'sa2018-10-31T17:49:29',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.gt]: '2018-10-31T17:49:29.999Z'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test("Should return $gt end of minute if given a partial ISO String 'yyyy-mm-ddThh:mm'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'sa2018-10-31T17:49',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.gt]: '2018-10-31T17:49:59.999Z'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			// TODO - Should I throw an error in this situation? Hours without minutes is not allowed.
+			test("Should return $gt end of hour if given a partial ISO String 'yyyy-mm-ddThh'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'sa2018-10-31T17',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.gt]: '2018-10-31T17:59:59.999Z'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test("Should return $gt end of day if given a partial ISO String 'yyyy-mm-dd'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'sa2018-10-31',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.gt]: '2018-10-31T23:59:59.999Z'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test("Should return $gt end of month if given a partial ISO String 'yyyy-mm'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'sa2018-10',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.gt]: '2018-10-31T23:59:59.999Z'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test("Should return $gt end of year if given a partial ISO String 'yyyy'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'sa2018',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.gt]: '2018-12-31T23:59:59.999Z'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+		});
+		describe('eb Modifier Tests', () => {
+			// TODO - Should I throw an error in this situation? Providing ms is not allowed.
+			test("Should return $lt ISO String if given a full ISO String 'yyyy-mm-ddThh:mm:ss.###Z'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'eb2018-10-31T17:49:29.000Z',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.lt]: '2018-10-31T17:49:29.000Z'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test("Should return $lt ISO String if given a partial ISO String of format 'yyyy-mm-ddThh:mm:ss'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'eb2018-10-31T17:49:29',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.lt]: '2018-10-31T17:49:29.000Z'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test("Should return $lt start of minute if given a partial ISO String 'yyyy-mm-ddThh:mm'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'eb2018-10-31T17:49',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.lt]: '2018-10-31T17:49:00.000Z'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			// TODO - Should I throw an error in this situation? Hours without minutes is not allowed.
+			test("Should return $lt start of hour if given a partial ISO String 'yyyy-mm-ddThh'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'eb2018-10-31T17',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.lt]: '2018-10-31T17:00:00.000Z'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test("Should return $lt start of day if given a partial ISO String 'yyyy-mm-dd'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'eb2018-10-31',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.lt]: '2018-10-31T00:00:00.000Z'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test("Should return $lt start of month if given a partial ISO String 'yyyy-mm'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'eb2018-10',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.lt]: '2018-10-01T00:00:00.000Z'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test("Should return $lt start of year if given a partial ISO String 'yyyy'", () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'eb2018',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {type: 'date', xpath: 'Resource.foo'},
+				};
+				const includeArchived = false;
+				let {errors, query} = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								foo: {[Op.lt]: '2018-01-01T00:00:00.000Z'}
+							}]
+						}]
+					}
+				}];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+		});
 		// describe('ap Modifier Tests', () => {
 		// 	// TODO - Should I throw an error in this situation? Providing ms is not allowed.
 		// 	test(
