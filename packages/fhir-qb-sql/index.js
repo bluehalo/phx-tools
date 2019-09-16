@@ -97,7 +97,7 @@ let buildStartsWithQuery = function({ field, value, caseSensitive = false }) {
 	if (caseSensitive) {
 		return { name: field, value: { [Op.startsWith]: value } };
 	} else {
-		return { name: field, value: { [Op.iLike]: `${value}%` } };
+		return { name: field, value: { [Op.iRegexp]: `^${value}` } };
 	}
 };
 
