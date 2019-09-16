@@ -73,7 +73,7 @@ let buildExistsQuery = function({ field, exists }) {
  * Builds a query to get records where the value of the field key matches the given pattern and options.
  */
 let buildRegexQuery = function({ field, pattern, options }) {
-	return { name: field, value:  { $regex: pattern, $options: options } };
+	return { name: field, value: { $regex: pattern, $options: options } };
 };
 
 /**
@@ -97,7 +97,7 @@ let buildStartsWithQuery = function({ field, value, caseSensitive = false }) {
 	if (caseSensitive) {
 		return { name: field, value: { [Op.startsWith]: value } };
 	} else {
-		return { name: field, value: { [Op.iRegexp]: `^${value}` } };
+		return { name: field, value: { [Op.iLike]: `${value}%` } };
 	}
 };
 
