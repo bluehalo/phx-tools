@@ -249,7 +249,7 @@ class QueryBuilder {
 		// This regex matches accents, diacritics, etc.
 		const accentRegex = /[\u0300-\u036f]/g;
 		let stringQuery;
-		if (!modifier || modifier === matchModifiers.exact) {
+		if (modifier === matchModifiers.exact) {
 			// If we're looking for an exact match
 			stringQuery = this.qb.buildEqualToQuery({ field, value });
 		} else {
