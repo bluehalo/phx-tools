@@ -18,11 +18,9 @@ let buildAndQuery = function(queries) {
  * Takes in a list of queries and wraps them in an $or block
  */
 let buildOrQuery = function({ queries, invert = false }) {
-
 	if (invert) {
-		return { [Op.not]: { [Op.or]: queries} };
-	}
-	else {
+		return { [Op.not]: { [Op.or]: queries } };
+	} else {
 		return { [Op.or]: queries };
 	}
 };
@@ -32,7 +30,7 @@ let buildOrQuery = function({ queries, invert = false }) {
  * Setting invert to true will get records that are NOT equal instead.
  */
 let buildEqualToQuery = function({ field, value, invert = false }) {
-	return { [field]: invert ? { [Op.ne]: value } : value };
+	return { name: field, value: invert ? { [Op.ne]: value } : value };
 };
 
 /**
@@ -55,18 +53,12 @@ let buildComparatorQuery = function({ field, value, comparator }) {
  * Builds query to get records where the value of the field is in the specified range
  * Setting invert to true will get records that are NOT in the specified range.
  */
-let buildInRangeQuery = function({
-	field,
-	lowerBound,
-	upperBound,
-	invert = false,
-	}) {
-		if (invert) {
-			return { [field]: { [Op.notBetween]: [lowerBound, upperBound] } };
-		}
-		else {
-			return { [field]: { [Op.between]: [lowerBound, upperBound] } };
-		}
+let buildInRangeQuery = function({ field, lowerBound, upperBound, invert = false }) {
+	if (invert) {
+		return { [field]: { [Op.notBetween]: [lowerBound, upperBound] } };
+	} else {
+		return { [field]: { [Op.between]: [lowerBound, upperBound] } };
+	}
 };
 
 /**
@@ -91,10 +83,9 @@ let buildRegexQuery = function({ field, pattern, options }) {
 let buildContainsQuery = function({ field, value, caseSensitive = false }) {
 	// TODO: contains is not working as expected, like is for string matching - doublecheck this
 	if (caseSensitive) {
-		return { [field]: { [Op.like]: value }};
-	}
-	else {
-		return { [field]: { [Op.iLike]: value }};
+		return { name: field, value: { [Op.like]: value } };
+	} else {
+		return { name: field, value: { [Op.iLike]: value } };
 	}
 };
 
@@ -104,10 +95,9 @@ let buildContainsQuery = function({ field, value, caseSensitive = false }) {
  */
 let buildStartsWithQuery = function({ field, value, caseSensitive = false }) {
 	if (caseSensitive) {
-		return { [field]: {[Op.startsWith]: value }};
-	}
-	else {
-		return { [field]: {[Op.iRegexp]: `^${value}` }};
+		return { name: field, value: { [Op.startsWith]: value } };
+	} else {
+		return { name: field, value: { [Op.iRegexp]: `^${value}` } };
 	}
 };
 
@@ -117,10 +107,9 @@ let buildStartsWithQuery = function({ field, value, caseSensitive = false }) {
  */
 let buildEndsWithQuery = function({ field, value, caseSensitive = false }) {
 	if (caseSensitive) {
-		return { [field]: {[Op.endsWith]: value }};
-	}
-	else {
-		return { [field]: {[Op.iRegexp]: `${value}$` }};
+		return { name: field, value: { [Op.endsWith]: value } };
+	} else {
+		return { name: field, value: { [Op.iRegexp]: `${value}$` } };
 	}
 };
 
@@ -219,9 +208,9 @@ let assembleSearchQuery = function({
 	let toSuppress = {};
 
 	// Check that the necessary implementation parameters were passed through
-	let {archivedParamPath} = implementationParameters;
+	let { archivedParamPath } = implementationParameters;
 	if (!archivedParamPath) {
-		throw new Error('Missing required implementation parameter \'archivedParamPath\'');
+		throw new Error("Missing required implementation parameter 'archivedParamPath'");
 	}
 
 	// // Construct the necessary joins and add them to the aggregate pipeline. Also follow each $lookup with an $unwind
