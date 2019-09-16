@@ -46,7 +46,7 @@ let buildComparatorQuery = function({ field, value, comparator }) {
 		sa: Op.gt,
 		eb: Op.lt,
 	};
-	return { [field]: { [sqlComparators[comparator]]: value } };
+	return { name: field, value: { [sqlComparators[comparator]]: value } };
 };
 
 /**
@@ -55,9 +55,9 @@ let buildComparatorQuery = function({ field, value, comparator }) {
  */
 let buildInRangeQuery = function({ field, lowerBound, upperBound, invert = false }) {
 	if (invert) {
-		return { [field]: { [Op.notBetween]: [lowerBound, upperBound] } };
+		return { name: field, value: { [Op.notBetween]: [lowerBound, upperBound] } };
 	} else {
-		return { [field]: { [Op.between]: [lowerBound, upperBound] } };
+		return { name: field, value: { [Op.between]: [lowerBound, upperBound] } };
 	}
 };
 
@@ -73,7 +73,7 @@ let buildExistsQuery = function({ field, exists }) {
  * Builds a query to get records where the value of the field key matches the given pattern and options.
  */
 let buildRegexQuery = function({ field, pattern, options }) {
-	return { [field]: { $regex: pattern, $options: options } };
+	return { name: field, value:  { $regex: pattern, $options: options } };
 };
 
 /**
