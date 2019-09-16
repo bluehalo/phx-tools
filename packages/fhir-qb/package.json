@@ -30,7 +30,7 @@
 		"@asymmetrik/fhir-qb-mongo": "^0.10.3",
 		"@asymmetrik/fhir-sanitize-param": "^1.1.2",
 		"mathjs": "^5.2.3",
-		"moment": "^2.22.2",
+		"moment": "^2.24.0",
 		"xregexp": "^4.2.0"
 	},
 	"devDependencies": {

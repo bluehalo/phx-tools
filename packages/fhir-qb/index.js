@@ -540,6 +540,20 @@ class QueryBuilder {
 	}
 
 	/**
+	 * Parse the xpath to the data in the resource
+	 * @parameter xpath
+	 * @returns {*|string}
+	 */
+	static parseXPath(xpaths) {
+		xpaths = Array.isArray(xpaths) ? xpaths : [xpaths];
+		let parsedXPaths = [];
+		xpaths.forEach(xpath => {
+			parsedXPaths.push(xpath.split(/\.(.+)/)[1]);
+		});
+		return parsedXPaths;
+	}
+
+	/**
 	 * @function parseArguments
 	 * @description Parse only arguments needed for this type of request
 	 * @parameter {Express.req} req - Request from an express server
