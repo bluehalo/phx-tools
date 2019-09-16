@@ -7,6 +7,14 @@ let supportedSearchTransformations = {
 	},
 };
 
+let formDateComparison = function(date, comparator, colName = 'value') {
+	return Sequelize.where(
+		Sequelize.fn('date', Sequelize.col(colName)),
+		comparator,
+		date,
+	);
+};
+
 /**
  * Takes in a list of queries and wraps them in an $and block
  */
@@ -29,14 +37,31 @@ let buildOrQuery = function({ queries, invert = false }) {
  * Builds query to get records where the value of the field equal to the value.
  * Setting invert to true will get records that are NOT equal instead.
  */
-let buildEqualToQuery = function({ field, value, invert = false }) {
-	return { name: field, value: invert ? { [Op.ne]: value } : value };
+let buildEqualToQuery = function({
+	field,
+	value,
+	invert = false,
+	isDate = false,
+}) {
+	if (isDate) {
+		const comparator = invert ? '!=' : '=';
+		return {
+			[Op.and]: [{ name: field }, formDateComparison(value, comparator)],
+		};
+	} else {
+		return { name: field, value: invert ? { [Op.ne]: value } : value };
+	}
 };
 
 /**
  * Builds query to get records where the value of the field is [<,<=,>,>=,!=] to the value.
  */
-let buildComparatorQuery = function({ field, value, comparator }) {
+let buildComparatorQuery = function({
+	field,
+	value,
+	comparator,
+	isDate = false,
+}) {
 	const sqlComparators = {
 		gt: Op.gt,
 		ge: Op.gte,
@@ -46,17 +71,51 @@ let buildComparatorQuery = function({ field, value, comparator }) {
 		sa: Op.gt,
 		eb: Op.lt,
 	};
-	return { name: field, value: { [sqlComparators[comparator]]: value } };
+	const sqlComparator = sqlComparators[comparator];
+	if (isDate) {
+		return {
+			[Op.and]: [{ name: field }, formDateComparison(value, sqlComparator)],
+		};
+	} else {
+		return { name: field, value: { [sqlComparator]: value } };
+	}
 };
 
 /**
  * Builds query to get records where the value of the field is in the specified range
  * Setting invert to true will get records that are NOT in the specified range.
  */
-let buildInRangeQuery = function({ field, lowerBound, upperBound, invert = false }) {
+let buildInRangeQuery = function({
+	field,
+	lowerBound,
+	upperBound,
+	invert = false,
+	isDate = false,
+}) {
 	if (invert) {
-		return { name: field, value: { [Op.notBetween]: [lowerBound, upperBound] } };
+		if (isDate) {
+			return {
+				[Op.and]: [
+					{ name: field },
+					formDateComparison(lowerBound, '<='),
+					formDateComparison(upperBound, '>='),
+				],
+			};
+		}
+		return {
+			name: field,
+			value: { [Op.notBetween]: [lowerBound, upperBound] },
+		};
 	} else {
+		if (isDate) {
+			return {
+				[Op.and]: [
+					{ name: field },
+					formDateComparison(lowerBound, '>='),
+					formDateComparison(upperBound, '<='),
+				],
+			};
+		}
 		return { name: field, value: { [Op.between]: [lowerBound, upperBound] } };
 	}
 };
@@ -210,7 +269,9 @@ let assembleSearchQuery = function({
 	// Check that the necessary implementation parameters were passed through
 	let { archivedParamPath } = implementationParameters;
 	if (!archivedParamPath) {
-		throw new Error("Missing required implementation parameter 'archivedParamPath'");
+		throw new Error(
+			"Missing required implementation parameter 'archivedParamPath'",
+		);
 	}
 
 	// // Construct the necessary joins and add them to the aggregate pipeline. Also follow each $lookup with an $unwind

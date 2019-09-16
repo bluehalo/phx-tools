@@ -47,13 +47,15 @@ class QueryBuilder {
 		globalParameterDefinitions = {},
 		pageParam = 'page',
 		resultsPerPage = 10,
-		implementationParameters = {}
+		implementationParameters = {},
+		columnIdentifierStrategy = 'xpath',
 	}) {
 		this.qb = require(packageName);
 		this.globalParameterDefinitions = globalParameterDefinitions;
 		this.pageParam = pageParam;
 		this.resultsPerPage = resultsPerPage;
 		this.implementationParameters = implementationParameters;
+		this.columnIdentifierStrategy = columnIdentifierStrategy;
 	}
 
 	/**
@@ -104,6 +106,7 @@ class QueryBuilder {
 	buildDateQuery({ field, value }) {
 		// Sanitize the request value
 		let prefix;
+		let isDate = true;
 		({ prefix, value } = sanitize.sanitizeDate({ field, value }));
 		// Create a UTC moment of the supplied date
 		value = moment.utc(value);
@@ -143,6 +146,7 @@ class QueryBuilder {
 					lowerBound,
 					upperBound,
 					invert,
+					isDate,
 				});
 			} else {
 				// Else, we have an exact datetime, so query it directly
@@ -151,6 +155,7 @@ class QueryBuilder {
 					field,
 					value,
 					invert,
+					isDate,
 				});
 			}
 		} else if (prefix === prefixes.APPROXIMATELY) {
@@ -165,7 +170,12 @@ class QueryBuilder {
 			let upperBound = moment(value)
 				.add(difference, timeUnits.SECOND)
 				.toISOString();
-			dateQuery = this.qb.buildInRangeQuery({ field, lowerBound, upperBound });
+			dateQuery = this.qb.buildInRangeQuery({
+				field,
+				lowerBound,
+				upperBound,
+				isDate,
+			});
 		} else {
 			// Construct a query for the relevant comparison operator (>, >=, <, <=)
 			// If the modifier is for 'greater than' or 'starts after' and we have an interval scale, change the target
@@ -181,6 +191,7 @@ class QueryBuilder {
 				field,
 				value,
 				comparator: prefix,
+				isDate,
 			});
 		}
 		return dateQuery;
@@ -552,20 +563,6 @@ class QueryBuilder {
 	}
 
 	/**
-	 * Parse the xpath to the data in the resource
-	 * @parameter xpath
-	 * @returns {*|string}
-	 */
-	static parseXPath(xpaths) {
-		xpaths = Array.isArray(xpaths) ? xpaths : [xpaths];
-		let parsedXPaths = [];
-		xpaths.forEach((xpath) => {
-			parsedXPaths.push(xpath.split(/\.(.+)/)[1]);
-		});
-		return parsedXPaths;
-	}
-
-	/**
 	 * Given an http request and parameter definitions of a resource, construct a search query.
 	 * @parameter req
 	 * @parameter parameterDefinitions
@@ -635,9 +632,14 @@ class QueryBuilder {
 					throw new Error(`Unknown parameter '${parameter}'`);
 				}
 
+				let field;
 				let { type, fhirtype, xpath } = parameterDefinition;
-				let field = QueryBuilder.parseXPath(xpath);
 
+				if (this.columnIdentifierStrategy === 'parameter') {
+					field = [parameter];
+				} else {
+					field = QueryBuilder.parseXPath(xpath);
+				}
 				// Handle implicit URI logic before handling explicit modifiers
 				if (type === 'uri') {
 					if (parameterValue.endsWith('/') && modifier === '') {
@@ -678,16 +680,16 @@ class QueryBuilder {
 
 			// For each match to perform, transform them into the appropriate format using the db specific qb;
 			let matchesToPerform = [];
-			rawMatchesToPerform.forEach((rawMatch) =>{
+			rawMatchesToPerform.forEach(rawMatch => {
 				let orStatements = [];
 				// Because there can be multiple fields to check for a given parameter, account for all of them in the
 				// or statement being constructed.
-				rawMatch.field.forEach((field) => {
+				rawMatch.field.forEach(field => {
 					// Make a copy of the rawMatch that's only specific to one of the possible fields
 					let fieldRawMatch = Object.assign({}, rawMatch);
 					fieldRawMatch.field = field;
 					// For each value, add to the or statement for the given field
-					rawMatch.values.forEach((value) => {
+					rawMatch.values.forEach(value => {
 						fieldRawMatch.value = value;
 						orStatements.push(this.getSubSearchQuery(fieldRawMatch));
 					});
