@@ -5,7 +5,7 @@ const Op = Sequelize.Op;
 describe('SQL Query Builder Tests', () => {
 	describe('buildEqualToQuery Tests', () => {
 		test('Should return mongo equals query given a key and a value', () => {
-			const expectedResult = { foo: 'bar' };
+			const expectedResult = { name: 'foo', value: 'bar' };
 			let observedResult = sqlQB.buildEqualToQuery({
 				field: 'foo',
 				value: 'bar',
@@ -13,7 +13,7 @@ describe('SQL Query Builder Tests', () => {
 			expect(observedResult).toEqual(expectedResult);
 		});
 		test('Should return sequelize $ne query given a key, value, and invert = true', () => {
-			const expectedResult = { foo: { [Op.ne]: 'bar' } };
+			const expectedResult = { name: 'foo', value: { [Op.ne]: 'bar' } };
 			let observedResult = sqlQB.buildEqualToQuery({
 				field: 'foo',
 				value: 'bar',
@@ -24,7 +24,7 @@ describe('SQL Query Builder Tests', () => {
 	});
 	describe('buildComparatorQuery Tests', () => {
 		test('Should return sequelize $gt query given a key, value, and gt', () => {
-			const expectedResult = { foo: { [Op.gt]: 'bar' } };
+			const expectedResult = { name: 'foo', value: { [Op.gt]: 'bar' } };
 			let observedResult = sqlQB.buildComparatorQuery({
 				field: 'foo',
 				value: 'bar',
@@ -33,7 +33,7 @@ describe('SQL Query Builder Tests', () => {
 			expect(observedResult).toEqual(expectedResult);
 		});
 		test('Should return mongo $gte query given a key, value, and ge', () => {
-			const expectedResult = { foo: { [Op.gte]: 'bar' } };
+			const expectedResult = { name: 'foo', value: { [Op.gte]: 'bar' } };
 			let observedResult = sqlQB.buildComparatorQuery({
 				field: 'foo',
 				value: 'bar',
@@ -42,7 +42,7 @@ describe('SQL Query Builder Tests', () => {
 			expect(observedResult).toEqual(expectedResult);
 		});
 		test('Should return mongo $lt query given a key, value, and lt', () => {
-			const expectedResult = { foo: { [Op.lt]: 'bar' } };
+			const expectedResult = { name: 'foo', value: { [Op.lt]: 'bar' } };
 			let observedResult = sqlQB.buildComparatorQuery({
 				field: 'foo',
 				value: 'bar',
@@ -51,7 +51,7 @@ describe('SQL Query Builder Tests', () => {
 			expect(observedResult).toEqual(expectedResult);
 		});
 		test('Should return mongo $lte query given a key, value, and le', () => {
-			const expectedResult = { foo: { [Op.lte]: 'bar' } };
+			const expectedResult = { name: 'foo', value: { [Op.lte]: 'bar' } };
 			let observedResult = sqlQB.buildComparatorQuery({
 				field: 'foo',
 				value: 'bar',
@@ -60,7 +60,7 @@ describe('SQL Query Builder Tests', () => {
 			expect(observedResult).toEqual(expectedResult);
 		});
 		test('Should return mongo $gt query given a key, value, and sa', () => {
-			const expectedResult = { foo: { [Op.gt]: 'bar' } };
+			const expectedResult = { name: 'foo', value: { [Op.gt]: 'bar' } };
 			let observedResult = sqlQB.buildComparatorQuery({
 				field: 'foo',
 				value: 'bar',
@@ -69,7 +69,7 @@ describe('SQL Query Builder Tests', () => {
 			expect(observedResult).toEqual(expectedResult);
 		});
 		test('Should return mongo $lt query given a key, value, and eb', () => {
-			const expectedResult = { foo: { [Op.lt]: 'bar' } };
+			const expectedResult = { name: 'foo', value: { [Op.lt]: 'bar' } };
 			let observedResult = sqlQB.buildComparatorQuery({
 				field: 'foo',
 				value: 'bar',
@@ -78,7 +78,7 @@ describe('SQL Query Builder Tests', () => {
 			expect(observedResult).toEqual(expectedResult);
 		});
 		test('Should return mongo $ne query given a key, value, and ne', () => {
-			const expectedResult = { foo: { [Op.ne]: 'bar' } };
+			const expectedResult = { name: 'foo', value: { [Op.ne]: 'bar' } };
 			let observedResult = sqlQB.buildComparatorQuery({
 				field: 'foo',
 				value: 'bar',
@@ -96,7 +96,9 @@ describe('SQL Query Builder Tests', () => {
 			expect(observedResult).toEqual(expectedResult);
 		});
 		test('Should return $nor of given queries if invert option is true', () => {
-			const expectedResult = { [Op.not]: { [Op.or]: [{ foo: 'bar'}, { bar: 'foo'}]}};
+			const expectedResult = {
+				[Op.not]: { [Op.or]: [{ foo: 'bar' }, { bar: 'foo' }] },
+			};
 			let observedResult = sqlQB.buildOrQuery({
 				queries: [{ foo: 'bar' }, { bar: 'foo' }],
 				invert: true,
@@ -106,7 +108,7 @@ describe('SQL Query Builder Tests', () => {
 	});
 	describe('buildContainsQuery Tests', () => {
 		test('Should return case sensitive match regex query', () => {
-			const expectedResult = { foo: { [Op.like]: 'bar'} };
+			const expectedResult = { name: 'foo', value: { [Op.like]: 'bar' } };
 			let observedResult = sqlQB.buildContainsQuery({
 				field: 'foo',
 				value: 'bar',
@@ -116,7 +118,7 @@ describe('SQL Query Builder Tests', () => {
 			console.log(observedResult);
 		});
 		test('Should return case insensitive match regex query', () => {
-			const expectedResult = { foo: { [Op.iLike]: 'bar'} };
+			const expectedResult = { name: 'foo', value: { [Op.iLike]: 'bar' } };
 			let observedResult = sqlQB.buildContainsQuery({
 				field: 'foo',
 				value: 'bar',
@@ -127,7 +129,7 @@ describe('SQL Query Builder Tests', () => {
 	});
 	describe('buildStartsWithQuery Tests', () => {
 		test('Should return case sensitive front of word match regex query', () => {
-			const expectedResult = { foo: { [Op.startsWith]: 'bar' } };
+			const expectedResult = { name: 'foo', value: { [Op.startsWith]: 'bar' } };
 			let observedResult = sqlQB.buildStartsWithQuery({
 				field: 'foo',
 				value: 'bar',
@@ -136,7 +138,7 @@ describe('SQL Query Builder Tests', () => {
 			expect(observedResult).toEqual(expectedResult);
 		});
 		test('Should return case insensitive front of word match regex query', () => {
-			const expectedResult = { foo: { [Op.iRegexp]: '^bar' } };
+			const expectedResult = { name: 'foo', value: { [Op.iRegexp]: '^bar' } };
 			let observedResult = sqlQB.buildStartsWithQuery({
 				field: 'foo',
 				value: 'bar',
@@ -146,7 +148,7 @@ describe('SQL Query Builder Tests', () => {
 	});
 	describe('buildEndsWithQuery Tests', () => {
 		test('Should return case sensitive front of word match regex query', () => {
-			const expectedResult = { foo: { [Op.endsWith]: 'bar' } };
+			const expectedResult = { name: 'foo', value: { [Op.endsWith]: 'bar' } };
 			let observedResult = sqlQB.buildEndsWithQuery({
 				field: 'foo',
 				value: 'bar',
@@ -155,7 +157,7 @@ describe('SQL Query Builder Tests', () => {
 			expect(observedResult).toEqual(expectedResult);
 		});
 		test('Should return case insensitive front of word match regex query', () => {
-			const expectedResult = { foo: { [Op.iRegexp]: 'bar$' } };
+			const expectedResult = { name: 'foo', value: { [Op.iRegexp]: 'bar$' } };
 			let observedResult = sqlQB.buildEndsWithQuery({
 				field: 'foo',
 				value: 'bar',
@@ -165,7 +167,7 @@ describe('SQL Query Builder Tests', () => {
 	});
 	describe('buildExistsQuery Tests', () => {
 		test('Should return a range query', () => {
-			const expectedResult = { foo: { $exists: true } };
+			const expectedResult = 'NOT IMPLEMENTED';
 			let observedResult = sqlQB.buildExistsQuery({
 				field: 'foo',
 				exists: true,
@@ -175,7 +177,7 @@ describe('SQL Query Builder Tests', () => {
 	});
 	describe('buildInRangeQuery Tests', () => {
 		test('Should return a range query', () => {
-			const expectedResult = { foo: { [Op.between]: [1, 10]} };
+			const expectedResult = { name: 'foo', value: { [Op.between]: [1, 10] } };
 			let observedResult = sqlQB.buildInRangeQuery({
 				field: 'foo',
 				lowerBound: 1,
@@ -184,7 +186,10 @@ describe('SQL Query Builder Tests', () => {
 			expect(observedResult).toEqual(expectedResult);
 		});
 		test('Should return an exclusive range query if given an invert flag', () => {
-			const expectedResult = { foo: { [Op.notBetween]: [1, 10]} };
+			const expectedResult = {
+				name: 'foo',
+				value: { [Op.notBetween]: [1, 10] },
+			};
 			let observedResult = sqlQB.buildInRangeQuery({
 				field: 'foo',
 				lowerBound: 1,
@@ -201,7 +206,7 @@ describe('SQL Query Builder Tests', () => {
 				joinsToPerform: [],
 				matchesToPerform: [],
 				searchResultTransformations: {},
-				implementationParameters: {archivedParamPath: 'meta._isArchived'},
+				implementationParameters: { archivedParamPath: 'meta._isArchived' },
 				includeArchived: false,
 				pageNumber: 1,
 				resultsPerPage: 10,
@@ -214,7 +219,7 @@ describe('SQL Query Builder Tests', () => {
 				joinsToPerform: [{ from: 'foo', localKey: 'bar', foreignKey: 'baz' }],
 				matchesToPerform: [],
 				searchResultTransformations: {},
-				implementationParameters: {archivedParamPath: 'meta._isArchived'},
+				implementationParameters: { archivedParamPath: 'meta._isArchived' },
 				includeArchived: false,
 				pageNumber: 1,
 				resultsPerPage: 10,
@@ -222,14 +227,12 @@ describe('SQL Query Builder Tests', () => {
 			expect(observedResult).toEqual(expectedResult);
 		});
 		test('Should fill in empty matches with empty objects to keep queries valid', () => {
-			const expectedResult = [
-				{ where: { [Op.and]: [{ [Op.or]: [{}] }] } },
-			];
+			const expectedResult = [{ where: { [Op.and]: [{ [Op.or]: [{}] }] } }];
 			let observedResult = sqlQB.assembleSearchQuery({
 				joinsToPerform: [],
 				matchesToPerform: [[]],
 				searchResultTransformations: {},
-				implementationParameters: {archivedParamPath: 'meta._isArchived'},
+				implementationParameters: { archivedParamPath: 'meta._isArchived' },
 				includeArchived: false,
 				pageNumber: 1,
 				resultsPerPage: 10,
@@ -238,13 +241,17 @@ describe('SQL Query Builder Tests', () => {
 		});
 		test('Should handle matches appropriately', () => {
 			const expectedResult = [
-				{ where: { [Op.and]: [{ [Op.or]: [{ foo: { [Op.gte]: 1, [Op.lte]: 10 } }] }] } }
+				{
+					where: {
+						[Op.and]: [{ [Op.or]: [{ foo: { [Op.gte]: 1, [Op.lte]: 10 } }] }],
+					},
+				},
 			];
 			let observedResult = sqlQB.assembleSearchQuery({
 				joinsToPerform: [],
 				matchesToPerform: [[{ foo: { [Op.gte]: 1, [Op.lte]: 10 } }]],
 				searchResultTransformations: {},
-				implementationParameters: {archivedParamPath: 'meta._isArchived'},
+				implementationParameters: { archivedParamPath: 'meta._isArchived' },
 				includeArchived: false,
 				pageNumber: 1,
 				resultsPerPage: 10,
