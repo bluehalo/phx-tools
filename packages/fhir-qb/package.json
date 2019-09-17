@@ -9,6 +9,11 @@
 	},
 	"homepage": "https://github.com/Asymmetrik/phx-tools",
 	"author": "Sumeet-S <sshah@asymmetrik.com>",
+	"contributors": [
+		"Shane O'Neill <soneill@asymmetrik.com>",
+		"Sumeet-S <sshah@asymmetrik.com>",
+		"Tracy Nguyen <tnguyen@asymmetrik.com>"
+	],
 	"license": "MIT",
 	"publishConfig": {
 		"access": "public"
@@ -28,7 +33,6 @@
 	},
 	"dependencies": {
 		"@asymmetrik/fhir-qb-mongo": "^0.10.3",
-		"@asymmetrik/fhir-qb-sql": "../fhir-qb-sql",
 		"@asymmetrik/fhir-sanitize-param": "^1.1.2",
 		"mathjs": "^5.2.3",
 		"moment": "^2.24.0",
