@@ -1,7 +1,6 @@
 const QueryBuilder = require('./index');
 const moment = require('moment');
 
-
 describe('Mongo Tests', () => {
 	beforeAll(() => {
 		// Do this for tests only
@@ -76,7 +75,7 @@ describe('Mongo Tests', () => {
 	};
 	const qb = new QueryBuilder({
 		globalParameterDefinitions,
-		implementationParameters: {archivedParamPath: 'meta._isArchived'}
+		implementationParameters: { archivedParamPath: 'meta._isArchived' },
 	});
 	describe('Build Date Query Tests', () => {
 		describe('eq Modifier Tests', () => {
@@ -6564,7 +6563,14 @@ describe('Mongo Tests', () => {
 			const expectedResult = [
 				{
 					$match: {
-						$and: [{ $or: [{ foo: { $regex: '^Eve', $options: 'i' } }, { bar: { $regex: '^Eve', $options: 'i' } }] }],
+						$and: [
+							{
+								$or: [
+									{ foo: { $regex: '^Eve', $options: 'i' } },
+									{ bar: { $regex: '^Eve', $options: 'i' } },
+								],
+							},
+						],
 					},
 				},
 				{ $match: { 'meta._isArchived': false } },
@@ -6606,13 +6612,18 @@ describe('Mongo Tests', () => {
 				{
 					$match: {
 						$and: [
-							{ $or: [{ foo: { $options: 'i', $regex: '^foo' } }, { qux: { $options: 'i', $regex: '^foo' } }] },
+							{
+								$or: [
+									{ foo: { $options: 'i', $regex: '^foo' } },
+									{ qux: { $options: 'i', $regex: '^foo' } },
+								],
+							},
 							{
 								$or: [
 									{ foo: { $options: 'i', $regex: '^bar' } },
 									{ foo: { $options: 'i', $regex: '^baz' } },
 									{ qux: { $options: 'i', $regex: '^bar' } },
-									{ qux: { $options: 'i', $regex: '^baz' } }
+									{ qux: { $options: 'i', $regex: '^baz' } },
 								],
 							},
 						],
@@ -6641,6 +6652,7 @@ describe('Mongo Tests', () => {
 });
 
 const Sequelize = require('sequelize');
+const { formDateComparison } = require('../fhir-qb-sql/index');
 const Op = Sequelize.Op;
 
 describe('SQL Tests', () => {
@@ -6718,11 +6730,10 @@ describe('SQL Tests', () => {
 	const qb = new QueryBuilder({
 		packageName: '../fhir-qb-sql/index.js',
 		globalParameterDefinitions,
-		implementationParameters: {archivedParamPath: 'meta._isArchived'}
+		implementationParameters: { archivedParamPath: 'meta._isArchived' },
 	});
 	describe('Build Date Query Tests', () => {
 		describe('eq Modifier Tests', () => {
-			// TODO - Should I throw an error in this situation? Providing ms is not allowed according to the spec.
 			test("Should return the ISO String if the given a full ISO String 'yyyy-mm-ddThh:mm:ss.###Z'", () => {
 				const req = {
 					method: 'GET',
@@ -6731,23 +6742,32 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: '2018-10-31T17:49:29.000Z'
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison('=', '2018-10-31T17:49:29.000Z'),
+											],
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -6759,26 +6779,33 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.between]: [
-										'2018-10-31T17:49:29.000Z',
-										'2018-10-31T17:49:29.999Z',
-									]}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison('>=', '2018-10-31T17:49:29.000Z'),
+												formDateComparison('<=', '2018-10-31T17:49:29.999Z'),
+											],
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
@@ -6791,30 +6818,36 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.between]: [
-										'2018-10-31T17:49:00.000Z',
-										'2018-10-31T17:49:59.999Z',
-									]}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison('>=', '2018-10-31T17:49:00.000Z'),
+												formDateComparison('>=', '2018-10-31T17:49:00.000Z'),
+											],
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
-			// TODO - Should I throw an error in this situation? Hours without minutes is not allowed.
 			test("Should return a 1 hour range if given a partial ISO string of format 'yyyy-mm-ddThh'", () => {
 				const req = {
 					method: 'GET',
@@ -6823,26 +6856,33 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.between]: [
-										'2018-10-31T17:00:00.000Z',
-										'2018-10-31T17:59:59.999Z',
-									]}
-							}]
-						}]
-					}
-				}];
+                const expectedResult = [
+                    {
+                        where: {
+                            [Op.and]: [
+                                {
+                                    [Op.or]: [
+                                        {
+                                            [Op.and]: [
+                                                { name: 'foo' },
+												formDateComparison('>=', '2018-10-31T17:00:00.000Z'),
+												formDateComparison('<=', '2018-10-31T17:59:59.999Z'),
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    },
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -6854,26 +6894,33 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.between]: [
-										'2018-10-31T00:00:00.000Z',
-										'2018-10-31T23:59:59.999Z',
-									]}
-							}]
-						}]
-					}
-				}];
+                const expectedResult = [
+                    {
+                        where: {
+                            [Op.and]: [
+                                {
+                                    [Op.or]: [
+                                        {
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison('>=', '2018-10-01T00:00:00.000Z'),
+                                                formDateComparison('<=', '2018-10-31T23:59:59.999Z'),
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    },
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -6885,26 +6932,33 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.between]: [
-										'2018-10-01T00:00:00.000Z',
-										'2018-10-31T23:59:59.999Z',
-									]}
-							}]
-						}]
-					}
-				}];
+                const expectedResult = [
+                    {
+                        where: {
+                            [Op.and]: [
+                                {
+                                    [Op.or]: [
+                                        {
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison('>=', '2018-10-01T00:00:00.000Z'),
+                                                formDateComparison('<=', '2018-10-31T23:59:59.999Z'),
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    },
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -6916,26 +6970,33 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.between]: [
-										'2018-01-01T00:00:00.000Z',
-										'2018-12-31T23:59:59.999Z',
-									]}
-							}]
-						}]
-					}
-				}];
+                const expectedResult = [
+                    {
+                        where: {
+                            [Op.and]: [
+                                {
+                                    [Op.or]: [
+                                        {
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison('>=', '2018-01-01T00:00:00.000Z'),
+                                                formDateComparison('<=', '2018-12-31T23:59:59.999Z'),
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    },
+                ];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -6947,26 +7008,33 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.between]: [
-										'2018-01-01T00:00:00.000Z',
-										'2018-12-31T23:59:59.999Z',
-									]}
-							}]
-						}]
-					}
-				}];
+                const expectedResult = [
+                    {
+                        where: {
+                            [Op.and]: [
+                                {
+                                    [Op.or]: [
+                                        {
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison('>=', '2018-01-01T00:00:00.000Z'),
+                                                formDateComparison('<=', '2018-12-31T23:59:59.999Z'),
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    },
+                ];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -6981,25 +7049,33 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {
-									[Op.ne]: '2018-10-31T17:49:29.000Z'
-								}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+                                        {
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison('>=', '2018-01-01T00:00:00.000Z'),
+                                                formDateComparison('<=', '2018-12-31T23:59:59.999Z'),
+                                            ],
+                                        },
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7011,25 +7087,33 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {
-									[Op.notBetween]: ['2018-10-31T17:49:29.000Z', '2018-10-31T17:49:29.999Z']
-								}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+                                        {
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison('>=', '2018-01-01T00:00:00.000Z'),
+                                                formDateComparison('<=', '2018-12-31T23:59:59.999Z'),
+                                            ],
+                                        },
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7041,26 +7125,35 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {
-									[Op.notBetween]: ['2018-10-31T17:49:00.000Z', '2018-10-31T17:49:59.999Z']
-								}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison('>=', '2018-01-01T00:00:00.000Z'),
+                                                formDateComparison('<=', '2018-12-31T23:59:59.999Z'),
+                                            ],
+                                        },
+
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7073,25 +7166,33 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {
-									[Op.notBetween]: ['2018-10-31T17:00:00.000Z', '2018-10-31T17:59:59.999Z']
-								}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+                                        {
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison('>=', '2018-01-01T00:00:00.000Z'),
+                                                formDateComparison('<=', '2018-12-31T23:59:59.999Z'),
+                                            ],
+                                        },
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7103,25 +7204,33 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {
-									[Op.notBetween]: ['2018-10-31T00:00:00.000Z', '2018-10-31T23:59:59.999Z']
-								}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+                                        {
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison('>=', '2018-01-01T00:00:00.000Z'),
+                                                formDateComparison('<=', '2018-12-31T23:59:59.999Z'),
+                                            ],
+                                        },
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7133,25 +7242,33 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {
-									[Op.notBetween]: ['2018-10-01T00:00:00.000Z', '2018-10-31T23:59:59.999Z']
-								}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+                                        {
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison('>=', '2018-01-01T00:00:00.000Z'),
+                                                formDateComparison('<=', '2018-12-31T23:59:59.999Z'),
+                                            ],
+                                        },
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7163,25 +7280,33 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {
-									[Op.notBetween]: ['2018-01-01T00:00:00.000Z', '2018-12-31T23:59:59.999Z']
-								}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+                                        {
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison('>=', '2018-01-01T00:00:00.000Z'),
+                                                formDateComparison('<=', '2018-12-31T23:59:59.999Z'),
+                                            ],
+                                        },
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7196,23 +7321,30 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.gt]: '2018-10-31T17:49:29.000Z'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.gt]: '2018-10-31T17:49:29.000Z' },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7224,23 +7356,30 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.gt]: '2018-10-31T17:49:29.999Z'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.gt]: '2018-10-31T17:49:29.999Z' },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7252,23 +7391,30 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.gt]: '2018-10-31T17:49:59.999Z'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.gt]: '2018-10-31T17:49:59.999Z' },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7281,23 +7427,30 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.gt]: '2018-10-31T17:59:59.999Z'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.gt]: '2018-10-31T17:59:59.999Z' },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7309,23 +7462,30 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.gt]: '2018-10-31T23:59:59.999Z'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.gt]: '2018-10-31T23:59:59.999Z' },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7337,23 +7497,30 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.gt]: '2018-10-31T23:59:59.999Z'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.gt]: '2018-10-31T23:59:59.999Z' },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7365,23 +7532,30 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.gt]: '2018-12-31T23:59:59.999Z'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.gt]: '2018-12-31T23:59:59.999Z' },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7396,23 +7570,30 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.gte]: '2018-10-31T17:49:29.000Z'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.gte]: '2018-10-31T17:49:29.000Z' },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7424,23 +7605,30 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.gte]: '2018-10-31T17:49:29.000Z'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.gte]: '2018-10-31T17:49:29.000Z' },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7452,23 +7640,30 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.gte]: '2018-10-31T17:49:00.000Z'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.gte]: '2018-10-31T17:49:00.000Z' },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7481,23 +7676,30 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.gte]: '2018-10-31T17:00:00.000Z'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.gte]: '2018-10-31T17:00:00.000Z' },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7509,23 +7711,30 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.gte]: '2018-10-31T00:00:00.000Z'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.gte]: '2018-10-31T00:00:00.000Z' },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7537,23 +7746,30 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.gte]: '2018-10-01T00:00:00.000Z'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.gte]: '2018-10-01T00:00:00.000Z' },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7565,23 +7781,30 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.gte]: '2018-01-01T00:00:00.000Z'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.gte]: '2018-01-01T00:00:00.000Z' },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7596,23 +7819,30 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.lt]: '2018-10-31T17:49:29.000Z'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.lt]: '2018-10-31T17:49:29.000Z' },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7624,23 +7854,30 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.lt]: '2018-10-31T17:49:29.000Z'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.lt]: '2018-10-31T17:49:29.000Z' },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7652,23 +7889,30 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.lt]: '2018-10-31T17:49:00.000Z'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.lt]: '2018-10-31T17:49:00.000Z' },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7681,23 +7925,30 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.lt]: '2018-10-31T17:00:00.000Z'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.lt]: '2018-10-31T17:00:00.000Z' },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7709,23 +7960,30 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.lt]: '2018-10-31T00:00:00.000Z'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.lt]: '2018-10-31T00:00:00.000Z' },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7737,23 +7995,30 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.lt]: '2018-10-01T00:00:00.000Z'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.lt]: '2018-10-01T00:00:00.000Z' },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7765,23 +8030,30 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.lt]: '2018-01-01T00:00:00.000Z'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.lt]: '2018-01-01T00:00:00.000Z' },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7796,23 +8068,30 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.lte]: '2018-10-31T17:49:29.000Z'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.lte]: '2018-10-31T17:49:29.000Z' },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7824,23 +8103,30 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.lte]: '2018-10-31T17:49:29.000Z'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.lte]: '2018-10-31T17:49:29.000Z' },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7852,23 +8138,30 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.lte]: '2018-10-31T17:49:00.000Z'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.lte]: '2018-10-31T17:49:00.000Z' },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7881,23 +8174,30 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.lte]: '2018-10-31T17:00:00.000Z'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.lte]: '2018-10-31T17:00:00.000Z' },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7909,23 +8209,30 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.lte]: '2018-10-31T00:00:00.000Z'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.lte]: '2018-10-31T00:00:00.000Z' },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7937,23 +8244,30 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.lte]: '2018-10-01T00:00:00.000Z'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.lte]: '2018-10-01T00:00:00.000Z' },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7965,23 +8279,30 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.lte]: '2018-01-01T00:00:00.000Z'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.lte]: '2018-01-01T00:00:00.000Z' },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7996,23 +8317,30 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.gt]: '2018-10-31T17:49:29.000Z'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.gt]: '2018-10-31T17:49:29.000Z' },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -8024,23 +8352,30 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.gt]: '2018-10-31T17:49:29.999Z'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.gt]: '2018-10-31T17:49:29.999Z' },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -8052,23 +8387,30 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.gt]: '2018-10-31T17:49:59.999Z'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.gt]: '2018-10-31T17:49:59.999Z' },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -8081,23 +8423,30 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.gt]: '2018-10-31T17:59:59.999Z'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.gt]: '2018-10-31T17:59:59.999Z' },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -8109,23 +8458,30 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.gt]: '2018-10-31T23:59:59.999Z'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.gt]: '2018-10-31T23:59:59.999Z' },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -8137,23 +8493,30 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.gt]: '2018-10-31T23:59:59.999Z'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.gt]: '2018-10-31T23:59:59.999Z' },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -8165,23 +8528,30 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.gt]: '2018-12-31T23:59:59.999Z'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.gt]: '2018-12-31T23:59:59.999Z' },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -8196,23 +8566,30 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.lt]: '2018-10-31T17:49:29.000Z'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.lt]: '2018-10-31T17:49:29.000Z' },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -8224,23 +8601,30 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.lt]: '2018-10-31T17:49:29.000Z'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.lt]: '2018-10-31T17:49:29.000Z' },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -8252,23 +8636,30 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.lt]: '2018-10-31T17:49:00.000Z'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.lt]: '2018-10-31T17:49:00.000Z' },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -8281,23 +8672,30 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.lt]: '2018-10-31T17:00:00.000Z'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.lt]: '2018-10-31T17:00:00.000Z' },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -8309,23 +8707,30 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.lt]: '2018-10-31T00:00:00.000Z'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.lt]: '2018-10-31T00:00:00.000Z' },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -8337,23 +8742,30 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.lt]: '2018-10-01T00:00:00.000Z'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.lt]: '2018-10-01T00:00:00.000Z' },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -8365,23 +8777,30 @@ describe('SQL Tests', () => {
 					},
 				};
 				const parameterDefinitions = {
-					foo: {type: 'date', xpath: 'Resource.foo'},
+					foo: { type: 'date', xpath: 'Resource.foo' },
 				};
 				const includeArchived = false;
-				let {errors, query} = qb.buildSearchQuery({
+				let { errors, query } = qb.buildSearchQuery({
 					req,
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.lt]: '2018-01-01T00:00:00.000Z'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: formDateComparison('<', '2018-01-01T00:00:00.000Z'),
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -8390,7 +8809,7 @@ describe('SQL Tests', () => {
 			// TODO - Should I throw an error in this situation? Providing ms is not allowed.
 			test(
 				'Should return range with upper lower bounds equal to the target date +/- 0.1 * the amount of time ' +
-				"between now and the target date if given a full ISO String 'yyyy-mm-ddThh:mm:ss.###Z'",
+					"between now and the target date if given a full ISO String 'yyyy-mm-ddThh:mm:ss.###Z'",
 				() => {
 					const testDate = '2018-10-31T17:49:29.000Z';
 					const req = {
@@ -8400,7 +8819,7 @@ describe('SQL Tests', () => {
 						},
 					};
 					const parameterDefinitions = {
-						foo: {type: 'date', xpath: 'Resource.foo'},
+						foo: { type: 'date', xpath: 'Resource.foo' },
 					};
 					const targetDate = moment.utc(testDate);
 					const rangePadding = 0.1;
@@ -8418,17 +8837,17 @@ describe('SQL Tests', () => {
 					);
 
 					const includeArchived = false;
-					let {query, errors} = qb.buildSearchQuery({
+					let { query, errors } = qb.buildSearchQuery({
 						req,
 						parameterDefinitions,
 						includeArchived,
 					});
 
 					let observedLowerBound = moment(
-						query[0].where[Op.and][0][Op.or][0].foo[Op.between][0]
+						query[0].where[Op.and][0][Op.or][0].foo[Op.between][0],
 					);
 					let observedUpperBound = moment(
-						query[0].where[Op.and][0][Op.or][0].foo[Op.between][1]
+						query[0].where[Op.and][0][Op.or][0].foo[Op.between][1],
 					);
 
 					let lowerBoundDifference = moment
@@ -8448,7 +8867,7 @@ describe('SQL Tests', () => {
 			);
 			test(
 				'Should return range with upper lower bounds equal to the target date +/- 0.1 * the amount of time ' +
-				"between now and the target date if given a partial ISO String of format 'yyyy-mm-ddThh:mm:ss'",
+					"between now and the target date if given a partial ISO String of format 'yyyy-mm-ddThh:mm:ss'",
 				() => {
 					const testDate = '2018-10-31T17:49:29';
 					const req = {
@@ -8458,7 +8877,7 @@ describe('SQL Tests', () => {
 						},
 					};
 					const parameterDefinitions = {
-						foo: {type: 'date', xpath: 'Resource.foo'},
+						foo: { type: 'date', xpath: 'Resource.foo' },
 					};
 					const targetDate = moment.utc(testDate);
 					const rangePadding = 0.1;
@@ -8476,17 +8895,17 @@ describe('SQL Tests', () => {
 					);
 
 					const includeArchived = false;
-					let {query, errors} = qb.buildSearchQuery({
+					let { query, errors } = qb.buildSearchQuery({
 						req,
 						parameterDefinitions,
 						includeArchived,
 					});
-
+					console.log(query[0].where[Op.and][0][Op.or][0][Op.and][2].logic);
 					let observedLowerBound = moment(
-						query[0].where[Op.and][0][Op.or][0].foo[Op.between][0]
+						query[0].where[Op.and][0][Op.or][0][Op.and][1].logic,
 					);
 					let observedUpperBound = moment(
-						query[0].where[Op.and][0][Op.or][0].foo[Op.between][1]
+						query[0].where[Op.and][0][Op.or][0][Op.and][2].logic,
 					);
 
 					let lowerBoundDifference = moment
@@ -8506,7 +8925,7 @@ describe('SQL Tests', () => {
 			);
 			test(
 				'Should return range with upper lower bounds equal to the target date +/- 0.1 * the amount of time ' +
-				"between now and the start of the specified minute if given a partial ISO String of format 'yyyy-mm-ddThh:mm'",
+					"between now and the start of the specified minute if given a partial ISO String of format 'yyyy-mm-ddThh:mm'",
 				() => {
 					const testDate = '2018-10-31T17:49';
 					const req = {
@@ -8516,7 +8935,7 @@ describe('SQL Tests', () => {
 						},
 					};
 					const parameterDefinitions = {
-						foo: {type: 'date', xpath: 'Resource.foo'},
+						foo: { type: 'date', xpath: 'Resource.foo' },
 					};
 					const targetDate = moment.utc(testDate);
 					const rangePadding = 0.1;
@@ -8534,17 +8953,17 @@ describe('SQL Tests', () => {
 					);
 
 					const includeArchived = false;
-					let {query, errors} = qb.buildSearchQuery({
+					let { query, errors } = qb.buildSearchQuery({
 						req,
 						parameterDefinitions,
 						includeArchived,
 					});
 
 					let observedLowerBound = moment(
-						query[0].where[Op.and][0][Op.or][0].foo[Op.between][0]
+						query[0].where[Op.and][0][Op.or][0].foo[Op.between][0],
 					);
 					let observedUpperBound = moment(
-						query[0].where[Op.and][0][Op.or][0].foo[Op.between][1]
+						query[0].where[Op.and][0][Op.or][0].foo[Op.between][1],
 					);
 
 					let lowerBoundDifference = moment
@@ -8565,7 +8984,7 @@ describe('SQL Tests', () => {
 			// TODO - Should I throw an error in this situation? Hours without minutes is not allowed.
 			test(
 				'Should return range with upper lower bounds equal to the target date +/- 0.1 * the amount of time ' +
-				"between currentDateTimeOverride and the start of the specified hour if given a partial ISO String of format 'yyyy-mm-ddThh'",
+					"between currentDateTimeOverride and the start of the specified hour if given a partial ISO String of format 'yyyy-mm-ddThh'",
 				() => {
 					const testDate = '2018-10-31T17';
 					const req = {
@@ -8575,7 +8994,7 @@ describe('SQL Tests', () => {
 						},
 					};
 					const parameterDefinitions = {
-						foo: {type: 'date', xpath: 'Resource.foo'},
+						foo: { type: 'date', xpath: 'Resource.foo' },
 					};
 					const targetDate = moment.utc(testDate);
 					const rangePadding = 0.1;
@@ -8593,17 +9012,17 @@ describe('SQL Tests', () => {
 					);
 
 					const includeArchived = false;
-					let {query, errors} = qb.buildSearchQuery({
+					let { query, errors } = qb.buildSearchQuery({
 						req,
 						parameterDefinitions,
 						includeArchived,
 					});
 
 					let observedLowerBound = moment(
-						query[0].where[Op.and][0][Op.or][0].foo[Op.between][0]
+						query[0].where[Op.and][0][Op.or][0].foo[Op.between][0],
 					);
 					let observedUpperBound = moment(
-						query[0].where[Op.and][0][Op.or][0].foo[Op.between][1]
+						query[0].where[Op.and][0][Op.or][0].foo[Op.between][1],
 					);
 
 					let lowerBoundDifference = moment
@@ -8623,7 +9042,7 @@ describe('SQL Tests', () => {
 			);
 			test(
 				'Should return range with upper lower bounds equal to the target date +/- 0.1 * the amount of time ' +
-				"between currentDateTimeOverride and the start of the specified day if given a partial ISO String of format 'yyyy-mm-dd'",
+					"between currentDateTimeOverride and the start of the specified day if given a partial ISO String of format 'yyyy-mm-dd'",
 				() => {
 					const testDate = '2018-10-31';
 					const req = {
@@ -8633,7 +9052,7 @@ describe('SQL Tests', () => {
 						},
 					};
 					const parameterDefinitions = {
-						foo: {type: 'date', xpath: 'Resource.foo'},
+						foo: { type: 'date', xpath: 'Resource.foo' },
 					};
 					const targetDate = moment.utc(testDate);
 					const rangePadding = 0.1;
@@ -8651,17 +9070,17 @@ describe('SQL Tests', () => {
 					);
 
 					const includeArchived = false;
-					let {query, errors} = qb.buildSearchQuery({
+					let { query, errors } = qb.buildSearchQuery({
 						req,
 						parameterDefinitions,
 						includeArchived,
 					});
 
 					let observedLowerBound = moment(
-						query[0].where[Op.and][0][Op.or][0].foo[Op.between][0]
+						query[0].where[Op.and][0][Op.or][0].foo[Op.between][0],
 					);
 					let observedUpperBound = moment(
-						query[0].where[Op.and][0][Op.or][0].foo[Op.between][1]
+						query[0].where[Op.and][0][Op.or][0].foo[Op.between][1],
 					);
 
 					let lowerBoundDifference = moment
@@ -8681,7 +9100,7 @@ describe('SQL Tests', () => {
 			);
 			test(
 				'Should return range with upper lower bounds equal to the target date +/- 0.1 * the amount of time ' +
-				"between currentDateTimeOverride and the start of the specified month if given a partial ISO String of format 'yyyy-mm'",
+					"between currentDateTimeOverride and the start of the specified month if given a partial ISO String of format 'yyyy-mm'",
 				() => {
 					const testDate = '2018-10';
 					const req = {
@@ -8691,7 +9110,7 @@ describe('SQL Tests', () => {
 						},
 					};
 					const parameterDefinitions = {
-						foo: {type: 'date', xpath: 'Resource.foo'},
+						foo: { type: 'date', xpath: 'Resource.foo' },
 					};
 					const targetDate = moment.utc(testDate);
 					const rangePadding = 0.1;
@@ -8709,17 +9128,17 @@ describe('SQL Tests', () => {
 					);
 
 					const includeArchived = false;
-					let {query, errors} = qb.buildSearchQuery({
+					let { query, errors } = qb.buildSearchQuery({
 						req,
 						parameterDefinitions,
 						includeArchived,
 					});
 
 					let observedLowerBound = moment(
-						query[0].where[Op.and][0][Op.or][0].foo[Op.between][0]
+						query[0].where[Op.and][0][Op.or][0].foo[Op.between][0],
 					);
 					let observedUpperBound = moment(
-						query[0].where[Op.and][0][Op.or][0].foo[Op.between][1]
+						query[0].where[Op.and][0][Op.or][0].foo[Op.between][1],
 					);
 
 					let lowerBoundDifference = moment
@@ -8739,7 +9158,7 @@ describe('SQL Tests', () => {
 			);
 			test(
 				'Should return range with upper lower bounds equal to the target date +/- 0.1 * the amount of time ' +
-				"between currentDateTime and the start of the specified year if given a partial ISO String of format 'yyyy'",
+					"between currentDateTime and the start of the specified year if given a partial ISO String of format 'yyyy'",
 				() => {
 					const testDate = '2018';
 					const req = {
@@ -8749,7 +9168,7 @@ describe('SQL Tests', () => {
 						},
 					};
 					const parameterDefinitions = {
-						foo: {type: 'date', xpath: 'Resource.foo'},
+						foo: { type: 'date', xpath: 'Resource.foo' },
 					};
 					const targetDate = moment.utc(testDate);
 					const rangePadding = 0.1;
@@ -8767,17 +9186,17 @@ describe('SQL Tests', () => {
 					);
 
 					const includeArchived = false;
-					let {query, errors} = qb.buildSearchQuery({
+					let { query, errors } = qb.buildSearchQuery({
 						req,
 						parameterDefinitions,
 						includeArchived,
 					});
 
 					let observedLowerBound = moment(
-						query[0].where[Op.and][0][Op.or][0].foo[Op.between][0]
+						query[0].where[Op.and][0][Op.or][0].foo[Op.between][0],
 					);
 					let observedUpperBound = moment(
-						query[0].where[Op.and][0][Op.or][0].foo[Op.between][1]
+						query[0].where[Op.and][0][Op.or][0].foo[Op.between][1],
 					);
 
 					let lowerBoundDifference = moment
@@ -8816,21 +9235,28 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.between]: [99.5, 100.5]}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.between]: [99.5, 100.5] },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
 			test(
 				'Should return range with upper lower bounds equal to +/- 0.5 * the most significant digit given a number with' +
-				'significant decimal places.',
+					'significant decimal places.',
 				() => {
 					const req = {
 						method: 'GET',
@@ -8847,15 +9273,22 @@ describe('SQL Tests', () => {
 						parameterDefinitions,
 						includeArchived,
 					});
-					const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.between]: [99.9995, 100.0005]}
-							}]
-						}]
-					}
-				}];
+					const expectedResult = [
+						{
+							where: {
+								[Op.and]: [
+									{
+										[Op.or]: [
+											{
+												name: 'foo',
+												value: { [Op.between]: [99.9995, 100.0005] },
+											},
+										],
+									},
+								],
+							},
+						},
+					];
 					expect(errors).toHaveLength(0);
 					expect(query).toEqual(expectedResult);
 				},
@@ -8876,15 +9309,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.between]: [99.5, 100.5]}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.between]: [99.5, 100.5] },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(query).toEqual(expectedResult);
 			});
 		});
@@ -8905,21 +9345,28 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.notBetween]: [99.5, 100.5]}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.notBetween]: [99.5, 100.5] },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
 			test(
 				'Should return $or that fully excludes range with upper lower bounds equal to +/- 0.5 * the most significant ' +
-				'digit given a number with significant decimal places.',
+					'digit given a number with significant decimal places.',
 				() => {
 					const req = {
 						method: 'GET',
@@ -8936,15 +9383,22 @@ describe('SQL Tests', () => {
 						parameterDefinitions,
 						includeArchived,
 					});
-					const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.notBetween]: [99.9995, 100.0005]}
-							}]
-						}]
-					}
-				}];
+					const expectedResult = [
+						{
+							where: {
+								[Op.and]: [
+									{
+										[Op.or]: [
+											{
+												name: 'foo',
+												value: { [Op.notBetween]: [99.9995, 100.0005] },
+											},
+										],
+									},
+								],
+							},
+						},
+					];
 					expect(errors).toHaveLength(0);
 					expect(query).toEqual(expectedResult);
 				},
@@ -8967,15 +9421,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.lt]: 100.0000001}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.lt]: 100.0000001 },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
@@ -8996,15 +9457,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.lte]: 100.0000001}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.lte]: 100.0000001 },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -9024,15 +9492,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.gt]: 100.0000001}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.gt]: 100.0000001 },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -9052,15 +9527,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.gte]: 100.0000001}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.gte]: 100.0000001 },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -9082,15 +9564,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.between]: [-11, -9]}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.between]: [-11, -9] },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -9112,15 +9601,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.between]: [-10.5, -9.5]}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.between]: [-10.5, -9.5] },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -9140,15 +9636,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.between]: [9.5, 10.5]}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.between]: [9.5, 10.5] },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -9173,15 +9676,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.iRegexp]: '^Eve'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.iRegexp]: '^Eve' },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -9203,15 +9713,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: {[Op.iLike]: 'Eve'}
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.iLike]: 'Eve' },
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -9233,15 +9750,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [{
-					where: {
-						[Op.and]: [{
-							[Op.or]: [{
-								foo: 'Evë'
-							}]
-						}]
-					}
-				}];
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: 'Evë',
+										},
+									],
+								},
+							],
+						},
+					},
+				];
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});

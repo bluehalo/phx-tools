@@ -7,7 +7,7 @@ let supportedSearchTransformations = {
 	},
 };
 
-let formDateComparison = function(date, comparator, colName = 'value') {
+let formDateComparison = function(comparator, date, colName = 'value') {
 	return Sequelize.where(
 		Sequelize.fn('date', Sequelize.col(colName)),
 		comparator,
@@ -46,7 +46,7 @@ let buildEqualToQuery = function({
 	if (isDate) {
 		const comparator = invert ? '!=' : '=';
 		return {
-			[Op.and]: [{ name: field }, formDateComparison(value, comparator)],
+			[Op.and]: [{ name: field }, formDateComparison(comparator, value)],
 		};
 	} else {
 		return { name: field, value: invert ? { [Op.ne]: value } : value };
@@ -74,7 +74,7 @@ let buildComparatorQuery = function({
 	const sqlComparator = sqlComparators[comparator];
 	if (isDate) {
 		return {
-			[Op.and]: [{ name: field }, formDateComparison(value, sqlComparator)],
+			[Op.and]: [{ name: field }, formDateComparison(sqlComparator, value)],
 		};
 	} else {
 		return { name: field, value: { [sqlComparator]: value } };
@@ -97,8 +97,8 @@ let buildInRangeQuery = function({
 			return {
 				[Op.and]: [
 					{ name: field },
-					formDateComparison(lowerBound, '<='),
-					formDateComparison(upperBound, '>='),
+					formDateComparison('<=', lowerBound),
+					formDateComparison('>=', upperBound),
 				],
 			};
 		}
@@ -111,8 +111,8 @@ let buildInRangeQuery = function({
 			return {
 				[Op.and]: [
 					{ name: field },
-					formDateComparison(lowerBound, '>='),
-					formDateComparison(upperBound, '<='),
+					formDateComparison('>=', lowerBound),
+					formDateComparison('<=', upperBound),
 				],
 			};
 		}
@@ -330,4 +330,5 @@ module.exports = {
 	buildInRangeQuery,
 	buildStartsWithQuery,
 	supportedSearchTransformations,
+	formDateComparison,
 };

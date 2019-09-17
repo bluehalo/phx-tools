@@ -9,6 +9,11 @@
   dependencies:
     xregexp "^4.2.0"
 
+"@asymmetrik/fhir-qb-sql@../fhir-qb-sql":
+  version "0.1.0"
+  dependencies:
+    xregexp "^4.2.0"
+
 "@asymmetrik/fhir-sanitize-param@^1.1.2":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@asymmetrik/fhir-sanitize-param/-/fhir-sanitize-param-1.1.2.tgz#a0bf01bd5d1db5700ff4d176d091996aa6b021d3"
