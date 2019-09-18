@@ -1,11 +1,7 @@
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 
-let supportedSearchTransformations = {
-	_count: function(value) {
-		return { $limit: value };
-	},
-};
+let supportedSearchTransformations = {};
 
 let formDateComparison = function(comparator, date, colName = 'value') {
 	return Sequelize.where(
@@ -129,13 +125,6 @@ let buildExistsQuery = function({ field, exists }) {
 };
 
 /**
- * Builds a query to get records where the value of the field key matches the given pattern and options.
- */
-let buildRegexQuery = function({ field, pattern, options }) {
-	return { name: field, value: { $regex: pattern, $options: options } };
-};
-
-/**
  * Builds query to get records where the value of the field contains the value.
  * Setting caseSensitive to true will cause the regex to be case insensitive
  */
@@ -255,16 +244,10 @@ let buildEndsWithQuery = function({ field, value, caseSensitive = false }) {
  * @returns {Array}
  */
 let assembleSearchQuery = function({
-	joinsToPerform,
 	matchesToPerform,
-	searchResultTransformations,
 	implementationParameters,
-	includeArchived,
-	pageNumber,
-	resultsPerPage,
 }) {
 	let query = [];
-	let toSuppress = {};
 
 	// Check that the necessary implementation parameters were passed through
 	let { archivedParamPath } = implementationParameters;
@@ -273,24 +256,6 @@ let assembleSearchQuery = function({
 			"Missing required implementation parameter 'archivedParamPath'",
 		);
 	}
-
-	// // Construct the necessary joins and add them to the aggregate pipeline. Also follow each $lookup with an $unwind
-	// // for ease of use.
-	// if (joinsToPerform.length > 0) {
-	// 	for (let join of joinsToPerform) {
-	// 		let { from, localKey, foreignKey } = join;
-	// 		query.push({
-	// 			$lookup: {
-	// 				from: from,
-	// 				localField: localKey,
-	// 				foreignField: foreignKey,
-	// 				as: from,
-	// 			},
-	// 		});
-	// 		query.push({ $unwind: `$${from}` });
-	// 		toSuppress[from] = 0;
-	// 	}
-	// }
 
 	// Construct the necessary queries for each match and add them the pipeline.
 	if (matchesToPerform.length > 0) {
@@ -303,18 +268,6 @@ let assembleSearchQuery = function({
 		}
 		query.push({ where: buildAndQuery(listOfOrs) });
 	}
-
-	// // Suppress the tables that were joined from being displayed in the returned query. TODO might not want to do this.
-	// if (Object.keys(toSuppress).length > 0) {
-	// 	query.push({ $project: toSuppress });
-	// }
-
-	// query = applyArchivedFilter({ query, archivedParamPath, includeArchived });
-	// query = applySearchResultTransformations({
-	// 	query,
-	// 	searchResultTransformations,
-	// });
-	// query = applyPaging({ query, pageNumber, resultsPerPage });
 	return query;
 };
 

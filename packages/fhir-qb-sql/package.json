@@ -27,6 +27,7 @@
   ]
  },
  "dependencies": {
+  "sequelize": "^5.18.4",
   "xregexp": "^4.2.0"
  },
  "devDependencies": {

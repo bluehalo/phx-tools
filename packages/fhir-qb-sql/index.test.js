@@ -4,7 +4,7 @@ const Op = Sequelize.Op;
 
 describe('SQL Query Builder Tests', () => {
 	describe('buildEqualToQuery Tests', () => {
-		test('Should return mongo equals query given a key and a value', () => {
+		test('Should return sequelize equals query given a key and a value', () => {
 			const expectedResult = { name: 'foo', value: 'bar' };
 			let observedResult = sqlQB.buildEqualToQuery({
 				field: 'foo',
@@ -18,6 +18,47 @@ describe('SQL Query Builder Tests', () => {
 				field: 'foo',
 				value: 'bar',
 				invert: true,
+			});
+			expect(observedResult).toEqual(expectedResult);
+		});
+		test('Should return sequelize equals date query given a key and a value with an isDate flag', () => {
+			const expectedResult = {
+				[Op.and]: [
+					{
+						'name': 'foo'
+					},
+					Sequelize.where(
+						Sequelize.fn('date', Sequelize.col('value')),
+						'=',
+						'2015'
+					)
+				]
+			};
+			let observedResult = sqlQB.buildEqualToQuery({
+				field: 'foo',
+				value: '2015',
+				isDate: true
+			});
+			expect(observedResult).toEqual(expectedResult);
+		});
+		test('Should return sequelize ne date query given a key and a value with isDate and invert flags', () => {
+			const expectedResult = {
+				[Op.and]: [
+					{
+						'name': 'foo'
+					},
+					Sequelize.where(
+						Sequelize.fn('date', Sequelize.col('value')),
+						'!=',
+						'2015'
+					)
+				]
+			};
+			let observedResult = sqlQB.buildEqualToQuery({
+				field: 'foo',
+				value: '2015',
+				isDate: true,
+				invert: true
 			});
 			expect(observedResult).toEqual(expectedResult);
 		});
@@ -83,6 +124,27 @@ describe('SQL Query Builder Tests', () => {
 				field: 'foo',
 				value: 'bar',
 				comparator: 'ne',
+			});
+			expect(observedResult).toEqual(expectedResult);
+		});
+		test('Should return sequelize comparator query given a key, value, comparator, and isDate flag', () => {
+			const expectedResult = {
+				[Op.and]: [
+					{
+						'name': 'foo'
+					},
+					Sequelize.where(
+						Sequelize.fn('date', Sequelize.col('value')),
+						Op.ne,
+						'2016'
+					)
+				]
+			};
+			let observedResult = sqlQB.buildComparatorQuery({
+				field: 'foo',
+				value: '2016',
+				comparator: 'ne',
+				isDate: true
 			});
 			expect(observedResult).toEqual(expectedResult);
 		});
@@ -198,6 +260,59 @@ describe('SQL Query Builder Tests', () => {
 			});
 			expect(observedResult).toEqual(expectedResult);
 		});
+		test('Should return a date range query if given an isDate flag', () => {
+			const expectedResult = {
+				[Op.and]: [
+					{
+						'name': 'foo'
+					},
+					Sequelize.where(
+						Sequelize.fn('date', Sequelize.col('value')),
+						'>=',
+						'2013'
+					),
+					Sequelize.where(
+						Sequelize.fn('date', Sequelize.col('value')),
+						'<=',
+						'2014'
+					)
+				]
+			};
+			let observedResult = sqlQB.buildInRangeQuery({
+				field: 'foo',
+				lowerBound: '2013',
+				upperBound: '2014',
+				isDate: true
+			});
+			expect(observedResult).toEqual(expectedResult);
+		});
+		test('Should return an exclusive date range query if given an invert flag and an isDate flag', () => {
+			const expectedResult = {
+				[Op.and]: [
+					{
+						'name': 'foo'
+					},
+					Sequelize.where(
+						Sequelize.fn('date', Sequelize.col('value')),
+						'<=',
+						'2013'
+					),
+					Sequelize.where(
+						Sequelize.fn('date', Sequelize.col('value')),
+						'>=',
+						'2014'
+					)
+				]
+			};
+			let observedResult = sqlQB.buildInRangeQuery({
+				field: 'foo',
+				lowerBound: '2013',
+				upperBound: '2014',
+				invert: true,
+				isDate: true
+			});
+			expect(observedResult).toEqual(expectedResult);
+		});
 	});
 	describe('assembleSearchQuery Tests', () => {
 		test('Should return empty pipeline (except for archival and paging) if no matches or joins to perform', () => {
@@ -257,6 +372,24 @@ describe('SQL Query Builder Tests', () => {
 				resultsPerPage: 10,
 			});
 			expect(observedResult).toEqual(expectedResult);
+		});
+		test("Should throw an error if required implementation parameter 'archivedParamPath' is missing", () => {
+			const expectedError = new Error("Missing required implementation parameter 'archivedParamPath'");
+			let observedError;
+			try {
+				let observedResult = sqlQB.assembleSearchQuery({
+					joinsToPerform: [],
+					matchesToPerform: [],
+					searchResultTransformations: {},
+					implementationParameters: {},
+					includeArchived: false,
+					pageNumber: 1,
+					resultsPerPage: 10,
+				});
+			} catch (err) {
+				observedError = err;
+			}
+			expect(observedError).toEqual(expectedError);
 		});
 	});
 	// describe('Search Result Transformation Tests', () => {
