@@ -1,36 +1,41 @@
 {
- "name": "@asymmetrik/fhir-qb-sql",
- "version": "0.1.0",
- "description": "FHIR query builder for SQL",
- "main": "index.js",
- "repository": {
-  "type": "git",
-  "url": "https://github.com/Asymmetrik/phx-tools.git"
- },
- "homepage": "https://github.com/Asymmetrik/phx-tools",
- "author": "Sumeet-S <sshah@asymmetrik.com>",
- "license": "MIT",
- "publishConfig": {
-  "access": "public"
- },
- "jest": {
-  "verbose": true,
-  "testEnvironment": "node",
-  "collectCoverage": false,
-  "coverageReporters": [
-   "text",
-   "lcov",
-   "json"
-  ],
-  "coveragePathIgnorePatterns": [
-   "<rootDir>/src/testutils/"
-  ]
- },
- "dependencies": {
-  "sequelize": "^5.18.4",
-  "xregexp": "^4.2.0"
- },
- "devDependencies": {
-  "jest": "^24.5.0"
- }
+	"name": "@asymmetrik/fhir-qb-sql",
+	"version": "0.1.0",
+	"description": "FHIR query builder for SQL",
+	"main": "index.js",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Asymmetrik/phx-tools.git"
+	},
+	"homepage": "https://github.com/Asymmetrik/phx-tools",
+	"author": "Sumeet-S <sshah@asymmetrik.com>",
+	"contributors": [
+		"Shane O'Neill <soneill@asymmetrik.com>",
+		"Sumeet-S <sshah@asymmetrik.com>",
+		"Tracy Nguyen <tnguyen@asymmetrik.com>"
+	],
+	"license": "MIT",
+	"publishConfig": {
+		"access": "public"
+	},
+	"jest": {
+		"verbose": true,
+		"testEnvironment": "node",
+		"collectCoverage": false,
+		"coverageReporters": [
+			"text",
+			"lcov",
+			"json"
+		],
+		"coveragePathIgnorePatterns": [
+			"<rootDir>/src/testutils/"
+		]
+	},
+	"dependencies": {
+		"sequelize": "^5.18.4",
+		"xregexp": "^4.2.0"
+	},
+	"devDependencies": {
+		"jest": "^24.5.0"
+	}
 }
