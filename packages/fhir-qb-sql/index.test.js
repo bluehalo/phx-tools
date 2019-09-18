@@ -25,19 +25,19 @@ describe('SQL Query Builder Tests', () => {
 			const expectedResult = {
 				[Op.and]: [
 					{
-						'name': 'foo'
+						name: 'foo',
 					},
 					Sequelize.where(
 						Sequelize.fn('date', Sequelize.col('value')),
 						'=',
-						'2015'
-					)
-				]
+						'2015',
+					),
+				],
 			};
 			let observedResult = sqlQB.buildEqualToQuery({
 				field: 'foo',
 				value: '2015',
-				isDate: true
+				isDate: true,
 			});
 			expect(observedResult).toEqual(expectedResult);
 		});
@@ -45,20 +45,20 @@ describe('SQL Query Builder Tests', () => {
 			const expectedResult = {
 				[Op.and]: [
 					{
-						'name': 'foo'
+						name: 'foo',
 					},
 					Sequelize.where(
 						Sequelize.fn('date', Sequelize.col('value')),
 						'!=',
-						'2015'
-					)
-				]
+						'2015',
+					),
+				],
 			};
 			let observedResult = sqlQB.buildEqualToQuery({
 				field: 'foo',
 				value: '2015',
 				isDate: true,
-				invert: true
+				invert: true,
 			});
 			expect(observedResult).toEqual(expectedResult);
 		});
@@ -73,7 +73,7 @@ describe('SQL Query Builder Tests', () => {
 			});
 			expect(observedResult).toEqual(expectedResult);
 		});
-		test('Should return mongo $gte query given a key, value, and ge', () => {
+		test('Should return sequelize greater than query given a key, value, and ge', () => {
 			const expectedResult = { name: 'foo', value: { [Op.gte]: 'bar' } };
 			let observedResult = sqlQB.buildComparatorQuery({
 				field: 'foo',
@@ -82,7 +82,7 @@ describe('SQL Query Builder Tests', () => {
 			});
 			expect(observedResult).toEqual(expectedResult);
 		});
-		test('Should return mongo $lt query given a key, value, and lt', () => {
+		test('Should return sequelize less than query given a key, value, and lt', () => {
 			const expectedResult = { name: 'foo', value: { [Op.lt]: 'bar' } };
 			let observedResult = sqlQB.buildComparatorQuery({
 				field: 'foo',
@@ -91,7 +91,7 @@ describe('SQL Query Builder Tests', () => {
 			});
 			expect(observedResult).toEqual(expectedResult);
 		});
-		test('Should return mongo $lte query given a key, value, and le', () => {
+		test('Should return sequelize less than or equal to query given a key, value, and le', () => {
 			const expectedResult = { name: 'foo', value: { [Op.lte]: 'bar' } };
 			let observedResult = sqlQB.buildComparatorQuery({
 				field: 'foo',
@@ -100,7 +100,7 @@ describe('SQL Query Builder Tests', () => {
 			});
 			expect(observedResult).toEqual(expectedResult);
 		});
-		test('Should return mongo $gt query given a key, value, and sa', () => {
+		test('Should return sequelize greater than query given a key, value, and sa', () => {
 			const expectedResult = { name: 'foo', value: { [Op.gt]: 'bar' } };
 			let observedResult = sqlQB.buildComparatorQuery({
 				field: 'foo',
@@ -109,7 +109,7 @@ describe('SQL Query Builder Tests', () => {
 			});
 			expect(observedResult).toEqual(expectedResult);
 		});
-		test('Should return mongo $lt query given a key, value, and eb', () => {
+		test('Should return sequelize less than query given a key, value, and eb', () => {
 			const expectedResult = { name: 'foo', value: { [Op.lt]: 'bar' } };
 			let observedResult = sqlQB.buildComparatorQuery({
 				field: 'foo',
@@ -118,7 +118,7 @@ describe('SQL Query Builder Tests', () => {
 			});
 			expect(observedResult).toEqual(expectedResult);
 		});
-		test('Should return mongo $ne query given a key, value, and ne', () => {
+		test('Should return sequelize not equal query given a key, value, and ne', () => {
 			const expectedResult = { name: 'foo', value: { [Op.ne]: 'bar' } };
 			let observedResult = sqlQB.buildComparatorQuery({
 				field: 'foo',
@@ -131,20 +131,20 @@ describe('SQL Query Builder Tests', () => {
 			const expectedResult = {
 				[Op.and]: [
 					{
-						'name': 'foo'
+						name: 'foo',
 					},
 					Sequelize.where(
 						Sequelize.fn('date', Sequelize.col('value')),
 						Op.ne,
-						'2016'
-					)
-				]
+						'2016',
+					),
+				],
 			};
 			let observedResult = sqlQB.buildComparatorQuery({
 				field: 'foo',
 				value: '2016',
 				comparator: 'ne',
-				isDate: true
+				isDate: true,
 			});
 			expect(observedResult).toEqual(expectedResult);
 		});
@@ -264,25 +264,25 @@ describe('SQL Query Builder Tests', () => {
 			const expectedResult = {
 				[Op.and]: [
 					{
-						'name': 'foo'
+						name: 'foo',
 					},
 					Sequelize.where(
 						Sequelize.fn('date', Sequelize.col('value')),
 						'>=',
-						'2013'
+						'2013',
 					),
 					Sequelize.where(
 						Sequelize.fn('date', Sequelize.col('value')),
 						'<=',
-						'2014'
-					)
-				]
+						'2014',
+					),
+				],
 			};
 			let observedResult = sqlQB.buildInRangeQuery({
 				field: 'foo',
 				lowerBound: '2013',
 				upperBound: '2014',
-				isDate: true
+				isDate: true,
 			});
 			expect(observedResult).toEqual(expectedResult);
 		});
@@ -290,26 +290,26 @@ describe('SQL Query Builder Tests', () => {
 			const expectedResult = {
 				[Op.and]: [
 					{
-						'name': 'foo'
+						name: 'foo',
 					},
 					Sequelize.where(
 						Sequelize.fn('date', Sequelize.col('value')),
 						'<=',
-						'2013'
+						'2013',
 					),
 					Sequelize.where(
 						Sequelize.fn('date', Sequelize.col('value')),
 						'>=',
-						'2014'
-					)
-				]
+						'2014',
+					),
+				],
 			};
 			let observedResult = sqlQB.buildInRangeQuery({
 				field: 'foo',
 				lowerBound: '2013',
 				upperBound: '2014',
 				invert: true,
-				isDate: true
+				isDate: true,
 			});
 			expect(observedResult).toEqual(expectedResult);
 		});
@@ -374,10 +374,12 @@ describe('SQL Query Builder Tests', () => {
 			expect(observedResult).toEqual(expectedResult);
 		});
 		test("Should throw an error if required implementation parameter 'archivedParamPath' is missing", () => {
-			const expectedError = new Error("Missing required implementation parameter 'archivedParamPath'");
+			const expectedError = new Error(
+				"Missing required implementation parameter 'archivedParamPath'",
+			);
 			let observedError;
 			try {
-				let observedResult = sqlQB.assembleSearchQuery({
+				sqlQB.assembleSearchQuery({
 					joinsToPerform: [],
 					matchesToPerform: [],
 					searchResultTransformations: {},
@@ -392,128 +394,4 @@ describe('SQL Query Builder Tests', () => {
 			expect(observedError).toEqual(expectedError);
 		});
 	});
-	// describe('Search Result Transformation Tests', () => {
-	// 	test('Should add $limit to the end of the pipeline when given _count parameter', () => {
-	// 		const expectedResult = [
-	// 			{ $match: { 'meta._isArchived': false } },
-	// 			{ $limit: 3 },
-	// 			{
-	// 				$facet: {
-	// 					data: [{ $skip: 0 }, { $limit: 10 }],
-	// 					metadata: [
-	// 						{ $count: 'total' },
-	// 						{
-	// 							$addFields: {
-	// 								numberOfPages: { $ceil: { $divide: ['$total', 10] } },
-	// 							},
-	// 						},
-	// 						{ $addFields: { page: 1 } },
-	// 					],
-	// 				},
-	// 			},
-	// 		];
-	// 		let observedResult = sqlQB.assembleSearchQuery({
-	// 			joinsToPerform: [],
-	// 			matchesToPerform: [],
-	// 			searchResultTransformations: { _count: 3 },
-	// 			implementationParameters: {archivedParamPath: 'meta._isArchived'},
-	// 			includeArchived: false,
-	// 			pageNumber: 1,
-	// 			resultsPerPage: 10,
-	// 		});
-	// 		expect(observedResult).toEqual(expectedResult);
-	// 	});
-	// });
-	// describe('Paging Tests', () => {
-	// 	test('Should default to page 1 with no limits if resultsPerPage is undefined', () => {
-	// 		const expectedResult = [
-	// 			{
-	// 				$match: {
-	// 					'meta._isArchived': false,
-	// 				},
-	// 			},
-	// 			{
-	// 				$facet: {
-	// 					data: [{ $skip: 0 }],
-	// 					metadata: [
-	// 						{
-	// 							$count: 'total',
-	// 						},
-	// 						{
-	// 							$addFields: {
-	// 								numberOfPages: 1,
-	// 							},
-	// 						},
-	// 						{
-	// 							$addFields: {
-	// 								page: 1,
-	// 							},
-	// 						},
-	// 					],
-	// 				},
-	// 			},
-	// 		];
-	// 		let observedResult = sqlQB.assembleSearchQuery({
-	// 			joinsToPerform: [],
-	// 			matchesToPerform: [],
-	// 			searchResultTransformations: {},
-	// 			implementationParameters: {archivedParamPath: 'meta._isArchived'},
-	// 			includeArchived: false,
-	// 			pageNumber: 1,
-	// 		});
-	// 		expect(observedResult).toEqual(expectedResult);
-	// 	});
-	// });
-	// describe('Apply Archived Filter Tests', () => {
-	// 	test('Should throw an error if missing the required archivedParamPath from the implementation parameters', () => {
-	// 		let error;
-	// 		try {
-	// 			sqlQB.assembleSearchQuery({
-	// 				joinsToPerform: [],
-	// 				matchesToPerform: [],
-	// 				searchResultTransformations: {},
-	// 				implementationParameters: {},
-	// 				includeArchived: false,
-	// 				pageNumber: 1,
-	// 			});
-	// 		} catch (err) {
-	// 			error = err;
-	// 		}
-	// 		expect(error.message).toContain('Missing required implementation parameter \'archivedParamPath\'');
-	// 	});
-	// 	test('Should return input query as is if we are not filtering out archived results', () => {
-	// 		const expectedResult = [
-	// 			{
-	// 				$facet: {
-	// 					data: [{ $skip: 0 }, {$limit: 10}],
-	// 					metadata: [
-	// 						{
-	// 							$count: 'total',
-	// 						},
-	// 						{
-	// 							$addFields: {
-	// 								numberOfPages: {$ceil: {$divide:['$total',10]}},
-	// 							},
-	// 						},
-	// 						{
-	// 							$addFields: {
-	// 								page: 1,
-	// 							},
-	// 						},
-	// 					],
-	// 				},
-	// 			},
-	// 		];
-	// 		let observedResult = sqlQB.assembleSearchQuery({
-	// 			joinsToPerform: [],
-	// 			matchesToPerform: [],
-	// 			searchResultTransformations: {},
-	// 			implementationParameters: {archivedParamPath: 'meta._isArchived'},
-	// 			includeArchived: true,
-	// 			pageNumber: 1,
-	// 			resultsPerPage: 10
-	// 		});
-	// 		expect(observedResult).toEqual(expectedResult);
-	// 	});
-	// });
 });
