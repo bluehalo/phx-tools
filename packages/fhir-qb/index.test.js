@@ -6836,7 +6836,7 @@ describe('SQL Tests', () => {
 											[Op.and]: [
 												{ name: 'foo' },
 												formDateComparison('>=', '2018-10-31T17:49:00.000Z'),
-												formDateComparison('>=', '2018-10-31T17:49:00.000Z'),
+												formDateComparison('<=', '2018-10-31T17:49:59.999Z'),
 											],
 										},
 									],
@@ -6911,7 +6911,7 @@ describe('SQL Tests', () => {
                                         {
                                             [Op.and]: [
                                                 { name: 'foo' },
-                                                formDateComparison('>=', '2018-10-01T00:00:00.000Z'),
+                                                formDateComparison('>=', '2018-10-31T00:00:00.000Z'),
                                                 formDateComparison('<=', '2018-10-31T23:59:59.999Z'),
                                             ],
                                         },
@@ -7000,7 +7000,7 @@ describe('SQL Tests', () => {
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
-			test("Should implicityly use 'eq' prefix if one is not supplied in the request", () => {
+			test("Should implicitly use 'eq' prefix if one is not supplied in the request", () => {
 				const req = {
 					method: 'GET',
 					query: {
@@ -7063,13 +7063,13 @@ describe('SQL Tests', () => {
 							[Op.and]: [
 								{
 									[Op.or]: [
-                                        {
+										{
                                             [Op.and]: [
                                                 { name: 'foo' },
-                                                formDateComparison('>=', '2018-01-01T00:00:00.000Z'),
-                                                formDateComparison('<=', '2018-12-31T23:59:59.999Z'),
+                                                formDateComparison('!=', '2018-10-31T17:49:29.000Z'),
                                             ],
                                         },
+
 									],
 								},
 							],
@@ -7104,8 +7104,8 @@ describe('SQL Tests', () => {
                                         {
                                             [Op.and]: [
                                                 { name: 'foo' },
-                                                formDateComparison('>=', '2018-01-01T00:00:00.000Z'),
-                                                formDateComparison('<=', '2018-12-31T23:59:59.999Z'),
+                                                formDateComparison('<=', '2018-10-31T17:49:29.000Z'),
+                                                formDateComparison('>=', '2018-10-31T17:49:29.999Z'),
                                             ],
                                         },
 									],
@@ -7143,8 +7143,8 @@ describe('SQL Tests', () => {
 										{
                                             [Op.and]: [
                                                 { name: 'foo' },
-                                                formDateComparison('>=', '2018-01-01T00:00:00.000Z'),
-                                                formDateComparison('<=', '2018-12-31T23:59:59.999Z'),
+                                                formDateComparison('<=', '2018-10-31T17:49:00.000Z'),
+                                                formDateComparison('>=', '2018-10-31T17:49:59.999Z'),
                                             ],
                                         },
 
@@ -7183,8 +7183,8 @@ describe('SQL Tests', () => {
                                         {
                                             [Op.and]: [
                                                 { name: 'foo' },
-                                                formDateComparison('>=', '2018-01-01T00:00:00.000Z'),
-                                                formDateComparison('<=', '2018-12-31T23:59:59.999Z'),
+                                                formDateComparison('<=', '2018-10-31T17:00:00.000Z'),
+                                                formDateComparison('>=', '2018-10-31T17:59:59.999Z'),
                                             ],
                                         },
 									],
@@ -7221,8 +7221,8 @@ describe('SQL Tests', () => {
                                         {
                                             [Op.and]: [
                                                 { name: 'foo' },
-                                                formDateComparison('>=', '2018-01-01T00:00:00.000Z'),
-                                                formDateComparison('<=', '2018-12-31T23:59:59.999Z'),
+                                                formDateComparison('<=', '2018-10-31T00:00:00.000Z'),
+                                                formDateComparison('>=', '2018-10-31T23:59:59.999Z'),
                                             ],
                                         },
 									],
@@ -7259,8 +7259,8 @@ describe('SQL Tests', () => {
                                         {
                                             [Op.and]: [
                                                 { name: 'foo' },
-                                                formDateComparison('>=', '2018-01-01T00:00:00.000Z'),
-                                                formDateComparison('<=', '2018-12-31T23:59:59.999Z'),
+                                                formDateComparison('<=', '2018-10-01T00:00:00.000Z'),
+                                                formDateComparison('>=', '2018-10-31T23:59:59.999Z'),
                                             ],
                                         },
 									],
@@ -7297,8 +7297,8 @@ describe('SQL Tests', () => {
                                         {
                                             [Op.and]: [
                                                 { name: 'foo' },
-                                                formDateComparison('>=', '2018-01-01T00:00:00.000Z'),
-                                                formDateComparison('<=', '2018-12-31T23:59:59.999Z'),
+                                                formDateComparison('<=', '2018-01-01T00:00:00.000Z'),
+                                                formDateComparison('>=', '2018-12-31T23:59:59.999Z'),
                                             ],
                                         },
 									],
@@ -7336,9 +7336,12 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.gt]: '2018-10-31T17:49:29.000Z' },
-										},
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison(Op.gt, '2018-10-31T17:49:29.000Z'),
+                                            ],
+                                        },
+
 									],
 								},
 							],
@@ -7371,9 +7374,12 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.gt]: '2018-10-31T17:49:29.999Z' },
-										},
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison(Op.gt, '2018-10-31T17:49:29.999Z'),
+                                            ],
+                                        },
+
 									],
 								},
 							],
@@ -7406,9 +7412,12 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.gt]: '2018-10-31T17:49:59.999Z' },
-										},
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison(Op.gt, '2018-10-31T17:49:59.999Z'),
+                                            ],
+                                        },
+
 									],
 								},
 							],
@@ -7442,9 +7451,12 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.gt]: '2018-10-31T17:59:59.999Z' },
-										},
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison(Op.gt, '2018-10-31T17:59:59.999Z'),
+                                            ],
+                                        },
+
 									],
 								},
 							],
@@ -7477,9 +7489,12 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.gt]: '2018-10-31T23:59:59.999Z' },
-										},
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison(Op.gt, '2018-10-31T23:59:59.999Z'),
+                                            ],
+                                        },
+
 									],
 								},
 							],
@@ -7512,9 +7527,12 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.gt]: '2018-10-31T23:59:59.999Z' },
-										},
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison(Op.gt, '2018-10-31T23:59:59.999Z'),
+                                            ],
+                                        },
+
 									],
 								},
 							],
@@ -7547,9 +7565,12 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.gt]: '2018-12-31T23:59:59.999Z' },
-										},
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison(Op.gt, '2018-12-31T23:59:59.999Z'),
+                                            ],
+                                        },
+
 									],
 								},
 							],
@@ -7560,7 +7581,7 @@ describe('SQL Tests', () => {
 				expect(query).toEqual(expectedResult);
 			});
 		});
-		describe('ge Modifier Tests', () => {
+		describe('gte Modifier Tests', () => {
 			// TODO - Should I throw an error in this situation? Providing ms is not allowed.
 			test("Should return $gte ISO String if given a full ISO String 'yyyy-mm-ddThh:mm:ss.###Z'", () => {
 				const req = {
@@ -7585,9 +7606,12 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.gte]: '2018-10-31T17:49:29.000Z' },
-										},
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison(Op.gte, '2018-10-31T17:49:29.000Z'),
+                                            ],
+                                        },
+
 									],
 								},
 							],
@@ -7620,9 +7644,12 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.gte]: '2018-10-31T17:49:29.000Z' },
-										},
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison(Op.gte, '2018-10-31T17:49:29.000Z'),
+                                            ],
+                                        },
+
 									],
 								},
 							],
@@ -7655,9 +7682,12 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.gte]: '2018-10-31T17:49:00.000Z' },
-										},
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison(Op.gte, '2018-10-31T17:49:00.000Z'),
+                                            ],
+                                        },
+
 									],
 								},
 							],
@@ -7691,9 +7721,12 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.gte]: '2018-10-31T17:00:00.000Z' },
-										},
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison(Op.gte, '2018-10-31T17:00:00.000Z'),
+                                            ],
+                                        },
+
 									],
 								},
 							],
@@ -7726,9 +7759,12 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.gte]: '2018-10-31T00:00:00.000Z' },
-										},
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison(Op.gte, '2018-10-31T00:00:00.000Z'),
+                                            ],
+                                        },
+
 									],
 								},
 							],
@@ -7761,9 +7797,12 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.gte]: '2018-10-01T00:00:00.000Z' },
-										},
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison(Op.gte, '2018-10-01T00:00:00.000Z'),
+                                            ],
+                                        },
+
 									],
 								},
 							],
@@ -7796,9 +7835,12 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.gte]: '2018-01-01T00:00:00.000Z' },
-										},
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison(Op.gte, '2018-01-01T00:00:00.000Z'),
+                                            ],
+                                        },
+
 									],
 								},
 							],
@@ -7834,9 +7876,12 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.lt]: '2018-10-31T17:49:29.000Z' },
-										},
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison(Op.lt, '2018-10-31T17:49:29.000Z'),
+                                            ],
+                                        },
+
 									],
 								},
 							],
@@ -7869,9 +7914,12 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.lt]: '2018-10-31T17:49:29.000Z' },
-										},
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison(Op.lt, '2018-10-31T17:49:29.000Z'),
+                                            ],
+                                        },
+
 									],
 								},
 							],
@@ -7904,9 +7952,12 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.lt]: '2018-10-31T17:49:00.000Z' },
-										},
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison(Op.lt, '2018-10-31T17:49:00.000Z'),
+                                            ],
+                                        },
+
 									],
 								},
 							],
@@ -7940,9 +7991,12 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.lt]: '2018-10-31T17:00:00.000Z' },
-										},
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison(Op.lt, '2018-10-31T17:00:00.000Z'),
+                                            ],
+                                        },
+
 									],
 								},
 							],
@@ -7975,9 +8029,12 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.lt]: '2018-10-31T00:00:00.000Z' },
-										},
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison(Op.lt, '2018-10-31T00:00:00.000Z'),
+                                            ],
+                                        },
+
 									],
 								},
 							],
@@ -8010,9 +8067,12 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.lt]: '2018-10-01T00:00:00.000Z' },
-										},
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison(Op.lt, '2018-10-01T00:00:00.000Z'),
+                                            ],
+                                        },
+
 									],
 								},
 							],
@@ -8045,9 +8105,12 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.lt]: '2018-01-01T00:00:00.000Z' },
-										},
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison(Op.lt, '2018-01-01T00:00:00.000Z'),
+                                            ],
+                                        },
+
 									],
 								},
 							],
@@ -8058,7 +8121,7 @@ describe('SQL Tests', () => {
 				expect(query).toEqual(expectedResult);
 			});
 		});
-		describe('le Modifier Tests', () => {
+		describe('lte Modifier Tests', () => {
 			// TODO - Should I throw an error in this situation? Providing ms is not allowed.
 			test("Should return $lte ISO String if given a full ISO String 'yyyy-mm-ddThh:mm:ss.###Z'", () => {
 				const req = {
@@ -8083,9 +8146,12 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.lte]: '2018-10-31T17:49:29.000Z' },
-										},
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison(Op.lte, '2018-10-31T17:49:29.000Z'),
+                                            ],
+                                        },
+
 									],
 								},
 							],
@@ -8118,9 +8184,12 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.lte]: '2018-10-31T17:49:29.000Z' },
-										},
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison(Op.lte, '2018-10-31T17:49:29.000Z'),
+                                            ],
+                                        },
+
 									],
 								},
 							],
@@ -8153,9 +8222,12 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.lte]: '2018-10-31T17:49:00.000Z' },
-										},
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison(Op.lte, '2018-10-31T17:49:00.000Z'),
+                                            ],
+                                        },
+
 									],
 								},
 							],
@@ -8189,9 +8261,12 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.lte]: '2018-10-31T17:00:00.000Z' },
-										},
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison(Op.lte, '2018-10-31T17:00:00.000Z'),
+                                            ],
+                                        },
+
 									],
 								},
 							],
@@ -8224,9 +8299,12 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.lte]: '2018-10-31T00:00:00.000Z' },
-										},
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison(Op.lte, '2018-10-31T00:00:00.000Z'),
+                                            ],
+                                        },
+
 									],
 								},
 							],
@@ -8259,9 +8337,12 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.lte]: '2018-10-01T00:00:00.000Z' },
-										},
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison(Op.lte, '2018-10-01T00:00:00.000Z'),
+                                            ],
+                                        },
+
 									],
 								},
 							],
@@ -8294,9 +8375,12 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.lte]: '2018-01-01T00:00:00.000Z' },
-										},
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison(Op.lte, '2018-01-01T00:00:00.000Z'),
+                                            ],
+                                        },
+
 									],
 								},
 							],
@@ -8332,9 +8416,12 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.gt]: '2018-10-31T17:49:29.000Z' },
-										},
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison(Op.gt, '2018-10-31T17:49:29.000Z'),
+                                            ],
+                                        },
+
 									],
 								},
 							],
@@ -8367,9 +8454,12 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.gt]: '2018-10-31T17:49:29.999Z' },
-										},
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison(Op.gt, '2018-10-31T17:49:29.999Z'),
+                                            ],
+                                        },
+
 									],
 								},
 							],
@@ -8402,9 +8492,12 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.gt]: '2018-10-31T17:49:59.999Z' },
-										},
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison(Op.gt, '2018-10-31T17:49:59.999Z'),
+                                            ],
+                                        },
+
 									],
 								},
 							],
@@ -8438,9 +8531,12 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.gt]: '2018-10-31T17:59:59.999Z' },
-										},
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison(Op.gt, '2018-10-31T17:59:59.999Z'),
+                                            ],
+                                        },
+
 									],
 								},
 							],
@@ -8473,9 +8569,12 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.gt]: '2018-10-31T23:59:59.999Z' },
-										},
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison(Op.gt, '2018-10-31T23:59:59.999Z'),
+                                            ],
+                                        },
+
 									],
 								},
 							],
@@ -8508,9 +8607,12 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.gt]: '2018-10-31T23:59:59.999Z' },
-										},
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison(Op.gt, '2018-10-31T23:59:59.999Z'),
+                                            ],
+                                        },
+
 									],
 								},
 							],
@@ -8543,9 +8645,12 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.gt]: '2018-12-31T23:59:59.999Z' },
-										},
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison(Op.gt, '2018-12-31T23:59:59.999Z'),
+                                            ],
+                                        },
+
 									],
 								},
 							],
@@ -8581,9 +8686,12 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.lt]: '2018-10-31T17:49:29.000Z' },
-										},
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison(Op.lt, '2018-10-31T17:49:29.000Z'),
+                                            ],
+                                        },
+
 									],
 								},
 							],
@@ -8616,9 +8724,12 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.lt]: '2018-10-31T17:49:29.000Z' },
-										},
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison(Op.lt, '2018-10-31T17:49:29.000Z'),
+                                            ],
+                                        },
+
 									],
 								},
 							],
@@ -8651,9 +8762,12 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.lt]: '2018-10-31T17:49:00.000Z' },
-										},
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison(Op.lt, '2018-10-31T17:49:00.000Z'),
+                                            ],
+                                        },
+
 									],
 								},
 							],
@@ -8687,9 +8801,12 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.lt]: '2018-10-31T17:00:00.000Z' },
-										},
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison(Op.lt, '2018-10-31T17:00:00.000Z'),
+                                            ],
+                                        },
+
 									],
 								},
 							],
@@ -8722,9 +8839,12 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.lt]: '2018-10-31T00:00:00.000Z' },
-										},
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison(Op.lt, '2018-10-31T00:00:00.000Z'),
+                                            ],
+                                        },
+
 									],
 								},
 							],
@@ -8757,9 +8877,12 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.lt]: '2018-10-01T00:00:00.000Z' },
-										},
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison(Op.lt, '2018-10-01T00:00:00.000Z'),
+                                            ],
+                                        },
+
 									],
 								},
 							],
@@ -8792,9 +8915,12 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: formDateComparison('<', '2018-01-01T00:00:00.000Z'),
-										},
+                                            [Op.and]: [
+                                                { name: 'foo' },
+                                                formDateComparison(Op.lt, '2018-01-01T00:00:00.000Z'),
+                                            ],
+                                        },
+
 									],
 								},
 							],
@@ -8844,10 +8970,10 @@ describe('SQL Tests', () => {
 					});
 
 					let observedLowerBound = moment(
-						query[0].where[Op.and][0][Op.or][0].foo[Op.between][0],
+						query[0].where[Op.and][0][Op.or][0][Op.and][1].logic,
 					);
 					let observedUpperBound = moment(
-						query[0].where[Op.and][0][Op.or][0].foo[Op.between][1],
+						query[0].where[Op.and][0][Op.or][0][Op.and][2].logic,
 					);
 
 					let lowerBoundDifference = moment
@@ -8900,7 +9026,6 @@ describe('SQL Tests', () => {
 						parameterDefinitions,
 						includeArchived,
 					});
-					console.log(query[0].where[Op.and][0][Op.or][0][Op.and][2].logic);
 					let observedLowerBound = moment(
 						query[0].where[Op.and][0][Op.or][0][Op.and][1].logic,
 					);
@@ -8960,10 +9085,10 @@ describe('SQL Tests', () => {
 					});
 
 					let observedLowerBound = moment(
-						query[0].where[Op.and][0][Op.or][0].foo[Op.between][0],
+						query[0].where[Op.and][0][Op.or][0][Op.and][1].logic,
 					);
 					let observedUpperBound = moment(
-						query[0].where[Op.and][0][Op.or][0].foo[Op.between][1],
+						query[0].where[Op.and][0][Op.or][0][Op.and][2].logic,
 					);
 
 					let lowerBoundDifference = moment
@@ -9019,10 +9144,10 @@ describe('SQL Tests', () => {
 					});
 
 					let observedLowerBound = moment(
-						query[0].where[Op.and][0][Op.or][0].foo[Op.between][0],
+						query[0].where[Op.and][0][Op.or][0][Op.and][1].logic,
 					);
 					let observedUpperBound = moment(
-						query[0].where[Op.and][0][Op.or][0].foo[Op.between][1],
+						query[0].where[Op.and][0][Op.or][0][Op.and][2].logic,
 					);
 
 					let lowerBoundDifference = moment
@@ -9077,10 +9202,10 @@ describe('SQL Tests', () => {
 					});
 
 					let observedLowerBound = moment(
-						query[0].where[Op.and][0][Op.or][0].foo[Op.between][0],
+						query[0].where[Op.and][0][Op.or][0][Op.and][1].logic,
 					);
 					let observedUpperBound = moment(
-						query[0].where[Op.and][0][Op.or][0].foo[Op.between][1],
+						query[0].where[Op.and][0][Op.or][0][Op.and][2].logic,
 					);
 
 					let lowerBoundDifference = moment
@@ -9135,10 +9260,10 @@ describe('SQL Tests', () => {
 					});
 
 					let observedLowerBound = moment(
-						query[0].where[Op.and][0][Op.or][0].foo[Op.between][0],
+						query[0].where[Op.and][0][Op.or][0][Op.and][1].logic,
 					);
 					let observedUpperBound = moment(
-						query[0].where[Op.and][0][Op.or][0].foo[Op.between][1],
+						query[0].where[Op.and][0][Op.or][0][Op.and][2].logic,
 					);
 
 					let lowerBoundDifference = moment
@@ -9193,10 +9318,10 @@ describe('SQL Tests', () => {
 					});
 
 					let observedLowerBound = moment(
-						query[0].where[Op.and][0][Op.or][0].foo[Op.between][0],
+						query[0].where[Op.and][0][Op.or][0][Op.and][1].logic,
 					);
 					let observedUpperBound = moment(
-						query[0].where[Op.and][0][Op.or][0].foo[Op.between][1],
+						query[0].where[Op.and][0][Op.or][0][Op.and][2].logic,
 					);
 
 					let lowerBoundDifference = moment
@@ -11660,7 +11785,6 @@ describe('SQL Tests', () => {
 		});
 	});
 
-	/** TODO: WIP RIGHT HERE!!!!!!*/
 	describe('Request Type Tests', () => {
 		test('Should use the request query for parameters', () => {
 			const req = {
@@ -11681,18 +11805,17 @@ describe('SQL Tests', () => {
 				parameterDefinitions,
 				includeArchived,
 			});
-			console.log('query', query);
 			const expectedResult = [{
 					where: {
 						[Op.and]: [{
 							[Op.or]: [{
-								[Op.and]: [{
-									name: 'foo',
-								},
+								[Op.and]: [
+									{name: 'foo'},
 								formDateComparison('=', '2018-10-31T17:49:29.000Z')
 								]
 						}]
 					}]
+						}
 				}];
 			expect(errors).toHaveLength(0);
 			expect(query).toEqual(expectedResult);
@@ -11720,11 +11843,13 @@ describe('SQL Tests', () => {
 					where: {
 						[Op.and]: [{
 							[Op.or]: [{
-								name: 'foo',
-								value: 'bar'
-							}]
+								[Op.and]: [
+									{name: 'foo'},
+								formDateComparison('=', '2017-10-31T17:49:29.000Z')
+								]
 						}]
-					}
+					}]
+						}
 				}];
 			expect(errors).toHaveLength(0);
 			expect(query).toEqual(expectedResult);
@@ -11749,31 +11874,27 @@ describe('SQL Tests', () => {
 				parameterDefinitions,
 				includeArchived,
 			});
-			const expectedResult = [
-				{
-					$match: {
-						$and: [
-							{ $or: [{ foo: '2017-10-31T17:49:29.000Z' }] },
-							{ $or: [{ bar: '2018-10-31T17:49:29.000Z' }] },
-						],
+			const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								[Op.and]: [
+									{name: 'foo'},
+								formDateComparison('=', '2017-10-31T17:49:29.000Z')
+								]
+						}]
 					},
-				},
-				{ $match: { 'meta._isArchived': false } },
-				{
-					$facet: {
-						data: [{ $skip: 0 }, { $limit: 10 }],
-						metadata: [
-							{ $count: 'total' },
 							{
-								$addFields: {
-									numberOfPages: { $ceil: { $divide: ['$total', 10] } },
-								},
-							},
-							{ $addFields: { page: 1 } },
-						],
-					},
-				},
-			];
+								[Op.or]: [{
+									[Op.and]: [
+										{name: 'bar'},
+										formDateComparison('=', '2018-10-31T17:49:29.000Z')
+									]
+								}]
+							}
+							]
+						}
+				}];
 			expect(errors).toHaveLength(0);
 			expect(query).toEqual(expectedResult);
 		});
@@ -11816,6 +11937,180 @@ describe('SQL Tests', () => {
 			expect(errors[0].message).toContain(
 				"Search modifier 'unsupportedModifier' is not currently supported",
 			);
+		});
+	});
+
+	describe('Global Parameter Query Tests', () => {
+		test('Test for global param _id', () => {
+			const req = {
+				method: 'GET',
+				query: {
+					_id: 'foo',
+				},
+			};
+			const parameterDefinitions = undefined;
+			const includeArchived = false;
+			let { query, errors } = qb.buildSearchQuery({
+				req,
+				parameterDefinitions,
+				includeArchived,
+			});
+			const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								name: 'id',
+								value: 'foo'
+							}]
+						}]
+					}
+				}];
+
+			expect(errors).toHaveLength(0);
+			expect(query).toEqual(expectedResult);
+		});
+		test('Test for global param _lastUpdated', () => {
+			const req = {
+				method: 'GET',
+				query: {
+					_lastUpdated: '2018-10-31T17:49:29.000Z',
+				},
+			};
+			const parameterDefinitions = undefined;
+			const includeArchived = false;
+			let { query, errors } = qb.buildSearchQuery({
+				req,
+				parameterDefinitions,
+				includeArchived,
+			});
+			const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								[Op.and]: [
+									{name: 'meta.lastUpdated'},
+								formDateComparison('=', '2018-10-31T17:49:29.000Z')
+								]
+						}]
+					}]
+						}
+				}];
+			expect(errors).toHaveLength(0);
+			expect(query).toEqual(expectedResult);
+		});
+		test('Should be able to initialize a new qb without supplying global parameters', () => {
+			const noGlobalQB = new QueryBuilder({
+				packageName: '@asymmetrik/fhir-qb-mongo',
+			});
+			expect(noGlobalQB).toBeDefined();
+		});
+	});
+
+	/** TODO: Look into _count param. Currently not handling it. Search transformations not implemented. */
+
+	/** TODO: Paging is currently handled in the server - think about migrating this?
+	/**  We would just need to calculate the offset + limit. */
+
+	describe('Parameter Definition Tests', () => {
+		test('TODO - test multiple xpaths', () => {
+			const req = {
+				method: 'GET',
+				query: {
+					foo: 'Evé',
+				},
+			};
+			const parameterDefinitions = {
+				foo: { type: 'string', xpath: ['Resource.foo', 'Resource.bar'] },
+			};
+			const includeArchived = false;
+			let { errors, query } = qb.buildSearchQuery({
+				req,
+				parameterDefinitions,
+				includeArchived,
+			});
+			const expectedResult = [{
+					where: {
+						[Op.and]: [{
+							[Op.or]: [{
+								name: 'foo',
+								value: {
+									[Op.iRegexp]: '^Eve'
+								}
+						},
+								{
+									name: 'bar',
+									value: {
+										[Op.iRegexp]: '^Eve'
+									}
+								}]
+					}]
+						}
+				}];
+			expect(errors).toHaveLength(0);
+			expect(query).toEqual(expectedResult);
+		});
+		test('Should return a query that matches foo AND (bar OR baz) in field foo or qux', () => {
+			const req = {
+				method: 'GET',
+				query: {
+					foo: ['foo', 'bar,baz'],
+				},
+			};
+			const parameterDefinitions = {
+				foo: { type: 'string', xpath: ['Resource.foo', 'Resource.qux'] },
+			};
+			const includeArchived = false;
+			let { errors, query } = qb.buildSearchQuery({
+				req,
+				parameterDefinitions,
+				includeArchived,
+			});
+			const expectedResult = [{
+				where: {
+					[Op.and]: [{
+						[Op.or]: [{
+							name: 'foo',
+							value: {
+								[Op.iRegexp]: '^foo'
+							}
+						},
+							{
+								name: 'qux',
+								value: {
+									[Op.iRegexp]: '^foo'
+								}
+							}]
+					},
+						{
+							[Op.or]: [{
+								name: 'foo',
+								value: {
+									[Op.iRegexp]: '^bar'
+								}
+							},
+								{
+									name: 'foo',
+									value: {
+										[Op.iRegexp]: '^baz'
+									}
+								},
+								{
+									name: 'qux',
+									value: {
+										[Op.iRegexp]: '^bar'
+									}
+								},
+								{
+									name: 'qux',
+									value: {
+										[Op.iRegexp]: '^baz'
+									}
+								}]
+						}]
+				}
+			}];
+			expect(errors).toHaveLength(0);
+			expect(query).toEqual(expectedResult);
 		});
 	});
 });
