@@ -208,9 +208,11 @@ let assembleSearchQuery = function({
 	let toSuppress = {};
 
 	// Check that the necessary implementation parameters were passed through
-	let {archivedParamPath} = implementationParameters;
+	let { archivedParamPath } = implementationParameters;
 	if (!archivedParamPath) {
-		throw new Error('Missing required implementation parameter \'archivedParamPath\'');
+		throw new Error(
+			"Missing required implementation parameter 'archivedParamPath'",
+		);
 	}
 
 	// Construct the necessary joins and add them to the aggregate pipeline. Also follow each $lookup with an $unwind

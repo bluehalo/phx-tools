@@ -215,7 +215,7 @@ describe('Mongo Query Builder Tests', () => {
 				joinsToPerform: [],
 				matchesToPerform: [],
 				searchResultTransformations: {},
-				implementationParameters: {archivedParamPath: 'meta._isArchived'},
+				implementationParameters: { archivedParamPath: 'meta._isArchived' },
 				includeArchived: false,
 				pageNumber: 1,
 				resultsPerPage: 10,
@@ -254,7 +254,7 @@ describe('Mongo Query Builder Tests', () => {
 				joinsToPerform: [{ from: 'foo', localKey: 'bar', foreignKey: 'baz' }],
 				matchesToPerform: [],
 				searchResultTransformations: {},
-				implementationParameters: {archivedParamPath: 'meta._isArchived'},
+				implementationParameters: { archivedParamPath: 'meta._isArchived' },
 				includeArchived: false,
 				pageNumber: 1,
 				resultsPerPage: 10,
@@ -284,7 +284,7 @@ describe('Mongo Query Builder Tests', () => {
 				joinsToPerform: [],
 				matchesToPerform: [[]],
 				searchResultTransformations: {},
-				implementationParameters: {archivedParamPath: 'meta._isArchived'},
+				implementationParameters: { archivedParamPath: 'meta._isArchived' },
 				includeArchived: false,
 				pageNumber: 1,
 				resultsPerPage: 10,
@@ -314,7 +314,7 @@ describe('Mongo Query Builder Tests', () => {
 				joinsToPerform: [],
 				matchesToPerform: [[{ foo: { $gte: 1, $lte: 10 } }]],
 				searchResultTransformations: {},
-				implementationParameters: {archivedParamPath: 'meta._isArchived'},
+				implementationParameters: { archivedParamPath: 'meta._isArchived' },
 				includeArchived: false,
 				pageNumber: 1,
 				resultsPerPage: 10,
@@ -346,7 +346,7 @@ describe('Mongo Query Builder Tests', () => {
 				joinsToPerform: [],
 				matchesToPerform: [],
 				searchResultTransformations: { _count: 3 },
-				implementationParameters: {archivedParamPath: 'meta._isArchived'},
+				implementationParameters: { archivedParamPath: 'meta._isArchived' },
 				includeArchived: false,
 				pageNumber: 1,
 				resultsPerPage: 10,
@@ -387,7 +387,7 @@ describe('Mongo Query Builder Tests', () => {
 				joinsToPerform: [],
 				matchesToPerform: [],
 				searchResultTransformations: {},
-				implementationParameters: {archivedParamPath: 'meta._isArchived'},
+				implementationParameters: { archivedParamPath: 'meta._isArchived' },
 				includeArchived: false,
 				pageNumber: 1,
 			});
@@ -409,20 +409,22 @@ describe('Mongo Query Builder Tests', () => {
 			} catch (err) {
 				error = err;
 			}
-			expect(error.message).toContain('Missing required implementation parameter \'archivedParamPath\'');
+			expect(error.message).toContain(
+				"Missing required implementation parameter 'archivedParamPath'",
+			);
 		});
 		test('Should return input query as is if we are not filtering out archived results', () => {
 			const expectedResult = [
 				{
 					$facet: {
-						data: [{ $skip: 0 }, {$limit: 10}],
+						data: [{ $skip: 0 }, { $limit: 10 }],
 						metadata: [
 							{
 								$count: 'total',
 							},
 							{
 								$addFields: {
-									numberOfPages: {$ceil: {$divide:['$total',10]}},
+									numberOfPages: { $ceil: { $divide: ['$total', 10] } },
 								},
 							},
 							{
@@ -438,10 +440,10 @@ describe('Mongo Query Builder Tests', () => {
 				joinsToPerform: [],
 				matchesToPerform: [],
 				searchResultTransformations: {},
-				implementationParameters: {archivedParamPath: 'meta._isArchived'},
+				implementationParameters: { archivedParamPath: 'meta._isArchived' },
 				includeArchived: true,
 				pageNumber: 1,
-				resultsPerPage: 10
+				resultsPerPage: 10,
 			});
 			expect(observedResult).toEqual(expectedResult);
 		});

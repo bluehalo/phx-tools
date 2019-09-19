@@ -32,6 +32,8 @@ const matchModifiers = {
 	'': '',
 };
 
+const supportedColumnIdentifierStrategies = ['xpath', 'parameter'];
+
 /* TODO
  * Need to add ability to get destination field's type for chained queries.
  * Add support for Chained Queries of depth > 1 (if necessary)
@@ -55,7 +57,17 @@ class QueryBuilder {
 		this.pageParam = pageParam;
 		this.resultsPerPage = resultsPerPage;
 		this.implementationParameters = implementationParameters;
-		this.columnIdentifierStrategy = columnIdentifierStrategy;
+		if (
+			supportedColumnIdentifierStrategies.includes(columnIdentifierStrategy)
+		) {
+			this.columnIdentifierStrategy = columnIdentifierStrategy;
+		} else {
+			throw new Error(
+				`Supplied columnIdentifierStrategy value '${columnIdentifierStrategy}' not one of currently supported columnIdentifierStrategy values: ${supportedColumnIdentifierStrategies.join(
+					', ',
+				)}`,
+			);
+		}
 	}
 
 	/**
@@ -654,6 +666,7 @@ class QueryBuilder {
 				} else {
 					field = QueryBuilder.parseXPath(xpath);
 				}
+
 				// Handle implicit URI logic before handling explicit modifiers
 				if (type === 'uri') {
 					if (parameterValue.endsWith('/') && modifier === '') {

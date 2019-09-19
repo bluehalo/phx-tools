@@ -36,6 +36,7 @@
 		"@asymmetrik/fhir-sanitize-param": "^1.1.2",
 		"mathjs": "^5.2.3",
 		"moment": "^2.24.0",
+		"sequelize": "^5.19.0",
 		"xregexp": "^4.2.0"
 	},
 	"devDependencies": {
