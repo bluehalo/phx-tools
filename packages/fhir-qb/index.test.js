@@ -6651,15 +6651,14 @@ describe('Mongo Tests', () => {
 	});
 });
 
-const Sequelize = require('sequelize');
-const { formDateComparison } = require('../fhir-qb-sql/index');
-const Op = Sequelize.Op;
-
 describe('SQL Tests', () => {
 	beforeAll(() => {
 		// Do this for tests only
 		moment.suppressDeprecationWarnings = true;
 	});
+	const Sequelize = require('sequelize');
+	const { formDateComparison } = require('../fhir-qb-sql/index');
+	const Op = Sequelize.Op;
 	const globalParameterDefinitions = {
 		_content: {
 			type: 'string',
@@ -6836,7 +6835,7 @@ describe('SQL Tests', () => {
 											[Op.and]: [
 												{ name: 'foo' },
 												formDateComparison('>=', '2018-10-31T17:49:00.000Z'),
-												formDateComparison('>=', '2018-10-31T17:49:00.000Z'),
+												formDateComparison('<=', '2018-10-31T17:49:59.999Z'),
 											],
 										},
 									],
@@ -6911,7 +6910,7 @@ describe('SQL Tests', () => {
 										{
 											[Op.and]: [
 												{ name: 'foo' },
-												formDateComparison('>=', '2018-10-01T00:00:00.000Z'),
+												formDateComparison('>=', '2018-10-31T00:00:00.000Z'),
 												formDateComparison('<=', '2018-10-31T23:59:59.999Z'),
 											],
 										},
@@ -7000,7 +6999,7 @@ describe('SQL Tests', () => {
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
-			test("Should implicityly use 'eq' prefix if one is not supplied in the request", () => {
+			test("Should implicitly use 'eq' prefix if one is not supplied in the request", () => {
 				const req = {
 					method: 'GET',
 					query: {
@@ -7066,8 +7065,7 @@ describe('SQL Tests', () => {
 										{
 											[Op.and]: [
 												{ name: 'foo' },
-												formDateComparison('>=', '2018-01-01T00:00:00.000Z'),
-												formDateComparison('<=', '2018-12-31T23:59:59.999Z'),
+												formDateComparison('!=', '2018-10-31T17:49:29.000Z'),
 											],
 										},
 									],
@@ -7104,8 +7102,8 @@ describe('SQL Tests', () => {
 										{
 											[Op.and]: [
 												{ name: 'foo' },
-												formDateComparison('>=', '2018-01-01T00:00:00.000Z'),
-												formDateComparison('<=', '2018-12-31T23:59:59.999Z'),
+												formDateComparison('<=', '2018-10-31T17:49:29.000Z'),
+												formDateComparison('>=', '2018-10-31T17:49:29.999Z'),
 											],
 										},
 									],
@@ -7143,8 +7141,8 @@ describe('SQL Tests', () => {
 										{
 											[Op.and]: [
 												{ name: 'foo' },
-												formDateComparison('>=', '2018-01-01T00:00:00.000Z'),
-												formDateComparison('<=', '2018-12-31T23:59:59.999Z'),
+												formDateComparison('<=', '2018-10-31T17:49:00.000Z'),
+												formDateComparison('>=', '2018-10-31T17:49:59.999Z'),
 											],
 										},
 									],
@@ -7182,8 +7180,8 @@ describe('SQL Tests', () => {
 										{
 											[Op.and]: [
 												{ name: 'foo' },
-												formDateComparison('>=', '2018-01-01T00:00:00.000Z'),
-												formDateComparison('<=', '2018-12-31T23:59:59.999Z'),
+												formDateComparison('<=', '2018-10-31T17:00:00.000Z'),
+												formDateComparison('>=', '2018-10-31T17:59:59.999Z'),
 											],
 										},
 									],
@@ -7220,8 +7218,8 @@ describe('SQL Tests', () => {
 										{
 											[Op.and]: [
 												{ name: 'foo' },
-												formDateComparison('>=', '2018-01-01T00:00:00.000Z'),
-												formDateComparison('<=', '2018-12-31T23:59:59.999Z'),
+												formDateComparison('<=', '2018-10-31T00:00:00.000Z'),
+												formDateComparison('>=', '2018-10-31T23:59:59.999Z'),
 											],
 										},
 									],
@@ -7258,8 +7256,8 @@ describe('SQL Tests', () => {
 										{
 											[Op.and]: [
 												{ name: 'foo' },
-												formDateComparison('>=', '2018-01-01T00:00:00.000Z'),
-												formDateComparison('<=', '2018-12-31T23:59:59.999Z'),
+												formDateComparison('<=', '2018-10-01T00:00:00.000Z'),
+												formDateComparison('>=', '2018-10-31T23:59:59.999Z'),
 											],
 										},
 									],
@@ -7296,8 +7294,8 @@ describe('SQL Tests', () => {
 										{
 											[Op.and]: [
 												{ name: 'foo' },
-												formDateComparison('>=', '2018-01-01T00:00:00.000Z'),
-												formDateComparison('<=', '2018-12-31T23:59:59.999Z'),
+												formDateComparison('<=', '2018-01-01T00:00:00.000Z'),
+												formDateComparison('>=', '2018-12-31T23:59:59.999Z'),
 											],
 										},
 									],
@@ -7335,8 +7333,10 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.gt]: '2018-10-31T17:49:29.000Z' },
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison(Op.gt, '2018-10-31T17:49:29.000Z'),
+											],
 										},
 									],
 								},
@@ -7370,8 +7370,10 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.gt]: '2018-10-31T17:49:29.999Z' },
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison(Op.gt, '2018-10-31T17:49:29.999Z'),
+											],
 										},
 									],
 								},
@@ -7405,8 +7407,10 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.gt]: '2018-10-31T17:49:59.999Z' },
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison(Op.gt, '2018-10-31T17:49:59.999Z'),
+											],
 										},
 									],
 								},
@@ -7441,8 +7445,10 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.gt]: '2018-10-31T17:59:59.999Z' },
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison(Op.gt, '2018-10-31T17:59:59.999Z'),
+											],
 										},
 									],
 								},
@@ -7476,8 +7482,10 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.gt]: '2018-10-31T23:59:59.999Z' },
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison(Op.gt, '2018-10-31T23:59:59.999Z'),
+											],
 										},
 									],
 								},
@@ -7511,8 +7519,10 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.gt]: '2018-10-31T23:59:59.999Z' },
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison(Op.gt, '2018-10-31T23:59:59.999Z'),
+											],
 										},
 									],
 								},
@@ -7546,8 +7556,10 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.gt]: '2018-12-31T23:59:59.999Z' },
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison(Op.gt, '2018-12-31T23:59:59.999Z'),
+											],
 										},
 									],
 								},
@@ -7559,7 +7571,7 @@ describe('SQL Tests', () => {
 				expect(query).toEqual(expectedResult);
 			});
 		});
-		describe('ge Modifier Tests', () => {
+		describe('gte Modifier Tests', () => {
 			// TODO - Should I throw an error in this situation? Providing ms is not allowed.
 			test("Should return $gte ISO String if given a full ISO String 'yyyy-mm-ddThh:mm:ss.###Z'", () => {
 				const req = {
@@ -7584,8 +7596,10 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.gte]: '2018-10-31T17:49:29.000Z' },
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison(Op.gte, '2018-10-31T17:49:29.000Z'),
+											],
 										},
 									],
 								},
@@ -7619,8 +7633,10 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.gte]: '2018-10-31T17:49:29.000Z' },
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison(Op.gte, '2018-10-31T17:49:29.000Z'),
+											],
 										},
 									],
 								},
@@ -7654,8 +7670,10 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.gte]: '2018-10-31T17:49:00.000Z' },
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison(Op.gte, '2018-10-31T17:49:00.000Z'),
+											],
 										},
 									],
 								},
@@ -7690,8 +7708,10 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.gte]: '2018-10-31T17:00:00.000Z' },
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison(Op.gte, '2018-10-31T17:00:00.000Z'),
+											],
 										},
 									],
 								},
@@ -7725,8 +7745,10 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.gte]: '2018-10-31T00:00:00.000Z' },
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison(Op.gte, '2018-10-31T00:00:00.000Z'),
+											],
 										},
 									],
 								},
@@ -7760,8 +7782,10 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.gte]: '2018-10-01T00:00:00.000Z' },
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison(Op.gte, '2018-10-01T00:00:00.000Z'),
+											],
 										},
 									],
 								},
@@ -7795,8 +7819,10 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.gte]: '2018-01-01T00:00:00.000Z' },
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison(Op.gte, '2018-01-01T00:00:00.000Z'),
+											],
 										},
 									],
 								},
@@ -7833,8 +7859,10 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.lt]: '2018-10-31T17:49:29.000Z' },
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison(Op.lt, '2018-10-31T17:49:29.000Z'),
+											],
 										},
 									],
 								},
@@ -7868,8 +7896,10 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.lt]: '2018-10-31T17:49:29.000Z' },
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison(Op.lt, '2018-10-31T17:49:29.000Z'),
+											],
 										},
 									],
 								},
@@ -7903,8 +7933,10 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.lt]: '2018-10-31T17:49:00.000Z' },
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison(Op.lt, '2018-10-31T17:49:00.000Z'),
+											],
 										},
 									],
 								},
@@ -7939,8 +7971,10 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.lt]: '2018-10-31T17:00:00.000Z' },
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison(Op.lt, '2018-10-31T17:00:00.000Z'),
+											],
 										},
 									],
 								},
@@ -7974,8 +8008,10 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.lt]: '2018-10-31T00:00:00.000Z' },
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison(Op.lt, '2018-10-31T00:00:00.000Z'),
+											],
 										},
 									],
 								},
@@ -8009,8 +8045,10 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.lt]: '2018-10-01T00:00:00.000Z' },
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison(Op.lt, '2018-10-01T00:00:00.000Z'),
+											],
 										},
 									],
 								},
@@ -8044,8 +8082,10 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.lt]: '2018-01-01T00:00:00.000Z' },
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison(Op.lt, '2018-01-01T00:00:00.000Z'),
+											],
 										},
 									],
 								},
@@ -8057,7 +8097,7 @@ describe('SQL Tests', () => {
 				expect(query).toEqual(expectedResult);
 			});
 		});
-		describe('le Modifier Tests', () => {
+		describe('lte Modifier Tests', () => {
 			// TODO - Should I throw an error in this situation? Providing ms is not allowed.
 			test("Should return $lte ISO String if given a full ISO String 'yyyy-mm-ddThh:mm:ss.###Z'", () => {
 				const req = {
@@ -8082,8 +8122,10 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.lte]: '2018-10-31T17:49:29.000Z' },
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison(Op.lte, '2018-10-31T17:49:29.000Z'),
+											],
 										},
 									],
 								},
@@ -8117,8 +8159,10 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.lte]: '2018-10-31T17:49:29.000Z' },
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison(Op.lte, '2018-10-31T17:49:29.000Z'),
+											],
 										},
 									],
 								},
@@ -8152,8 +8196,10 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.lte]: '2018-10-31T17:49:00.000Z' },
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison(Op.lte, '2018-10-31T17:49:00.000Z'),
+											],
 										},
 									],
 								},
@@ -8188,8 +8234,10 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.lte]: '2018-10-31T17:00:00.000Z' },
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison(Op.lte, '2018-10-31T17:00:00.000Z'),
+											],
 										},
 									],
 								},
@@ -8223,8 +8271,10 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.lte]: '2018-10-31T00:00:00.000Z' },
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison(Op.lte, '2018-10-31T00:00:00.000Z'),
+											],
 										},
 									],
 								},
@@ -8258,8 +8308,10 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.lte]: '2018-10-01T00:00:00.000Z' },
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison(Op.lte, '2018-10-01T00:00:00.000Z'),
+											],
 										},
 									],
 								},
@@ -8293,8 +8345,10 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.lte]: '2018-01-01T00:00:00.000Z' },
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison(Op.lte, '2018-01-01T00:00:00.000Z'),
+											],
 										},
 									],
 								},
@@ -8331,8 +8385,10 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.gt]: '2018-10-31T17:49:29.000Z' },
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison(Op.gt, '2018-10-31T17:49:29.000Z'),
+											],
 										},
 									],
 								},
@@ -8366,8 +8422,10 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.gt]: '2018-10-31T17:49:29.999Z' },
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison(Op.gt, '2018-10-31T17:49:29.999Z'),
+											],
 										},
 									],
 								},
@@ -8401,8 +8459,10 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.gt]: '2018-10-31T17:49:59.999Z' },
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison(Op.gt, '2018-10-31T17:49:59.999Z'),
+											],
 										},
 									],
 								},
@@ -8437,8 +8497,10 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.gt]: '2018-10-31T17:59:59.999Z' },
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison(Op.gt, '2018-10-31T17:59:59.999Z'),
+											],
 										},
 									],
 								},
@@ -8472,8 +8534,10 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.gt]: '2018-10-31T23:59:59.999Z' },
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison(Op.gt, '2018-10-31T23:59:59.999Z'),
+											],
 										},
 									],
 								},
@@ -8507,8 +8571,10 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.gt]: '2018-10-31T23:59:59.999Z' },
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison(Op.gt, '2018-10-31T23:59:59.999Z'),
+											],
 										},
 									],
 								},
@@ -8542,8 +8608,10 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.gt]: '2018-12-31T23:59:59.999Z' },
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison(Op.gt, '2018-12-31T23:59:59.999Z'),
+											],
 										},
 									],
 								},
@@ -8580,8 +8648,10 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.lt]: '2018-10-31T17:49:29.000Z' },
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison(Op.lt, '2018-10-31T17:49:29.000Z'),
+											],
 										},
 									],
 								},
@@ -8615,8 +8685,10 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.lt]: '2018-10-31T17:49:29.000Z' },
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison(Op.lt, '2018-10-31T17:49:29.000Z'),
+											],
 										},
 									],
 								},
@@ -8650,8 +8722,10 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.lt]: '2018-10-31T17:49:00.000Z' },
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison(Op.lt, '2018-10-31T17:49:00.000Z'),
+											],
 										},
 									],
 								},
@@ -8686,8 +8760,10 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.lt]: '2018-10-31T17:00:00.000Z' },
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison(Op.lt, '2018-10-31T17:00:00.000Z'),
+											],
 										},
 									],
 								},
@@ -8721,8 +8797,10 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.lt]: '2018-10-31T00:00:00.000Z' },
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison(Op.lt, '2018-10-31T00:00:00.000Z'),
+											],
 										},
 									],
 								},
@@ -8756,8 +8834,10 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: { [Op.lt]: '2018-10-01T00:00:00.000Z' },
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison(Op.lt, '2018-10-01T00:00:00.000Z'),
+											],
 										},
 									],
 								},
@@ -8791,11 +8871,10 @@ describe('SQL Tests', () => {
 								{
 									[Op.or]: [
 										{
-											name: 'foo',
-											value: formDateComparison(
-												'<',
-												'2018-01-01T00:00:00.000Z',
-											),
+											[Op.and]: [
+												{ name: 'foo' },
+												formDateComparison(Op.lt, '2018-01-01T00:00:00.000Z'),
+											],
 										},
 									],
 								},
@@ -8846,10 +8925,10 @@ describe('SQL Tests', () => {
 					});
 
 					let observedLowerBound = moment(
-						query[0].where[Op.and][0][Op.or][0].foo[Op.between][0],
+						query[0].where[Op.and][0][Op.or][0][Op.and][1].logic,
 					);
 					let observedUpperBound = moment(
-						query[0].where[Op.and][0][Op.or][0].foo[Op.between][1],
+						query[0].where[Op.and][0][Op.or][0][Op.and][2].logic,
 					);
 
 					let lowerBoundDifference = moment
@@ -8902,7 +8981,6 @@ describe('SQL Tests', () => {
 						parameterDefinitions,
 						includeArchived,
 					});
-					console.log(query[0].where[Op.and][0][Op.or][0][Op.and][2].logic);
 					let observedLowerBound = moment(
 						query[0].where[Op.and][0][Op.or][0][Op.and][1].logic,
 					);
@@ -8962,10 +9040,10 @@ describe('SQL Tests', () => {
 					});
 
 					let observedLowerBound = moment(
-						query[0].where[Op.and][0][Op.or][0].foo[Op.between][0],
+						query[0].where[Op.and][0][Op.or][0][Op.and][1].logic,
 					);
 					let observedUpperBound = moment(
-						query[0].where[Op.and][0][Op.or][0].foo[Op.between][1],
+						query[0].where[Op.and][0][Op.or][0][Op.and][2].logic,
 					);
 
 					let lowerBoundDifference = moment
@@ -9021,10 +9099,10 @@ describe('SQL Tests', () => {
 					});
 
 					let observedLowerBound = moment(
-						query[0].where[Op.and][0][Op.or][0].foo[Op.between][0],
+						query[0].where[Op.and][0][Op.or][0][Op.and][1].logic,
 					);
 					let observedUpperBound = moment(
-						query[0].where[Op.and][0][Op.or][0].foo[Op.between][1],
+						query[0].where[Op.and][0][Op.or][0][Op.and][2].logic,
 					);
 
 					let lowerBoundDifference = moment
@@ -9079,10 +9157,10 @@ describe('SQL Tests', () => {
 					});
 
 					let observedLowerBound = moment(
-						query[0].where[Op.and][0][Op.or][0].foo[Op.between][0],
+						query[0].where[Op.and][0][Op.or][0][Op.and][1].logic,
 					);
 					let observedUpperBound = moment(
-						query[0].where[Op.and][0][Op.or][0].foo[Op.between][1],
+						query[0].where[Op.and][0][Op.or][0][Op.and][2].logic,
 					);
 
 					let lowerBoundDifference = moment
@@ -9137,10 +9215,10 @@ describe('SQL Tests', () => {
 					});
 
 					let observedLowerBound = moment(
-						query[0].where[Op.and][0][Op.or][0].foo[Op.between][0],
+						query[0].where[Op.and][0][Op.or][0][Op.and][1].logic,
 					);
 					let observedUpperBound = moment(
-						query[0].where[Op.and][0][Op.or][0].foo[Op.between][1],
+						query[0].where[Op.and][0][Op.or][0][Op.and][2].logic,
 					);
 
 					let lowerBoundDifference = moment
@@ -9195,10 +9273,10 @@ describe('SQL Tests', () => {
 					});
 
 					let observedLowerBound = moment(
-						query[0].where[Op.and][0][Op.or][0].foo[Op.between][0],
+						query[0].where[Op.and][0][Op.or][0][Op.and][1].logic,
 					);
 					let observedUpperBound = moment(
-						query[0].where[Op.and][0][Op.or][0].foo[Op.between][1],
+						query[0].where[Op.and][0][Op.or][0][Op.and][2].logic,
 					);
 
 					let lowerBoundDifference = moment
@@ -9771,6 +9849,2743 @@ describe('SQL Tests', () => {
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
+		});
+	});
+
+	describe('Build Quantity Query Tests', () => {
+		describe('eq Modifier Tests', () => {
+			test('Should return range with upper lower bounds equal to +/- 0.5 given an integer quantity of SI unit', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'eq1||kg',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'quantity', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo.value',
+											value: {
+												[Op.between]: [0.5, 1.5],
+											},
+										},
+									],
+								},
+							],
+						},
+					},
+				];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test('Should return range with upper lower bounds equal to +/- 0.5 * the most significant digit of a given SI quantity', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'eq1.00||kg',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'quantity', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo.value',
+											value: {
+												[Op.between]: [0.995, 1.005],
+											},
+										},
+									],
+								},
+							],
+						},
+					},
+				];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test(
+				'Should return range with upper lower bounds equal to +/- 0.5 * the most significant digit of a given number ' +
+					'converted to SI units',
+				() => {
+					const req = {
+						method: 'GET',
+						query: {
+							foo: 'eq20.00||mg',
+						},
+					};
+					const parameterDefinitions = {
+						foo: { type: 'quantity', xpath: 'Resource.foo' },
+					};
+					const includeArchived = false;
+					let { errors, query } = qb.buildSearchQuery({
+						req,
+						parameterDefinitions,
+						includeArchived,
+					});
+					const expectedResult = [
+						{
+							where: {
+								[Op.and]: [
+									{
+										[Op.or]: [
+											{
+												name: 'foo.value',
+												value: {
+													[Op.between]: [0.000019995, 0.000020005],
+												},
+											},
+										],
+									},
+								],
+							},
+						},
+					];
+					expect(errors).toHaveLength(0);
+					expect(query).toEqual(expectedResult);
+				},
+			);
+		});
+		describe('ne Modifier Tests', () => {
+			test('Should return $or that fully excludes range with upper lower bounds equal to +/- 0.5 given an integer quantity of SI unit', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'ne1||kg',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'quantity', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo.value',
+											value: {
+												[Op.notBetween]: [0.5, 1.5],
+											},
+										},
+									],
+								},
+							],
+						},
+					},
+				];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test(
+				'Should return $or that fully excludes range with upper lower bounds equal to +/- 0.5 * the most significant ' +
+					'digit given a SI quantity with significant decimal places.',
+				() => {
+					const req = {
+						method: 'GET',
+						query: {
+							foo: 'ne1.00||kg',
+						},
+					};
+					const parameterDefinitions = {
+						foo: { type: 'quantity', xpath: 'Resource.foo' },
+					};
+					const includeArchived = false;
+					let { errors, query } = qb.buildSearchQuery({
+						req,
+						parameterDefinitions,
+						includeArchived,
+					});
+					const expectedResult = [
+						{
+							where: {
+								[Op.and]: [
+									{
+										[Op.or]: [
+											{
+												name: 'foo.value',
+												value: {
+													[Op.notBetween]: [0.995, 1.005],
+												},
+											},
+										],
+									},
+								],
+							},
+						},
+					];
+					expect(errors).toHaveLength(0);
+					expect(query).toEqual(expectedResult);
+				},
+			);
+			test(
+				'Should return $or that fully excludes range with upper lower bounds equal to +/- 0.5 * the most significant ' +
+					'digit given a quantity converted to SI units.',
+				() => {
+					const req = {
+						method: 'GET',
+						query: {
+							foo: 'ne20.00||mg',
+						},
+					};
+					const parameterDefinitions = {
+						foo: { type: 'quantity', xpath: 'Resource.foo' },
+					};
+					const includeArchived = false;
+					let { errors, query } = qb.buildSearchQuery({
+						req,
+						parameterDefinitions,
+						includeArchived,
+					});
+					const expectedResult = [
+						{
+							where: {
+								[Op.and]: [
+									{
+										[Op.or]: [
+											{
+												name: 'foo.value',
+												value: {
+													[Op.notBetween]: [0.000019995, 0.000020005],
+												},
+											},
+										],
+									},
+								],
+							},
+						},
+					];
+					expect(errors).toHaveLength(0);
+					expect(query).toEqual(expectedResult);
+				},
+			);
+		});
+		describe('lt, le, gt, ge Modifier Tests', () => {
+			test('Should return $lt a given target value in SI units', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'lt2.4||kg',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'quantity', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo.value',
+											value: {
+												[Op.lt]: 2.4,
+											},
+										},
+									],
+								},
+							],
+						},
+					},
+				];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test('Should return $lt a given target value converted to SI units', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'lt2.4||mg',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'quantity', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo.value',
+											value: {
+												[Op.lt]: 0.0000024,
+											},
+										},
+									],
+								},
+							],
+						},
+					},
+				];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test('Should return $lte a given target value in SI units', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'le2.4||kg',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'quantity', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo.value',
+											value: {
+												[Op.lte]: 2.4,
+											},
+										},
+									],
+								},
+							],
+						},
+					},
+				];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test('Should return $lte a given target value converted to SI units', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'le2.4||mg',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'quantity', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo.value',
+											value: {
+												[Op.lte]: 0.0000024,
+											},
+										},
+									],
+								},
+							],
+						},
+					},
+				];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test('Should return $gt a given target value in SI units', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'gt2.4||kg',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'quantity', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo.value',
+											value: {
+												[Op.gt]: 2.4,
+											},
+										},
+									],
+								},
+							],
+						},
+					},
+				];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test('Should return $gt a given target value converted to SI units', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'gt2.4||mg',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'quantity', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo.value',
+											value: {
+												[Op.gt]: 0.0000024,
+											},
+										},
+									],
+								},
+							],
+						},
+					},
+				];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test('Should return $gte a given target value in SI units', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'ge2.4||kg',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'quantity', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo.value',
+											value: {
+												[Op.gte]: 2.4,
+											},
+										},
+									],
+								},
+							],
+						},
+					},
+				];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test('Should return $gte a given target value converted to SI units', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'ge2.4||mg',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'quantity', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo.value',
+											value: {
+												[Op.gte]: 0.0000024,
+											},
+										},
+									],
+								},
+							],
+						},
+					},
+				];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+		});
+		describe('ap Prefix Tests', () => {
+			test('Should return range with upper lower bounds equal to +/- 10% given an integer quantity of SI unit', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'ap1||kg',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'quantity', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo.value',
+											value: {
+												[Op.between]: [0.9, 1.1],
+											},
+										},
+									],
+								},
+							],
+						},
+					},
+				];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test(
+				'Should return range with upper lower bounds equal to +/- 10% given a SI quantity with significant decimal ' +
+					'places.',
+				() => {
+					const req = {
+						method: 'GET',
+						query: {
+							foo: 'ap1.00||kg',
+						},
+					};
+					const parameterDefinitions = {
+						foo: { type: 'quantity', xpath: 'Resource.foo' },
+					};
+					const includeArchived = false;
+					let { errors, query } = qb.buildSearchQuery({
+						req,
+						parameterDefinitions,
+						includeArchived,
+					});
+					const expectedResult = [
+						{
+							where: {
+								[Op.and]: [
+									{
+										[Op.or]: [
+											{
+												name: 'foo.value',
+												value: {
+													[Op.between]: [0.9, 1.1],
+												},
+											},
+										],
+									},
+								],
+							},
+						},
+					];
+					expect(errors).toHaveLength(0);
+					expect(query).toEqual(expectedResult);
+				},
+			);
+			//TODO: This seems a bit off - come back and verify calculation.
+			test(
+				'Should return range with upper lower bounds equal to +/- 10% * the most significant given a quantity' +
+					' converted to SI units.',
+				() => {
+					const req = {
+						method: 'GET',
+						query: {
+							foo: 'ap20.00||mg',
+						},
+					};
+					const parameterDefinitions = {
+						foo: { type: 'quantity', xpath: 'Resource.foo' },
+					};
+					const includeArchived = false;
+					let { errors, query } = qb.buildSearchQuery({
+						req,
+						parameterDefinitions,
+						includeArchived,
+					});
+					const expectedResult = [
+						{
+							where: {
+								[Op.and]: [
+									{
+										[Op.or]: [
+											{
+												name: 'foo.value',
+												value: {
+													[Op.between]: [0.000018, 0.000022],
+												},
+											},
+										],
+									},
+								],
+							},
+						},
+					];
+					expect(errors).toHaveLength(0);
+					expect(query).toEqual(expectedResult);
+				},
+			);
+		});
+		describe('System Parameter Tests', () => {
+			test(
+				'Should return $and with range with upper lower bounds equal to +/- 0.5 given an integer quantity of SI unit AND ' +
+					'the provided system',
+				() => {
+					const req = {
+						method: 'GET',
+						query: {
+							foo: 'eq1|http://unitsofmeasure.org|kg',
+						},
+					};
+					const parameterDefinitions = {
+						foo: { type: 'quantity', xpath: 'Resource.foo' },
+					};
+					const includeArchived = false;
+					let { errors, query } = qb.buildSearchQuery({
+						req,
+						parameterDefinitions,
+						includeArchived,
+					});
+					const expectedResult = [
+						{
+							where: {
+								[Op.and]: [
+									{
+										[Op.or]: [
+											{
+												[Op.and]: [
+													{
+														name: 'foo.value',
+														value: {
+															[Op.between]: [0.5, 1.5],
+														},
+													},
+													{
+														name: 'foo.system',
+														value: 'http://unitsofmeasure.org',
+													},
+												],
+											},
+										],
+									},
+								],
+							},
+						},
+					];
+					expect(errors).toHaveLength(0);
+					expect(query).toEqual(expectedResult);
+				},
+			);
+		});
+	});
+
+	describe('Build URI Query Tests', () => {
+		describe('above Prefix Tests', () => {
+			test('Should return regex query matching anything ending with the given input string', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						'foo:above': 'endWithMe',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'uri', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: {
+												[Op.endsWith]: 'endWithMe',
+											},
+										},
+									],
+								},
+							],
+						},
+					},
+				];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+		});
+		describe('below Prefix Tests', () => {
+			test('Should return regex query matching anything starting with the given input string', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						'foo:below': 'startWithMe',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'uri', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: {
+												[Op.startsWith]: 'startWithMe',
+											},
+										},
+									],
+								},
+							],
+						},
+					},
+				];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test('Should implicitly use below suffix if value ends with trailing slash.', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'startWithMe/',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'uri', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: {
+												[Op.startsWith]: 'startWithMe/',
+											},
+										},
+									],
+								},
+							],
+						},
+					},
+				];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test('Should throw an error if given a urn with a suffix', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						'foo:above': 'urn:oid:1.2.3.4.5',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'uri', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				expect(errors).toHaveLength(1);
+				expect(errors[0].message).toContain(
+					"Search modifiers are not supported for parameter 'foo' as a URN of type uri",
+				);
+			});
+		});
+		describe('no Prefix Tests', () => {
+			test('Should return regex query matching anything exactly matching given input string', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'equalMe',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'uri', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: 'equalMe',
+										},
+									],
+								},
+							],
+						},
+					},
+				];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+		});
+	});
+
+	/** TODO: Exists does not work yet.*/
+
+	describe('Build Reference Query Tests', () => {
+		test('Should return a query with the [parameter].reference equal to the supplied value of format [type]/[id]', () => {
+			const req = {
+				method: 'GET',
+				query: {
+					foo: 'Patient/123',
+				},
+			};
+			const parameterDefinitions = {
+				foo: { type: 'reference', xpath: 'Resource.foo' },
+			};
+			const includeArchived = false;
+			let { errors, query } = qb.buildSearchQuery({
+				req,
+				parameterDefinitions,
+				includeArchived,
+			});
+			const expectedResult = [
+				{
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										name: 'foo.reference',
+										value: 'Patient/123',
+									},
+								],
+							},
+						],
+					},
+				},
+			];
+			expect(errors).toHaveLength(0);
+			expect(query).toEqual(expectedResult);
+		});
+		test('Should return a query with the [parameter].reference equal to the supplied value of format http.*/[type]/[id]', () => {
+			const req = {
+				method: 'GET',
+				query: {
+					foo: 'http://example.fhir.org/foo/bar/Patient/123',
+				},
+			};
+			const parameterDefinitions = {
+				foo: { type: 'reference', xpath: 'Resource.foo' },
+			};
+			const includeArchived = false;
+			let { errors, query } = qb.buildSearchQuery({
+				req,
+				parameterDefinitions,
+				includeArchived,
+			});
+			const expectedResult = [
+				{
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										name: 'foo.reference',
+										value: 'Patient/123',
+									},
+								],
+							},
+						],
+					},
+				},
+			];
+			expect(errors).toHaveLength(0);
+			expect(query).toEqual(expectedResult);
+		});
+	});
+
+	describe('Build And/Or Query Tests', () => {
+		test('Should return a query that matches foo AND bar', () => {
+			const req = {
+				method: 'GET',
+				query: {
+					foo: ['foo', 'bar'],
+				},
+			};
+			const parameterDefinitions = {
+				foo: { type: 'string', xpath: 'Resource.foo' },
+			};
+			const includeArchived = false;
+			let { errors, query } = qb.buildSearchQuery({
+				req,
+				parameterDefinitions,
+				includeArchived,
+			});
+			const expectedResult = [
+				{
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										name: 'foo',
+										value: {
+											[Op.iRegexp]: '^foo',
+										},
+									},
+								],
+							},
+							{
+								[Op.or]: [
+									{
+										name: 'foo',
+										value: {
+											[Op.iRegexp]: '^bar',
+										},
+									},
+								],
+							},
+						],
+					},
+				},
+			];
+			expect(errors).toHaveLength(0);
+			expect(query).toEqual(expectedResult);
+		});
+		test('Should return a query that matches foo AND (bar OR baz)', () => {
+			const req = {
+				method: 'GET',
+				query: {
+					foo: ['foo', 'bar,baz'],
+				},
+			};
+			const parameterDefinitions = {
+				foo: { type: 'string', xpath: 'Resource.foo' },
+			};
+			const includeArchived = false;
+			let { errors, query } = qb.buildSearchQuery({
+				req,
+				parameterDefinitions,
+				includeArchived,
+			});
+			const expectedResult = [
+				{
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										name: 'foo',
+										value: {
+											[Op.iRegexp]: '^foo',
+										},
+									},
+								],
+							},
+							{
+								[Op.or]: [
+									{
+										name: 'foo',
+										value: {
+											[Op.iRegexp]: '^bar',
+										},
+									},
+									{
+										name: 'foo',
+										value: {
+											[Op.iRegexp]: '^baz',
+										},
+									},
+								],
+							},
+						],
+					},
+				},
+			];
+			expect(errors).toHaveLength(0);
+			expect(query).toEqual(expectedResult);
+		});
+	});
+
+	describe('Build Token Query Tests', () => {
+		describe('Coding Token Tests', () => {
+			test('Should return an and query with 1 equal to condition when given just a system', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'bar|',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'token', fhirtype: 'Coding', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											[Op.and]: [
+												{
+													name: 'foo.system',
+													value: 'bar',
+												},
+											],
+										},
+									],
+								},
+							],
+						},
+					},
+				];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test('Should return an and query with 1 equal to condition when given just a code', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'bar',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'token', fhirtype: 'Coding', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											[Op.and]: [
+												{
+													name: 'foo.code',
+													value: 'bar',
+												},
+											],
+										},
+									],
+								},
+							],
+						},
+					},
+				];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test('Should return an and query with 1 equal to condition when given just a code', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: '|bar',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'token', fhirtype: 'Coding', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											[Op.and]: [
+												{
+													name: 'foo.code',
+													value: 'bar',
+												},
+											],
+										},
+									],
+								},
+							],
+						},
+					},
+				];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test('Should return an and query with 2 equal to conditions when given a system and code', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'bar|baz',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'token', fhirtype: 'Coding', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											[Op.and]: [
+												{
+													name: 'foo.system',
+													value: 'bar',
+												},
+												{
+													name: 'foo.code',
+													value: 'baz',
+												},
+											],
+										},
+									],
+								},
+							],
+						},
+					},
+				];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+		});
+		describe('CodableConcept Token Tests', () => {
+			test('Should return an and query with 1 equal to condition when given just a system', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'bar|',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {
+						type: 'token',
+						fhirtype: 'CodableConcept',
+						xpath: 'Resource.foo',
+					},
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											[Op.and]: [
+												{
+													name: 'foo.coding.system',
+													value: 'bar',
+												},
+											],
+										},
+									],
+								},
+							],
+						},
+					},
+				];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test('Should return an and query with 1 equal to condition when given just a code', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'bar',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {
+						type: 'token',
+						fhirtype: 'CodableConcept',
+						xpath: 'Resource.foo',
+					},
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											[Op.and]: [
+												{
+													name: 'foo.coding.code',
+													value: 'bar',
+												},
+											],
+										},
+									],
+								},
+							],
+						},
+					},
+				];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test('Should return an and query with 2 equal to conditions when given a system and code', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'bar|baz',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {
+						type: 'token',
+						fhirtype: 'CodableConcept',
+						xpath: 'Resource.foo',
+					},
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											[Op.and]: [
+												{
+													name: 'foo.coding.system',
+													value: 'bar',
+												},
+												{ name: 'foo.coding.code', value: 'baz' },
+											],
+										},
+									],
+								},
+							],
+						},
+					},
+				];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+		});
+		describe('Identifier Token Tests', () => {
+			test('Should return an and query with 1 equal to condition when given just a system', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'bar|',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'token', fhirtype: 'Identifier', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											[Op.and]: [
+												{
+													name: 'foo.system',
+													value: 'bar',
+												},
+											],
+										},
+									],
+								},
+							],
+						},
+					},
+				];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test('Should return an and query with 1 equal to condition when given just a code', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'bar',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'token', fhirtype: 'Identifier', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											[Op.and]: [
+												{
+													name: 'foo.value',
+													value: 'bar',
+												},
+											],
+										},
+									],
+								},
+							],
+						},
+					},
+				];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test('Should return an and query with 2 equal to conditions when given a system and code', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'bar|baz',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'token', fhirtype: 'Identifier', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											[Op.and]: [
+												{
+													name: 'foo.system',
+													value: 'bar',
+												},
+												{
+													name: 'foo.value',
+													value: 'baz',
+												},
+											],
+										},
+									],
+								},
+							],
+						},
+					},
+				];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+		});
+		describe('ContactPoint Token Tests', () => {
+			test('Should return an or query with an equal to condition for each of the ContactPoint fields given a code', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'bar',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {
+						type: 'token',
+						fhirtype: 'ContactPoint',
+						xpath: 'Resource.foo',
+					},
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											[Op.or]: [
+												{
+													name: 'foo.system',
+													value: 'bar',
+												},
+												{
+													name: 'foo.value',
+													value: 'bar',
+												},
+												{
+													name: 'foo.use',
+													value: 'bar',
+												},
+												{
+													name: 'foo.rank',
+													value: 'bar',
+												},
+												{
+													name: 'foo.period',
+													value: 'bar',
+												},
+											],
+										},
+									],
+								},
+							],
+						},
+					},
+				];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test('Should return an or query with an equal to condition for each of the ContactPoint fields given a code |', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: '|bar',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {
+						type: 'token',
+						fhirtype: 'ContactPoint',
+						xpath: 'Resource.foo',
+					},
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											[Op.or]: [
+												{
+													name: 'foo.system',
+													value: 'bar',
+												},
+												{
+													name: 'foo.value',
+													value: 'bar',
+												},
+												{
+													name: 'foo.use',
+													value: 'bar',
+												},
+												{
+													name: 'foo.rank',
+													value: 'bar',
+												},
+												{
+													name: 'foo.period',
+													value: 'bar',
+												},
+											],
+										},
+									],
+								},
+							],
+						},
+					},
+				];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test('Should return an or query with an equal to condition for each of the ContactPoint fields given two | codes', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'bar|baz',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {
+						type: 'token',
+						fhirtype: 'ContactPoint',
+						xpath: 'Resource.foo',
+					},
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											[Op.or]: [
+												{
+													name: 'foo.system',
+													value: 'baz',
+												},
+												{
+													name: 'foo.value',
+													value: 'baz',
+												},
+												{
+													name: 'foo.use',
+													value: 'baz',
+												},
+												{
+													name: 'foo.rank',
+													value: 'baz',
+												},
+												{
+													name: 'foo.period',
+													value: 'baz',
+												},
+											],
+										},
+									],
+								},
+							],
+						},
+					},
+				];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+		});
+		describe('code Token Tests', () => {
+			test('Should return an equal to query given a code', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'bar',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'token', fhirtype: 'code', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: 'bar',
+										},
+									],
+								},
+							],
+						},
+					},
+				];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test('Should return an equal to query given a code', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: '|bar',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'token', fhirtype: 'code', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: 'bar',
+										},
+									],
+								},
+							],
+						},
+					},
+				];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test('Should return an equal to query given a system and code (ignore the system)', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'bar|baz',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'token', fhirtype: 'code', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: 'baz',
+										},
+									],
+								},
+							],
+						},
+					},
+				];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+		});
+		describe('boolean Token Tests', () => {
+			test('Should throw an error if given just a system and no code', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'bar|',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'token', fhirtype: 'boolean', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				expect(errors).toHaveLength(1);
+				expect(errors[0].message).toContain(
+					'Type mismatch, expected boolean for parameter foo',
+				);
+			});
+			test('Should throw an error if given just a non boolean code', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'bar',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'token', fhirtype: 'boolean', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				expect(errors).toHaveLength(1);
+				expect(errors[0].message).toContain(
+					'Type mismatch, expected boolean for parameter foo',
+				);
+			});
+			test('Should return an equal to query given a code', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'true',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'token', fhirtype: 'boolean', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: 'true',
+										},
+									],
+								},
+							],
+						},
+					},
+				];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test('Should return an equal to query given a code |', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: '|false',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'token', fhirtype: 'boolean', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: 'false',
+										},
+									],
+								},
+							],
+						},
+					},
+				];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test('Should return an equal to query given a system and code (ignore the system)', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'bar|false',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'token', fhirtype: 'boolean', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: 'false',
+										},
+									],
+								},
+							],
+						},
+					},
+				];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+		});
+		describe('uri Token Tests', () => {
+			test('Should return an equal to query given a code', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'bar',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'token', fhirtype: 'uri', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: 'bar',
+										},
+									],
+								},
+							],
+						},
+					},
+				];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test('Should return an equal to query given a code', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: '|bar',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'token', fhirtype: 'uri', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: 'bar',
+										},
+									],
+								},
+							],
+						},
+					},
+				];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test('Should return an equal to query given a system and code (ignore the system)', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'bar|baz',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'token', fhirtype: 'uri', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: 'baz',
+										},
+									],
+								},
+							],
+						},
+					},
+				];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+		});
+		describe('string Token Tests', () => {
+			test('Should return an equal to query given a code', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'bar',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'token', fhirtype: 'string', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: 'bar',
+										},
+									],
+								},
+							],
+						},
+					},
+				];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test('Should return an equal to query given a code |', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: '|bar',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'token', fhirtype: 'string', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: 'bar',
+										},
+									],
+								},
+							],
+						},
+					},
+				];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+			test('Should return an equal to query given a system and code (ignore the system)', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'bar|baz',
+					},
+				};
+				const parameterDefinitions = {
+					foo: { type: 'token', fhirtype: 'string', xpath: 'Resource.foo' },
+				};
+				const includeArchived = false;
+				let { errors, query } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				const expectedResult = [
+					{
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: 'baz',
+										},
+									],
+								},
+							],
+						},
+					},
+				];
+				expect(errors).toHaveLength(0);
+				expect(query).toEqual(expectedResult);
+			});
+		});
+		describe('invalid fhirtype Token Tests', () => {
+			test('Should throw an error if given an unsupported fhirtype', () => {
+				const req = {
+					method: 'GET',
+					query: {
+						foo: 'bar',
+					},
+				};
+				const parameterDefinitions = {
+					foo: {
+						type: 'token',
+						fhirtype: 'unsupported',
+						xpath: 'Resource.foo',
+					},
+				};
+				const includeArchived = false;
+				let { errors } = qb.buildSearchQuery({
+					req,
+					parameterDefinitions,
+					includeArchived,
+				});
+				expect(errors).toHaveLength(1);
+				expect(errors[0].message).toContain(
+					"Unsupported fhirtype 'unsupported' supplied for token parameter 'foo'",
+				);
+			});
+		});
+	});
+
+	describe('Error Handling Tests', () => {
+		test('Should throw and catch an error and add it to the errors array if a parameter is invalid.', () => {
+			const req = {
+				method: 'GET',
+				query: {
+					foo: 'foo',
+				},
+			};
+			const parameterDefinitions = {
+				foo: { type: 'number', xpath: 'Resource.foo' },
+			};
+			const includeArchived = false;
+			let { errors } = qb.buildSearchQuery({
+				req,
+				parameterDefinitions,
+				includeArchived,
+			});
+			expect(errors).toHaveLength(1);
+			expect(errors[0].message).toContain('expected number for parameter foo');
+		});
+		test('Should throw and catch an error and add it to the errors array if a parameter is not defined in the config.', () => {
+			const req = {
+				method: 'GET',
+				query: {
+					foo: 'foo',
+				},
+			};
+			const parameterDefinitions = {
+				bar: { type: 'number', xpath: 'Resource.foo' },
+			};
+			const includeArchived = false;
+			let { errors } = qb.buildSearchQuery({
+				req,
+				parameterDefinitions,
+				includeArchived,
+			});
+			expect(errors).toHaveLength(1);
+			expect(errors[0].message).toContain("Unknown parameter 'foo'");
+		});
+		test('Should throw and catch an error and add it to the errors array if a parameter has an invalid type.', () => {
+			const req = {
+				method: 'GET',
+				query: {
+					foo: 'foo',
+				},
+			};
+			const parameterDefinitions = {
+				foo: { type: 'unsupported', xpath: 'Resource.foo' },
+			};
+			const includeArchived = false;
+			let { errors } = qb.buildSearchQuery({
+				req,
+				parameterDefinitions,
+				includeArchived,
+			});
+			expect(errors).toHaveLength(1);
+			expect(errors[0].message).toContain(
+				"Unsupported type 'unsupported' supplied for parameter 'foo'",
+			);
+		});
+	});
+
+	describe('Request Type Tests', () => {
+		test('Should use the request query for parameters', () => {
+			const req = {
+				method: 'GET',
+				query: {
+					foo: 'eq2018-10-31T17:49:29.000Z',
+				},
+				body: {
+					foo: 'eq2017-10-31T17:49:29.000Z',
+				},
+			};
+			const parameterDefinitions = {
+				foo: { type: 'date', xpath: 'Resource.foo' },
+			};
+			const includeArchived = false;
+			let { errors, query } = qb.buildSearchQuery({
+				req,
+				parameterDefinitions,
+				includeArchived,
+			});
+			const expectedResult = [
+				{
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison('=', '2018-10-31T17:49:29.000Z'),
+										],
+									},
+								],
+							},
+						],
+					},
+				},
+			];
+			expect(errors).toHaveLength(0);
+			expect(query).toEqual(expectedResult);
+		});
+		test('Should use the request body for parameters', () => {
+			const req = {
+				method: 'POST',
+				query: {
+					foo: 'eq2018-10-31T17:49:29.000Z',
+				},
+				body: {
+					foo: 'eq2017-10-31T17:49:29.000Z',
+				},
+			};
+			const parameterDefinitions = {
+				foo: { type: 'date', xpath: 'Resource.foo' },
+			};
+			const includeArchived = false;
+			let { errors, query } = qb.buildSearchQuery({
+				req,
+				parameterDefinitions,
+				includeArchived,
+			});
+			const expectedResult = [
+				{
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison('=', '2017-10-31T17:49:29.000Z'),
+										],
+									},
+								],
+							},
+						],
+					},
+				},
+			];
+			expect(errors).toHaveLength(0);
+			expect(query).toEqual(expectedResult);
+		});
+		test('Should merge the request body with request.params for parameters', () => {
+			const req = {
+				method: 'POST',
+				body: {
+					foo: 'eq2017-10-31T17:49:29.000Z',
+				},
+				params: {
+					bar: 'eq2018-10-31T17:49:29.000Z',
+				},
+			};
+			const parameterDefinitions = {
+				foo: { type: 'date', xpath: 'Resource.foo' },
+				bar: { type: 'date', xpath: 'Resource.bar' },
+			};
+			const includeArchived = false;
+			let { errors, query } = qb.buildSearchQuery({
+				req,
+				parameterDefinitions,
+				includeArchived,
+			});
+			const expectedResult = [
+				{
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison('=', '2017-10-31T17:49:29.000Z'),
+										],
+									},
+								],
+							},
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'bar' },
+											formDateComparison('=', '2018-10-31T17:49:29.000Z'),
+										],
+									},
+								],
+							},
+						],
+					},
+				},
+			];
+			expect(errors).toHaveLength(0);
+			expect(query).toEqual(expectedResult);
+		});
+		test('Should throw an error for unsupported request types', () => {
+			const req = {
+				method: 'PUT',
+				query: {
+					foo: 'eq2018-10-31T17:49:29.000Z',
+				},
+			};
+			const parameterDefinitions = {
+				foo: { type: 'date', xpath: 'Resource.foo' },
+			};
+			const includeArchived = false;
+			let { errors } = qb.buildSearchQuery({
+				req,
+				parameterDefinitions,
+				includeArchived,
+			});
+			expect(errors).toHaveLength(1);
+			expect(errors[0].message).toContain("Unsupported request method 'PUT'");
+		});
+		test('Should throw an error for unsupported modifiers', () => {
+			const req = {
+				method: 'GET',
+				query: {
+					'foo:unsupportedModifier': 'bar',
+				},
+			};
+			const parameterDefinitions = {
+				foo: { type: 'string', xpath: 'Resource.foo' },
+			};
+			const includeArchived = false;
+			let { errors } = qb.buildSearchQuery({
+				req,
+				parameterDefinitions,
+				includeArchived,
+			});
+			expect(errors).toHaveLength(1);
+			expect(errors[0].message).toContain(
+				"Search modifier 'unsupportedModifier' is not currently supported",
+			);
+		});
+	});
+
+	describe('Global Parameter Query Tests', () => {
+		test('Test for global param _id', () => {
+			const req = {
+				method: 'GET',
+				query: {
+					_id: 'foo',
+				},
+			};
+			const parameterDefinitions = undefined;
+			const includeArchived = false;
+			let { query, errors } = qb.buildSearchQuery({
+				req,
+				parameterDefinitions,
+				includeArchived,
+			});
+			const expectedResult = [
+				{
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										name: 'id',
+										value: 'foo',
+									},
+								],
+							},
+						],
+					},
+				},
+			];
+
+			expect(errors).toHaveLength(0);
+			expect(query).toEqual(expectedResult);
+		});
+		test('Test for global param _lastUpdated', () => {
+			const req = {
+				method: 'GET',
+				query: {
+					_lastUpdated: '2018-10-31T17:49:29.000Z',
+				},
+			};
+			const parameterDefinitions = undefined;
+			const includeArchived = false;
+			let { query, errors } = qb.buildSearchQuery({
+				req,
+				parameterDefinitions,
+				includeArchived,
+			});
+			const expectedResult = [
+				{
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'meta.lastUpdated' },
+											formDateComparison('=', '2018-10-31T17:49:29.000Z'),
+										],
+									},
+								],
+							},
+						],
+					},
+				},
+			];
+			expect(errors).toHaveLength(0);
+			expect(query).toEqual(expectedResult);
+		});
+		test('Should be able to initialize a new qb without supplying global parameters', () => {
+			const noGlobalQB = new QueryBuilder({
+				packageName: '@asymmetrik/fhir-qb-mongo',
+			});
+			expect(noGlobalQB).toBeDefined();
+		});
+	});
+
+	/** TODO: Look into _count param. Currently not handling it. Search transformations not implemented. */
+
+	/** TODO: Paging is currently handled in the server - think about migrating this?
+	/**  We would just need to calculate the offset + limit. */
+
+	describe('Parameter Definition Tests', () => {
+		test('TODO - test multiple xpaths', () => {
+			const req = {
+				method: 'GET',
+				query: {
+					foo: 'Evé',
+				},
+			};
+			const parameterDefinitions = {
+				foo: { type: 'string', xpath: ['Resource.foo', 'Resource.bar'] },
+			};
+			const includeArchived = false;
+			let { errors, query } = qb.buildSearchQuery({
+				req,
+				parameterDefinitions,
+				includeArchived,
+			});
+			const expectedResult = [
+				{
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										name: 'foo',
+										value: {
+											[Op.iRegexp]: '^Eve',
+										},
+									},
+									{
+										name: 'bar',
+										value: {
+											[Op.iRegexp]: '^Eve',
+										},
+									},
+								],
+							},
+						],
+					},
+				},
+			];
+			expect(errors).toHaveLength(0);
+			expect(query).toEqual(expectedResult);
+		});
+		test('Should return a query that matches foo AND (bar OR baz) in field foo or qux', () => {
+			const req = {
+				method: 'GET',
+				query: {
+					foo: ['foo', 'bar,baz'],
+				},
+			};
+			const parameterDefinitions = {
+				foo: { type: 'string', xpath: ['Resource.foo', 'Resource.qux'] },
+			};
+			const includeArchived = false;
+			let { errors, query } = qb.buildSearchQuery({
+				req,
+				parameterDefinitions,
+				includeArchived,
+			});
+			const expectedResult = [
+				{
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										name: 'foo',
+										value: {
+											[Op.iRegexp]: '^foo',
+										},
+									},
+									{
+										name: 'qux',
+										value: {
+											[Op.iRegexp]: '^foo',
+										},
+									},
+								],
+							},
+							{
+								[Op.or]: [
+									{
+										name: 'foo',
+										value: {
+											[Op.iRegexp]: '^bar',
+										},
+									},
+									{
+										name: 'foo',
+										value: {
+											[Op.iRegexp]: '^baz',
+										},
+									},
+									{
+										name: 'qux',
+										value: {
+											[Op.iRegexp]: '^bar',
+										},
+									},
+									{
+										name: 'qux',
+										value: {
+											[Op.iRegexp]: '^baz',
+										},
+									},
+								],
+							},
+						],
+					},
+				},
+			];
+			expect(errors).toHaveLength(0);
+			expect(query).toEqual(expectedResult);
+		});
+	});
+});
+
+describe('Constructor Tests', () => {
+	beforeAll(() => {
+		// Do this for tests only
+		moment.suppressDeprecationWarnings = true;
+	});
+	const Sequelize = require('sequelize');
+	const Op = Sequelize.Op;
+	const globalParameterDefinitions = {
+		_content: {
+			type: 'string',
+			fhirtype: 'string',
+			xpath: '',
+			definition: 'http://hl7.org/fhir/SearchParameter/Resource-content',
+			description: 'Search on the entire content of the resource',
+			modifier: 'missing,exact,contains',
+		},
+		_id: {
+			type: 'token',
+			fhirtype: 'token',
+			xpath: 'Resource.id',
+			definition: 'http://hl7.org/fhir/SearchParameter/Resource-id',
+			description: 'Logical id of this artifact',
+			modifier: 'missing,text,not,in,not-in,below,above,ofType',
+		},
+		_lastUpdated: {
+			type: 'date',
+			fhirtype: 'date',
+			xpath: 'Resource.meta.lastUpdated',
+			definition: 'http://hl7.org/fhir/SearchParameter/Resource-lastUpdated',
+			description: 'When the resource version last changed',
+			modifier: 'missing',
+		},
+		_profile: {
+			type: 'reference',
+			fhirtype: 'reference',
+			xpath: 'Resource.meta.profile',
+			definition: 'http://hl7.org/fhir/SearchParameter/Resource-profile',
+			description: 'Profiles this resource claims to conform to',
+			modifier: 'missing,type,identifier',
+		},
+		_query: {
+			type: 'token',
+			fhirtype: 'token',
+			xpath: '',
+			definition: 'http://hl7.org/fhir/SearchParameter/Resource-query',
+			description:
+				'A custom search profile that describes a specific defined query operation',
+			modifier: 'missing,text,not,in,not-in,below,above,ofType',
+		},
+		_security: {
+			type: 'token',
+			fhirtype: 'token',
+			xpath: 'Resource.meta.security',
+			definition: 'http://hl7.org/fhir/SearchParameter/Resource-security',
+			description: 'Security Labels applied to this resource',
+			modifier: 'missing,text,not,in,not-in,below,above,ofType',
+		},
+		_source: {
+			type: 'uri',
+			fhirtype: 'uri',
+			xpath: 'Resource.meta.source',
+			definition: 'http://hl7.org/fhir/SearchParameter/Resource-source',
+			description: 'Identifies where the resource comes from',
+			modifier: 'missing,below,above',
+		},
+		_tag: {
+			type: 'token',
+			fhirtype: 'token',
+			xpath: 'Resource.meta.tag',
+			definition: 'http://hl7.org/fhir/SearchParameter/Resource-tag',
+			description: 'Tags applied to this resource',
+			modifier: 'missing,text,not,in,not-in,below,above,ofType',
+		},
+	};
+	describe('columnIdentifierStrategy Tests', () => {
+		test('Should throw error when given unsupported columnIdentifierStrategy', () => {
+			let expectedError = new Error(
+				"Supplied columnIdentifierStrategy value 'foo' not one of currently " +
+					'supported columnIdentifierStrategy values: xpath, parameter',
+			);
+			let qb;
+			let observedError;
+			try {
+				qb = new QueryBuilder({
+					packageName: '../fhir-qb-sql/index.js',
+					globalParameterDefinitions,
+					implementationParameters: { archivedParamPath: 'meta._isArchived' },
+					columnIdentifierStrategy: 'foo',
+				});
+			} catch (err) {
+				observedError = err;
+			}
+			expect(observedError).toEqual(expectedError);
+			expect(qb).toBe(undefined);
+		});
+		test('Should use parameter instead of xpath when given columnIdentifierStrategy: parameter', () => {
+			let qb = new QueryBuilder({
+				packageName: '../fhir-qb-sql/index.js',
+				globalParameterDefinitions,
+				implementationParameters: { archivedParamPath: 'meta._isArchived' },
+				columnIdentifierStrategy: 'parameter',
+			});
+			const req = {
+				method: 'GET',
+				query: {
+					foobar: 'eq100',
+				},
+			};
+			const parameterDefinitions = {
+				foobar: { type: 'number', xpath: 'Resource.foo' },
+			};
+			const includeArchived = false;
+			let { errors, query } = qb.buildSearchQuery({
+				req,
+				parameterDefinitions,
+				includeArchived,
+			});
+			const expectedResult = [
+				{
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										name: 'foobar',
+										value: { [Op.between]: [99.5, 100.5] },
+									},
+								],
+							},
+						],
+					},
+				},
+			];
+			expect(errors).toHaveLength(0);
+			expect(query).toEqual(expectedResult);
 		});
 	});
 });

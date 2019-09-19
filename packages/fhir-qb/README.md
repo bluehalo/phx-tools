@@ -64,8 +64,6 @@ Link to the full parameter structure definition on the hl7 website
 
 #### `description`
 
-#### `description`
-
 Description of the parameter/argument
 
 The `buildSearchQuery` method returns a search query for the configured db implementation that can be
