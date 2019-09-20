@@ -1,7 +1,7 @@
 {
-	"name": "@asymmetrik/fhir-qb",
-	"version": "0.11.0",
-	"description": "FHIR query builder",
+	"name": "@asymmetrik/fhir-qb-sql",
+	"version": "0.1.0",
+	"description": "FHIR query builder for SQL",
 	"main": "index.js",
 	"repository": {
 		"type": "git",
@@ -32,11 +32,7 @@
 		]
 	},
 	"dependencies": {
-		"@asymmetrik/fhir-qb-mongo": "^0.10.3",
-		"@asymmetrik/fhir-sanitize-param": "^1.1.2",
-		"mathjs": "^5.2.3",
-		"moment": "^2.24.0",
-		"sequelize": "^5.19.0",
+		"sequelize": "^5.18.4",
 		"xregexp": "^4.2.0"
 	},
 	"devDependencies": {

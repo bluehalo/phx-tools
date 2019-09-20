@@ -51,7 +51,9 @@ class JSONSchemaValidator {
 				if (verbose) {
 					errors = this.validator.errors;
 				} else {
-					let resourceValidate = this.ajv.compile(this.getSubSchema(resourceType));
+					let resourceValidate = this.ajv.compile(
+						this.getSubSchema(resourceType),
+					);
 					resourceValidate(resource);
 					errors = resourceValidate.errors;
 				}
