@@ -1,14 +1,48 @@
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 
-let supportedSearchTransformations = {};
+/**
+ * Currently only support _count and _sort out of the list of search result set paramaters
+ */
+const supportedSearchTransformations = {
+	_count: {
+		label: 'limit',
+		transform: value => {
+			return value;
+		},
+	},
 
+	_sort: {
+		label: 'order',
+		transform: value => {
+			return parseSortQuery(value);
+		},
+	},
+};
+
+/**
+ * Given a parameter to sort on, return itself and it's correct direction
+ */
+let getSortOrder = function(sortable) {
+	if (sortable && sortable[0] === '-') {
+		return [sortable.substring(1), 'DESC'];
+	}
+	return [sortable, 'ASC'];
+};
+
+/**
+ * Given a comma seperated list of strings to order on, return a list of column and direction lists
+ */
+let parseSortQuery = function(sortables) {
+	const split = sortables.split(',');
+	return split.map(getSortOrder);
+};
+
+/**
+ * Form a Sequelize date comparison given a date and column
+ */
 let formDateComparison = function(comparator, date, colName = 'value') {
-	return Sequelize.where(
-		Sequelize.fn('date', Sequelize.col(colName)),
-		comparator,
-		date,
-	);
+	return Sequelize.where(Sequelize.fn('date', Sequelize.col(colName)), comparator, date);
 };
 
 /**
@@ -33,12 +67,7 @@ let buildOrQuery = function({ queries, invert = false }) {
  * Builds query to get records where the value of the field equal to the value.
  * Setting invert to true will get records that are NOT equal instead.
  */
-let buildEqualToQuery = function({
-	field,
-	value,
-	invert = false,
-	isDate = false,
-}) {
+let buildEqualToQuery = function({ field, value, invert = false, isDate = false }) {
 	if (isDate) {
 		const comparator = invert ? '!=' : '=';
 		return {
@@ -52,12 +81,7 @@ let buildEqualToQuery = function({
 /**
  * Builds query to get records where the value of the field is [<,<=,>,>=,!=] to the value.
  */
-let buildComparatorQuery = function({
-	field,
-	value,
-	comparator,
-	isDate = false,
-}) {
+let buildComparatorQuery = function({ field, value, comparator, isDate = false }) {
 	const sqlComparators = {
 		gt: Op.gt,
 		ge: Op.gte,
@@ -81,21 +105,11 @@ let buildComparatorQuery = function({
  * Builds query to get records where the value of the field is in the specified range
  * Setting invert to true will get records that are NOT in the specified range.
  */
-let buildInRangeQuery = function({
-	field,
-	lowerBound,
-	upperBound,
-	invert = false,
-	isDate = false,
-}) {
+let buildInRangeQuery = function({ field, lowerBound, upperBound, invert = false, isDate = false }) {
 	if (invert) {
 		if (isDate) {
 			return {
-				[Op.and]: [
-					{ name: field },
-					formDateComparison('<=', lowerBound),
-					formDateComparison('>=', upperBound),
-				],
+				[Op.and]: [{ name: field }, formDateComparison('<=', lowerBound), formDateComparison('>=', upperBound)],
 			};
 		}
 		return {
@@ -105,11 +119,7 @@ let buildInRangeQuery = function({
 	} else {
 		if (isDate) {
 			return {
-				[Op.and]: [
-					{ name: field },
-					formDateComparison('>=', lowerBound),
-					formDateComparison('<=', upperBound),
-				],
+				[Op.and]: [{ name: field }, formDateComparison('>=', lowerBound), formDateComparison('<=', upperBound)],
 			};
 		}
 		return { name: field, value: { [Op.between]: [lowerBound, upperBound] } };
@@ -122,6 +132,13 @@ let buildInRangeQuery = function({
 // TODO: Need to figure out how to do exist check.
 let buildExistsQuery = function({ field, exists }) {
 	return 'NOT IMPLEMENTED';
+};
+
+/**
+ * Builds a query to get records where the value of the field key matches the given pattern and options.
+ */
+let buildRegexQuery = function({ field, pattern, options }) {
+	return { name: field, value: { $regex: pattern, $options: options } };
 };
 
 /**
@@ -162,24 +179,97 @@ let buildEndsWithQuery = function({ field, value, caseSensitive = false }) {
 };
 
 /**
+ * Apply search result transformations
+ * @param query
+ * @param searchResultTransformations
+ */
+let applySearchResultTransformations = function({ query, searchResultTransformations }) {
+	Object.keys(searchResultTransformations).forEach(transformation => {
+		const transformer = supportedSearchTransformations[transformation];
+		const label = transformer.label;
+		query[label] = transformer.transform(searchResultTransformations[transformation]);
+	});
+	return query;
+};
+
+// /**
+//  * If we should not include archived, add a filter to remove them from the results
+//  * @param query
+//  * @param archivedParamPath
+//  * @param includeArchived
+//  * @returns {*}
+//  */
+// let applyArchivedFilter = function({
+// 	query,
+// 	archivedParamPath,
+// 	includeArchived,
+// }) {
+// 	if (!includeArchived) {
+// 		query.push({ $match: { [archivedParamPath]: false } });
+// 	}
+// 	return query;
+// };
+
+// /**
+//  * Apply paging
+//  * @param query
+//  * @param pageNumber
+//  * @param resultsPerPage
+//  * @returns {*}
+//  */
+// let applyPaging = function({ query, pageNumber, resultsPerPage }) {
+// 	// If resultsPerPage is defined, skip to the appropriate page and limit the number of results that appear per page.
+// 	// Otherwise just insert a filler (to keep mongo happy) that skips no entries.
+// 	let pageSelection = resultsPerPage
+// 		? [{ $skip: (pageNumber - 1) * resultsPerPage }, { $limit: resultsPerPage }]
+// 		: [{ $skip: 0 }];
+//
+// 	// If resultsPerPage is defined, calculate the total number of pages as the total number of records
+// 	// divided by the results per page rounded up to the nearest integer.
+// 	// Otherwise if resultsPerPage is not defined, all of the results will be on one page.
+// 	let numberOfPages = resultsPerPage
+// 		? { $ceil: { $divide: ['$total', resultsPerPage] } }
+// 		: 1;
+// 	query.push({
+// 		$facet: {
+// 			metadata: [
+// 				{ $count: 'total' },
+// 				{ $addFields: { numberOfPages: numberOfPages } },
+// 				{ $addFields: { page: pageNumber } }, // TODO may need some additional validation on this.
+// 			],
+// 			data: pageSelection,
+// 		},
+// 	});
+// 	return query;
+// };
+
+/**
  * Assembles a mongo aggregation pipeline
  * @param joinsToPerform - List of joins to perform first through lookups
  * @param matchesToPerform - List of matches to perform
+ * @param searchResultTransformations
  * @param implementationParameters
+ * @param includeArchived
+ * @param pageNumber
+ * @param resultsPerPage
  * @returns {Array}
  */
 let assembleSearchQuery = function({
+	joinsToPerform,
 	matchesToPerform,
+	searchResultTransformations,
 	implementationParameters,
+	includeArchived,
+	pageNumber,
+	resultsPerPage,
 }) {
-	let query = [];
+	let query = {};
+	let toSuppress = {};
 
 	// Check that the necessary implementation parameters were passed through
 	let { archivedParamPath } = implementationParameters;
 	if (!archivedParamPath) {
-		throw new Error(
-			"Missing required implementation parameter 'archivedParamPath'",
-		);
+		throw new Error("Missing required implementation parameter 'archivedParamPath'");
 	}
 
 	// Construct the necessary queries for each match and add them the pipeline.
@@ -191,8 +281,15 @@ let assembleSearchQuery = function({
 			}
 			listOfOrs.push(buildOrQuery({ queries: match }));
 		}
-		query.push({ where: buildAndQuery(listOfOrs) });
+		query.where = buildAndQuery(listOfOrs);
 	}
+
+	// query = applyArchivedFilter({ query, archivedParamPath, includeArchived });
+	query = applySearchResultTransformations({
+		query,
+		searchResultTransformations,
+	});
+	// query = applyPaging({ query, pageNumber, resultsPerPage });
 	return query;
 };
 
