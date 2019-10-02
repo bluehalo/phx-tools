@@ -32,6 +32,8 @@ const matchModifiers = {
 	'': '',
 };
 
+const supportedColumnIdentifierStrategies = ['xpath', 'parameter'];
+
 /* TODO
  * Need to add ability to get destination field's type for chained queries.
  * Add support for Chained Queries of depth > 1 (if necessary)
@@ -40,6 +42,7 @@ const matchModifiers = {
  * Add support for canonical units in Quantity queries
  * Add errors for invalid queries (maybe. tbd)
  */
+
 class QueryBuilder {
 	constructor({
 		packageName = '@asymmetrik/fhir-qb-mongo',
@@ -54,7 +57,17 @@ class QueryBuilder {
 		this.pageParam = pageParam;
 		this.resultsPerPage = resultsPerPage;
 		this.implementationParameters = implementationParameters;
-		this.columnIdentifierStrategy = columnIdentifierStrategy;
+		if (
+			supportedColumnIdentifierStrategies.includes(columnIdentifierStrategy)
+		) {
+			this.columnIdentifierStrategy = columnIdentifierStrategy;
+		} else {
+			throw new Error(
+				`Supplied columnIdentifierStrategy value '${columnIdentifierStrategy}' not one of currently supported columnIdentifierStrategy values: ${supportedColumnIdentifierStrategies.join(
+					', ',
+				)}`,
+			);
+		}
 	}
 
 	/**
