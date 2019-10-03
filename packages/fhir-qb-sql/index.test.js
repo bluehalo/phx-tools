@@ -4,7 +4,7 @@ const Op = Sequelize.Op;
 
 describe('SQL Query Builder Tests', () => {
 	describe('buildEqualToQuery Tests', () => {
-		test('Should return mongo equals query given a key and a value', () => {
+		test('Should return SQL equals query given a key and a value', () => {
 			const expectedResult = { name: 'foo', value: 'bar' };
 			let observedResult = sqlQB.buildEqualToQuery({
 				field: 'foo',
@@ -60,7 +60,7 @@ describe('SQL Query Builder Tests', () => {
 		});
 	});
 	describe('buildComparatorQuery Tests', () => {
-		test('Should return sequelize $gt query given a key, value, and gt', () => {
+		test('Should return sequelize Greater Than query given a key, value, and gt', () => {
 			const expectedResult = { name: 'foo', value: { [Op.gt]: 'bar' } };
 			let observedResult = sqlQB.buildComparatorQuery({
 				field: 'foo',
@@ -69,7 +69,7 @@ describe('SQL Query Builder Tests', () => {
 			});
 			expect(observedResult).toEqual(expectedResult);
 		});
-		test('Should return mongo $gte query given a key, value, and ge', () => {
+		test('Should return SQL Greater Than query given a key, value, and ge', () => {
 			const expectedResult = { name: 'foo', value: { [Op.gte]: 'bar' } };
 			let observedResult = sqlQB.buildComparatorQuery({
 				field: 'foo',
@@ -78,7 +78,7 @@ describe('SQL Query Builder Tests', () => {
 			});
 			expect(observedResult).toEqual(expectedResult);
 		});
-		test('Should return mongo $lt query given a key, value, and lt', () => {
+		test('Should return SQL Less Than query given a key, value, and lt', () => {
 			const expectedResult = { name: 'foo', value: { [Op.lt]: 'bar' } };
 			let observedResult = sqlQB.buildComparatorQuery({
 				field: 'foo',
@@ -87,7 +87,7 @@ describe('SQL Query Builder Tests', () => {
 			});
 			expect(observedResult).toEqual(expectedResult);
 		});
-		test('Should return mongo $lte query given a key, value, and le', () => {
+		test('Should return SQL Less Than or Equal query given a key, value, and le', () => {
 			const expectedResult = { name: 'foo', value: { [Op.lte]: 'bar' } };
 			let observedResult = sqlQB.buildComparatorQuery({
 				field: 'foo',
@@ -96,7 +96,7 @@ describe('SQL Query Builder Tests', () => {
 			});
 			expect(observedResult).toEqual(expectedResult);
 		});
-		test('Should return mongo $gt query given a key, value, and sa', () => {
+		test('Should return SQL Greater Than query given a key, value, and sa', () => {
 			const expectedResult = { name: 'foo', value: { [Op.gt]: 'bar' } };
 			let observedResult = sqlQB.buildComparatorQuery({
 				field: 'foo',
@@ -105,7 +105,7 @@ describe('SQL Query Builder Tests', () => {
 			});
 			expect(observedResult).toEqual(expectedResult);
 		});
-		test('Should return mongo $lt query given a key, value, and eb', () => {
+		test('Should return SQL Less Than query given a key, value, and eb', () => {
 			const expectedResult = { name: 'foo', value: { [Op.lt]: 'bar' } };
 			let observedResult = sqlQB.buildComparatorQuery({
 				field: 'foo',
@@ -114,7 +114,7 @@ describe('SQL Query Builder Tests', () => {
 			});
 			expect(observedResult).toEqual(expectedResult);
 		});
-		test('Should return mongo $ne query given a key, value, and ne', () => {
+		test('Should return SQL Not Equal query given a key, value, and ne', () => {
 			const expectedResult = { name: 'foo', value: { [Op.ne]: 'bar' } };
 			let observedResult = sqlQB.buildComparatorQuery({
 				field: 'foo',
@@ -125,14 +125,14 @@ describe('SQL Query Builder Tests', () => {
 		});
 	});
 	describe('buildOrQuery Tests', () => {
-		test('Should return $or of given queries', () => {
+		test('Should return an OR of given queries', () => {
 			const expectedResult = { [Op.or]: [{ foo: 'bar' }, { bar: 'foo' }] };
 			let observedResult = sqlQB.buildOrQuery({
 				queries: [{ foo: 'bar' }, { bar: 'foo' }],
 			});
 			expect(observedResult).toEqual(expectedResult);
 		});
-		test('Should return $nor of given queries if invert option is true', () => {
+		test('Should return a NOR of given queries if invert option is true', () => {
 			const expectedResult = {
 				[Op.not]: { [Op.or]: [{ foo: 'bar' }, { bar: 'foo' }] },
 			};
