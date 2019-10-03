@@ -42,7 +42,11 @@ let parseSortQuery = function(sortables) {
  * Form a Sequelize date comparison given a date and column
  */
 let formDateComparison = function(comparator, date, colName = 'value') {
-	return Sequelize.where(Sequelize.fn('date', Sequelize.col(colName)), comparator, date);
+	return Sequelize.where(
+		Sequelize.fn('date', Sequelize.col(colName)),
+		comparator,
+		date,
+	);
 };
 
 /**
@@ -67,7 +71,12 @@ let buildOrQuery = function({ queries, invert = false }) {
  * Builds query to get records where the value of the field equal to the value.
  * Setting invert to true will get records that are NOT equal instead.
  */
-let buildEqualToQuery = function({ field, value, invert = false, isDate = false }) {
+let buildEqualToQuery = function({
+	field,
+	value,
+	invert = false,
+	isDate = false,
+}) {
 	if (isDate) {
 		const comparator = invert ? '!=' : '=';
 		return {
@@ -81,7 +90,12 @@ let buildEqualToQuery = function({ field, value, invert = false, isDate = false 
 /**
  * Builds query to get records where the value of the field is [<,<=,>,>=,!=] to the value.
  */
-let buildComparatorQuery = function({ field, value, comparator, isDate = false }) {
+let buildComparatorQuery = function({
+	field,
+	value,
+	comparator,
+	isDate = false,
+}) {
 	const sqlComparators = {
 		gt: Op.gt,
 		ge: Op.gte,
@@ -105,11 +119,21 @@ let buildComparatorQuery = function({ field, value, comparator, isDate = false }
  * Builds query to get records where the value of the field is in the specified range
  * Setting invert to true will get records that are NOT in the specified range.
  */
-let buildInRangeQuery = function({ field, lowerBound, upperBound, invert = false, isDate = false }) {
+let buildInRangeQuery = function({
+	field,
+	lowerBound,
+	upperBound,
+	invert = false,
+	isDate = false,
+}) {
 	if (invert) {
 		if (isDate) {
 			return {
-				[Op.and]: [{ name: field }, formDateComparison('<=', lowerBound), formDateComparison('>=', upperBound)],
+				[Op.and]: [
+					{ name: field },
+					formDateComparison('<=', lowerBound),
+					formDateComparison('>=', upperBound),
+				],
 			};
 		}
 		return {
@@ -119,7 +143,11 @@ let buildInRangeQuery = function({ field, lowerBound, upperBound, invert = false
 	} else {
 		if (isDate) {
 			return {
-				[Op.and]: [{ name: field }, formDateComparison('>=', lowerBound), formDateComparison('<=', upperBound)],
+				[Op.and]: [
+					{ name: field },
+					formDateComparison('>=', lowerBound),
+					formDateComparison('<=', upperBound),
+				],
 			};
 		}
 		return { name: field, value: { [Op.between]: [lowerBound, upperBound] } };
@@ -183,11 +211,16 @@ let buildEndsWithQuery = function({ field, value, caseSensitive = false }) {
  * @param query
  * @param searchResultTransformations
  */
-let applySearchResultTransformations = function({ query, searchResultTransformations }) {
+let applySearchResultTransformations = function({
+	query,
+	searchResultTransformations,
+}) {
 	Object.keys(searchResultTransformations).forEach(transformation => {
 		const transformer = supportedSearchTransformations[transformation];
 		const label = transformer.label;
-		query[label] = transformer.transform(searchResultTransformations[transformation]);
+		query[label] = transformer.transform(
+			searchResultTransformations[transformation],
+		);
 	});
 	return query;
 };
@@ -269,7 +302,9 @@ let assembleSearchQuery = function({
 	// Check that the necessary implementation parameters were passed through
 	let { archivedParamPath } = implementationParameters;
 	if (!archivedParamPath) {
-		throw new Error("Missing required implementation parameter 'archivedParamPath'");
+		throw new Error(
+			"Missing required implementation parameter 'archivedParamPath'",
+		);
 	}
 
 	// Construct the necessary queries for each match and add them the pipeline.
