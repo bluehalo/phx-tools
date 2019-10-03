@@ -1,8 +1,46 @@
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 
-let supportedSearchTransformations = {};
+/**
+ * Currently only support _count and _sort out of the list of search result set paramaters
+ */
+const supportedSearchTransformations = {
+	_count: {
+		label: 'limit',
+		transform: value => {
+			return value;
+		},
+	},
 
+	_sort: {
+		label: 'order',
+		transform: value => {
+			return parseSortQuery(value);
+		},
+	},
+};
+
+/**
+ * Given a parameter to sort on, return itself and it's correct direction
+ */
+let getSortOrder = function(sortable) {
+	if (sortable && sortable[0] === '-') {
+		return [sortable.substring(1), 'DESC'];
+	}
+	return [sortable, 'ASC'];
+};
+
+/**
+ * Given a comma seperated list of strings to order on, return a list of column and direction lists
+ */
+let parseSortQuery = function(sortables) {
+	const split = sortables.split(',');
+	return split.map(getSortOrder);
+};
+
+/**
+ * Form a Sequelize date comparison given a date and column
+ */
 let formDateComparison = function(comparator, date, colName = 'value') {
 	return Sequelize.where(
 		Sequelize.fn('date', Sequelize.col(colName)),
@@ -162,17 +200,46 @@ let buildEndsWithQuery = function({ field, value, caseSensitive = false }) {
 };
 
 /**
+ * Apply search result transformations
+ * @param query
+ * @param searchResultTransformations
+ */
+let applySearchResultTransformations = function({
+	query,
+	searchResultTransformations,
+}) {
+	Object.keys(searchResultTransformations).forEach(transformation => {
+		const transformer = supportedSearchTransformations[transformation];
+		const label = transformer.label;
+		query[label] = transformer.transform(
+			searchResultTransformations[transformation],
+		);
+	});
+	return query;
+};
+
+/**
  * Assembles a mongo aggregation pipeline
  * @param joinsToPerform - List of joins to perform first through lookups
  * @param matchesToPerform - List of matches to perform
+ * @param searchResultTransformations
  * @param implementationParameters
+ * @param includeArchived
+ * @param pageNumber
+ * @param resultsPerPage
  * @returns {Array}
  */
 let assembleSearchQuery = function({
+	joinsToPerform,
 	matchesToPerform,
+	searchResultTransformations,
 	implementationParameters,
+	includeArchived,
+	pageNumber,
+	resultsPerPage,
 }) {
-	let query = [];
+	let query = {};
+	let toSuppress = {};
 
 	// Check that the necessary implementation parameters were passed through
 	let { archivedParamPath } = implementationParameters;
@@ -191,8 +258,15 @@ let assembleSearchQuery = function({
 			}
 			listOfOrs.push(buildOrQuery({ queries: match }));
 		}
-		query.push({ where: buildAndQuery(listOfOrs) });
+		query.where = buildAndQuery(listOfOrs);
 	}
+
+	// query = applyArchivedFilter({ query, archivedParamPath, includeArchived });
+	query = applySearchResultTransformations({
+		query,
+		searchResultTransformations,
+	});
+	// query = applyPaging({ query, pageNumber, resultsPerPage });
 	return query;
 };
 
@@ -209,4 +283,7 @@ module.exports = {
 	buildStartsWithQuery,
 	supportedSearchTransformations,
 	formDateComparison,
+	getSortOrder,
+	parseSortQuery,
+	applySearchResultTransformations,
 };
