@@ -1,6 +1,6 @@
 {
 	"name": "@asymmetrik/fhir-qb-sql",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "FHIR query builder for SQL",
 	"main": "index.js",
 	"repository": {
