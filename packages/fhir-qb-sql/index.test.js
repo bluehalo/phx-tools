@@ -291,6 +291,11 @@ describe('SQL Query Builder Tests', () => {
 			});
 			expect(observedResult).toEqual(expectedResult);
 		});
+		test("Should throw error about missing parameter 'archivedParameterPath'", () => {
+			expect(() =>
+				sqlQB.assembleSearchQuery({ implementationParameters: {} }),
+			).toThrow(Error);
+		});
 	});
 	describe('Should form date comparisons', () => {
 		test('It should form date comparisons properly with default column name', () => {
