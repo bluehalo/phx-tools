@@ -225,57 +225,6 @@ let applySearchResultTransformations = function({
 	return query;
 };
 
-// /**
-//  * If we should not include archived, add a filter to remove them from the results
-//  * @param query
-//  * @param archivedParamPath
-//  * @param includeArchived
-//  * @returns {*}
-//  */
-// let applyArchivedFilter = function({
-// 	query,
-// 	archivedParamPath,
-// 	includeArchived,
-// }) {
-// 	if (!includeArchived) {
-// 		query.push({ $match: { [archivedParamPath]: false } });
-// 	}
-// 	return query;
-// };
-
-// /**
-//  * Apply paging
-//  * @param query
-//  * @param pageNumber
-//  * @param resultsPerPage
-//  * @returns {*}
-//  */
-// let applyPaging = function({ query, pageNumber, resultsPerPage }) {
-// 	// If resultsPerPage is defined, skip to the appropriate page and limit the number of results that appear per page.
-// 	// Otherwise just insert a filler (to keep mongo happy) that skips no entries.
-// 	let pageSelection = resultsPerPage
-// 		? [{ $skip: (pageNumber - 1) * resultsPerPage }, { $limit: resultsPerPage }]
-// 		: [{ $skip: 0 }];
-//
-// 	// If resultsPerPage is defined, calculate the total number of pages as the total number of records
-// 	// divided by the results per page rounded up to the nearest integer.
-// 	// Otherwise if resultsPerPage is not defined, all of the results will be on one page.
-// 	let numberOfPages = resultsPerPage
-// 		? { $ceil: { $divide: ['$total', resultsPerPage] } }
-// 		: 1;
-// 	query.push({
-// 		$facet: {
-// 			metadata: [
-// 				{ $count: 'total' },
-// 				{ $addFields: { numberOfPages: numberOfPages } },
-// 				{ $addFields: { page: pageNumber } }, // TODO may need some additional validation on this.
-// 			],
-// 			data: pageSelection,
-// 		},
-// 	});
-// 	return query;
-// };
-
 /**
  * Assembles a mongo aggregation pipeline
  * @param joinsToPerform - List of joins to perform first through lookups
@@ -341,4 +290,7 @@ module.exports = {
 	buildStartsWithQuery,
 	supportedSearchTransformations,
 	formDateComparison,
+	getSortOrder,
+	parseSortQuery,
+	applySearchResultTransformations,
 };

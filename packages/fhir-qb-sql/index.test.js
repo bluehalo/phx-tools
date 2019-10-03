@@ -115,7 +115,6 @@ describe('SQL Query Builder Tests', () => {
 				caseSensitive: true,
 			});
 			expect(observedResult).toEqual(expectedResult);
-			console.log(observedResult);
 		});
 		test('Should return case insensitive match regex query', () => {
 			const expectedResult = { name: 'foo', value: { [Op.iLike]: 'bar' } };
@@ -124,7 +123,6 @@ describe('SQL Query Builder Tests', () => {
 				value: 'bar',
 			});
 			expect(observedResult).toEqual(expectedResult);
-			console.log(observedResult);
 		});
 	});
 	describe('buildStartsWithQuery Tests', () => {
@@ -257,128 +255,85 @@ describe('SQL Query Builder Tests', () => {
 			expect(observedResult).toEqual(expectedResult);
 		});
 	});
-	// describe('Search Result Transformation Tests', () => {
-	// 	test('Should add $limit to the end of the pipeline when given _count parameter', () => {
-	// 		const expectedResult = [
-	// 			{ $match: { 'meta._isArchived': false } },
-	// 			{ $limit: 3 },
-	// 			{
-	// 				$facet: {
-	// 					data: [{ $skip: 0 }, { $limit: 10 }],
-	// 					metadata: [
-	// 						{ $count: 'total' },
-	// 						{
-	// 							$addFields: {
-	// 								numberOfPages: { $ceil: { $divide: ['$total', 10] } },
-	// 							},
-	// 						},
-	// 						{ $addFields: { page: 1 } },
-	// 					],
-	// 				},
-	// 			},
-	// 		];
-	// 		let observedResult = sqlQB.assembleSearchQuery({
-	// 			joinsToPerform: [],
-	// 			matchesToPerform: [],
-	// 			searchResultTransformations: { _count: 3 },
-	// 			implementationParameters: {archivedParamPath: 'meta._isArchived'},
-	// 			includeArchived: false,
-	// 			pageNumber: 1,
-	// 			resultsPerPage: 10,
-	// 		});
-	// 		expect(observedResult).toEqual(expectedResult);
-	// 	});
-	// });
-	// describe('Paging Tests', () => {
-	// 	test('Should default to page 1 with no limits if resultsPerPage is undefined', () => {
-	// 		const expectedResult = [
-	// 			{
-	// 				$match: {
-	// 					'meta._isArchived': false,
-	// 				},
-	// 			},
-	// 			{
-	// 				$facet: {
-	// 					data: [{ $skip: 0 }],
-	// 					metadata: [
-	// 						{
-	// 							$count: 'total',
-	// 						},
-	// 						{
-	// 							$addFields: {
-	// 								numberOfPages: 1,
-	// 							},
-	// 						},
-	// 						{
-	// 							$addFields: {
-	// 								page: 1,
-	// 							},
-	// 						},
-	// 					],
-	// 				},
-	// 			},
-	// 		];
-	// 		let observedResult = sqlQB.assembleSearchQuery({
-	// 			joinsToPerform: [],
-	// 			matchesToPerform: [],
-	// 			searchResultTransformations: {},
-	// 			implementationParameters: {archivedParamPath: 'meta._isArchived'},
-	// 			includeArchived: false,
-	// 			pageNumber: 1,
-	// 		});
-	// 		expect(observedResult).toEqual(expectedResult);
-	// 	});
-	// });
-	// describe('Apply Archived Filter Tests', () => {
-	// 	test('Should throw an error if missing the required archivedParamPath from the implementation parameters', () => {
-	// 		let error;
-	// 		try {
-	// 			sqlQB.assembleSearchQuery({
-	// 				joinsToPerform: [],
-	// 				matchesToPerform: [],
-	// 				searchResultTransformations: {},
-	// 				implementationParameters: {},
-	// 				includeArchived: false,
-	// 				pageNumber: 1,
-	// 			});
-	// 		} catch (err) {
-	// 			error = err;
-	// 		}
-	// 		expect(error.message).toContain('Missing required implementation parameter \'archivedParamPath\'');
-	// 	});
-	// 	test('Should return input query as is if we are not filtering out archived results', () => {
-	// 		const expectedResult = [
-	// 			{
-	// 				$facet: {
-	// 					data: [{ $skip: 0 }, {$limit: 10}],
-	// 					metadata: [
-	// 						{
-	// 							$count: 'total',
-	// 						},
-	// 						{
-	// 							$addFields: {
-	// 								numberOfPages: {$ceil: {$divide:['$total',10]}},
-	// 							},
-	// 						},
-	// 						{
-	// 							$addFields: {
-	// 								page: 1,
-	// 							},
-	// 						},
-	// 					],
-	// 				},
-	// 			},
-	// 		];
-	// 		let observedResult = sqlQB.assembleSearchQuery({
-	// 			joinsToPerform: [],
-	// 			matchesToPerform: [],
-	// 			searchResultTransformations: {},
-	// 			implementationParameters: {archivedParamPath: 'meta._isArchived'},
-	// 			includeArchived: true,
-	// 			pageNumber: 1,
-	// 			resultsPerPage: 10
-	// 		});
-	// 		expect(observedResult).toEqual(expectedResult);
-	// 	});
-	// });
+	describe('Should form date comparisons', () => {
+		test('It should form date comparisons properly with default column name', () => {
+			const comparator = '<=';
+			const date = new Date('12-12-1990');
+			const expectedResult = {
+				attribute: { args: [{ col: 'value' }], fn: 'date' },
+				comparator: '<=',
+				logic: new Date('12-12-1990'),
+			};
+			let observedResult = sqlQB.formDateComparison(comparator, date);
+			expect(observedResult).toEqual(expectedResult);
+		});
+		test('It should form date comparisons properly with supplied column', () => {
+			const comparator = '<=';
+			const date = new Date('12-12-1990');
+			const colName = 'attribute';
+			const expectedResult = {
+				attribute: { args: [{ col: 'attribute' }], fn: 'date' },
+				comparator: '<=',
+				logic: new Date('12-12-1990'),
+			};
+			let observedResult = sqlQB.formDateComparison(comparator, date, colName);
+			expect(observedResult).toEqual(expectedResult);
+		});
+	});
+	describe('Should apply search result transformations to a query', () => {
+		test('Should assign the appropriate search result transformations to a query', () => {
+			const query = {};
+			const searchResultTransformations = {
+				_sort: 'birthdate',
+				_count: 1,
+			};
+			const expectedResult = {
+				order: [['birthdate', 'ASC']],
+				limit: 1,
+			};
+			const observedResult = sqlQB.applySearchResultTransformations({
+				query,
+				searchResultTransformations,
+			});
+			expect(observedResult).toEqual(expectedResult);
+		});
+	});
+	describe('Should handle sorting functions appropriately', () => {
+		test('Should sort ascending for normal parameter', () => {
+			const sortableParam = 'birthdate';
+			const expectedResult = ['birthdate', 'ASC'];
+			const observedResult = sqlQB.getSortOrder(sortableParam);
+			expect(observedResult).toEqual(expectedResult);
+		});
+		test('Should sort descending for negative parameter', () => {
+			const sortableParam = '-birthdate';
+			const expectedResult = ['birthdate', 'DESC'];
+			const observedResult = sqlQB.getSortOrder(sortableParam);
+			expect(observedResult).toEqual(expectedResult);
+		});
+		test('Should parse a comma seperated list of strings properly', () => {
+			const sortableParams = '-birthdate,_lastUpdated';
+			const expectedResult = [['birthdate', 'DESC'], ['_lastUpdated', 'ASC']];
+			const observedResult = sqlQB.parseSortQuery(sortableParams);
+			expect(observedResult).toEqual(expectedResult);
+		});
+		test('Should transform a comma seperated list of strings properly', () => {
+			const sortableParams = '-birthdate,_lastUpdated';
+			const expectedResult = [['birthdate', 'DESC'], ['_lastUpdated', 'ASC']];
+			const observedResult = sqlQB.supportedSearchTransformations._sort.transform(
+				sortableParams,
+			);
+			expect(observedResult).toEqual(expectedResult);
+		});
+	});
+	describe('Should handle limit queries appropriately', () => {
+		test('Should transform a given value for limit queries appropriately', () => {
+			const _countParam = '5';
+			const expectedResult = '5';
+			const observedResult = sqlQB.supportedSearchTransformations._count.transform(
+				_countParam,
+			);
+			expect(observedResult).toEqual(expectedResult);
+		});
+	});
 });
