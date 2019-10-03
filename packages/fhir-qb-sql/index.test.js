@@ -12,11 +12,48 @@ describe('SQL Query Builder Tests', () => {
 			});
 			expect(observedResult).toEqual(expectedResult);
 		});
-		test('Should return sequelize $ne query given a key, value, and invert = true', () => {
+		test('Should return sequelize Not Equal query given a key, value, and invert = true', () => {
 			const expectedResult = { name: 'foo', value: { [Op.ne]: 'bar' } };
 			let observedResult = sqlQB.buildEqualToQuery({
 				field: 'foo',
 				value: 'bar',
+				invert: true,
+			});
+			expect(observedResult).toEqual(expectedResult);
+		});
+		test('Should return sequelize Not Equal date query', () => {
+			const expectedResult = {
+				[Op.and]: [
+					{ name: 'foo' },
+					{
+						attribute: { args: [{ col: 'value' }], fn: 'date' },
+						comparator: '=',
+						logic: 'bar',
+					},
+				],
+			};
+			let observedResult = sqlQB.buildEqualToQuery({
+				field: 'foo',
+				value: 'bar',
+				isDate: true,
+			});
+			expect(observedResult).toEqual(expectedResult);
+		});
+		test('Should return sequelize Not Equal date query with invert = true', () => {
+			const expectedResult = {
+				[Op.and]: [
+					{ name: 'foo' },
+					{
+						attribute: { args: [{ col: 'value' }], fn: 'date' },
+						comparator: '!=',
+						logic: 'bar',
+					},
+				],
+			};
+			let observedResult = sqlQB.buildEqualToQuery({
+				field: 'foo',
+				value: 'bar',
+				isDate: true,
 				invert: true,
 			});
 			expect(observedResult).toEqual(expectedResult);
