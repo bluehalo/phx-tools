@@ -163,13 +163,6 @@ let buildExistsQuery = function({ field, exists }) {
 };
 
 /**
- * Builds a query to get records where the value of the field key matches the given pattern and options.
- */
-let buildRegexQuery = function({ field, pattern, options }) {
-	return { name: field, value: { $regex: pattern, $options: options } };
-};
-
-/**
  * Builds query to get records where the value of the field contains the value.
  * Setting caseSensitive to true will cause the regex to be case insensitive
  */
