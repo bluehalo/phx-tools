@@ -240,6 +240,7 @@ describe('SQL Query Builder Tests', () => {
 			let observedResult = sqlQB.assembleSearchQuery({
 				joinsToPerform: [],
 				matchesToPerform: [],
+				tokenMatches: [],
 				searchResultTransformations: {},
 				implementationParameters: { archivedParamPath: 'meta._isArchived' },
 				includeArchived: false,
@@ -253,6 +254,7 @@ describe('SQL Query Builder Tests', () => {
 			let observedResult = sqlQB.assembleSearchQuery({
 				joinsToPerform: [{ from: 'foo', localKey: 'bar', foreignKey: 'baz' }],
 				matchesToPerform: [],
+				tokenMatches: [],
 				searchResultTransformations: {},
 				implementationParameters: { archivedParamPath: 'meta._isArchived' },
 				includeArchived: false,
@@ -262,10 +264,11 @@ describe('SQL Query Builder Tests', () => {
 			expect(observedResult).toEqual(expectedResult);
 		});
 		test('Should fill in empty matches with empty objects to keep queries valid', () => {
-			const expectedResult = { where: { [Op.and]: [{ [Op.or]: [{}] }] } };
+			const expectedResult = {};
 			let observedResult = sqlQB.assembleSearchQuery({
 				joinsToPerform: [],
 				matchesToPerform: [[]],
+				tokenMatches: [],
 				searchResultTransformations: {},
 				implementationParameters: { archivedParamPath: 'meta._isArchived' },
 				includeArchived: false,
@@ -283,6 +286,7 @@ describe('SQL Query Builder Tests', () => {
 			let observedResult = sqlQB.assembleSearchQuery({
 				joinsToPerform: [],
 				matchesToPerform: [[{ foo: { [Op.gte]: 1, [Op.lte]: 10 } }]],
+				tokenMatches: [],
 				searchResultTransformations: {},
 				implementationParameters: { archivedParamPath: 'meta._isArchived' },
 				includeArchived: false,

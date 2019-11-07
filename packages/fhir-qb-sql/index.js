@@ -1,6 +1,21 @@
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 
+let getSortOrder = function(sortable) {
+	if (sortable && sortable[0] === '-') {
+		return [sortable.substring(1), 'DESC'];
+	}
+	return [sortable, 'ASC'];
+};
+
+/**
+ * Given a comma seperated list of strings to order on, return a list of column and direction lists
+ */
+let parseSortQuery = function(sortables) {
+	const split = sortables.split(',');
+	return split.map(getSortOrder);
+};
+
 /**
  * Currently only support _count and _sort out of the list of search result set paramaters
  */
@@ -18,24 +33,6 @@ const supportedSearchTransformations = {
 			return parseSortQuery(value);
 		},
 	},
-};
-
-/**
- * Given a parameter to sort on, return itself and it's correct direction
- */
-let getSortOrder = function(sortable) {
-	if (sortable && sortable[0] === '-') {
-		return [sortable.substring(1), 'DESC'];
-	}
-	return [sortable, 'ASC'];
-};
-
-/**
- * Given a comma seperated list of strings to order on, return a list of column and direction lists
- */
-let parseSortQuery = function(sortables) {
-	const split = sortables.split(',');
-	return split.map(getSortOrder);
 };
 
 /**
@@ -200,6 +197,45 @@ let buildEndsWithQuery = function({ field, value, caseSensitive = false }) {
 };
 
 /**
+ * Build a token query
+ */
+let buildTokenQuery = function({ name, system, code }) {
+	let queries = [{ name: name }];
+	if (system) {
+		queries.push({
+			system: system,
+		});
+	}
+	if (code) {
+		queries.push({
+			code: code,
+		});
+	}
+	return queries;
+};
+
+/**
+ *
+ */
+let buildTokenStringQuery = function({ field, value, system }) {
+	return buildAndQuery(buildTokenQuery({ name: field, code: value, system }));
+};
+
+/**
+ *
+ */
+let buildTokenURIQuery = function({ field, value }) {
+	return buildAndQuery([{ name: field }, { code: value }]);
+};
+
+/**
+ *
+ */
+let buildTokenEqualToQuery = function({ field, value }) {
+	return buildAndQuery([{ name: field }, { code: value }]);
+};
+
+/**
  * Apply search result transformations
  * @param query
  * @param searchResultTransformations
@@ -232,6 +268,7 @@ let applySearchResultTransformations = function({
 let assembleSearchQuery = function({
 	joinsToPerform,
 	matchesToPerform,
+	tokenMatches,
 	searchResultTransformations,
 	implementationParameters,
 	includeArchived,
@@ -251,14 +288,21 @@ let assembleSearchQuery = function({
 
 	// Construct the necessary queries for each match and add them the pipeline.
 	if (matchesToPerform.length > 0) {
-		let listOfOrs = [];
-		for (let match of matchesToPerform) {
-			if (match.length === 0) {
-				match.push({});
-			}
-			listOfOrs.push(buildOrQuery({ queries: match }));
+		let listOfOrs = matchesToPerform
+			.filter(match => match.length)
+			.map(match => buildOrQuery({ queries: match }));
+		if (listOfOrs.length) {
+			query.where = buildAndQuery(listOfOrs);
 		}
-		query.where = buildAndQuery(listOfOrs);
+	}
+
+	if (tokenMatches.length > 0) {
+		let listOfOrs = tokenMatches
+			.filter(match => match && match.length !== 0 && match !== {})
+			.map(match => buildOrQuery({ queries: match }));
+		if (listOfOrs.length) {
+			query.tokens = buildAndQuery(listOfOrs);
+		}
 	}
 
 	// query = applyArchivedFilter({ query, archivedParamPath, includeArchived });
@@ -277,6 +321,10 @@ module.exports = {
 	buildContainsQuery,
 	buildEndsWithQuery,
 	buildEqualToQuery,
+	buildTokenQuery,
+	buildTokenStringQuery,
+	buildTokenEqualToQuery,
+	buildTokenURIQuery,
 	buildExistsQuery,
 	buildOrQuery,
 	buildInRangeQuery,

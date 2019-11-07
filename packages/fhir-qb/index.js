@@ -288,6 +288,28 @@ class QueryBuilder {
 	}
 
 	/**
+	 * Construct a query when a String is treated as a token
+	 *
+	 * @param field
+	 * @param value
+	 */
+	buildTokenStringQuery({ field, value, system }) {
+		value = sanitize.sanitizeString({ field, value });
+		return this.qb.buildTokenStringQuery({ field, value, system });
+	}
+
+	/**
+	 * Construct a query when a String is treated as a token
+	 *
+	 * @param field
+	 * @param value
+	 */
+	buildTokenURIQuery({ field, value }) {
+		value = sanitize.sanitizeString({ field, value });
+		return this.qb.buildTokenURIQuery({ field, value });
+	}
+
+	/**
 	 * Constructs a query for the 'uri' data type
 	 * @parameter field
 	 * @parameter value
@@ -416,84 +438,65 @@ class QueryBuilder {
 		let isBoolean = fhirtype === 'boolean';
 		let { code, system } = sanitize.sanitizeToken({ field, value, isBoolean });
 		let tokenQuery;
-		let queries = [];
+		let queries;
 		switch (fhirtype) {
 			case 'Coding':
-				if (system) {
-					queries.push(
-						this.qb.buildEqualToQuery({
-							field: `${field}.system`,
-							value: system,
-						}),
-					);
-				}
-				if (code) {
-					queries.push(
-						this.qb.buildEqualToQuery({ field: `${field}.code`, value: code }),
-					);
-				}
+				queries = this.qb.buildTokenQuery({
+					name: field,
+					systemPath: `${field}.system`,
+					codePath: `${field}.code`,
+					system: system,
+					code: code,
+				});
 				tokenQuery = this.qb.buildAndQuery(queries);
 				break;
-			case 'CodableConcept':
-				if (system) {
-					queries.push(
-						this.qb.buildEqualToQuery({
-							field: `${field}.coding.system`,
-							value: system,
-						}),
-					);
-				}
-				if (code) {
-					queries.push(
-						this.qb.buildEqualToQuery({
-							field: `${field}.coding.code`,
-							value: code,
-						}),
-					);
-				}
+			case 'CodeableConcept':
+				queries = this.qb.buildTokenQuery({
+					name: field,
+					systemPath: `${field}.coding.system`,
+					codePath: `${field}.coding.code`,
+					system: system,
+					code: code,
+				});
 				tokenQuery = this.qb.buildAndQuery(queries);
 				break;
 			case 'Identifier':
-				if (system) {
-					queries.push(
-						this.qb.buildEqualToQuery({
-							field: `${field}.system`,
-							value: system,
-						}),
-					);
-				}
-				if (code) {
-					queries.push(
-						this.qb.buildEqualToQuery({ field: `${field}.value`, value: code }),
-					);
-				}
+				queries = this.qb.buildTokenQuery({
+					name: field,
+					systemPath: `${field}.system`,
+					codePath: `${field}.value`,
+					system: system,
+					code: code,
+				});
 				tokenQuery = this.qb.buildAndQuery(queries);
 				break;
 			case 'ContactPoint':
-				['system', 'value', 'use', 'rank', 'period'].forEach(attr => {
-					queries.push(
-						this.qb.buildEqualToQuery({
-							field: `${field}.${attr}`,
-							value: code,
-						}),
-					);
+				queries = this.qb.buildTokenQuery({
+					name: field,
+					systemPath: `${field}.system`,
+					codePath: `${field}.value`,
+					system: system,
+					code: code,
 				});
-				tokenQuery = this.qb.buildOrQuery({ queries });
+				tokenQuery = this.qb.buildAndQuery(queries);
 				break;
 			case 'uri':
-				tokenQuery = this.buildURIQuery({ field, value: code });
+				tokenQuery = this.buildTokenURIQuery({
+					field,
+					value: code,
+				});
 				break;
 			case 'string':
 			case 'boolean':
 			case 'code':
-				tokenQuery = this.buildStringQuery({
+				tokenQuery = this.buildTokenStringQuery({
+					system,
 					field,
 					value: code,
-					modifier: matchModifiers.exact,
 				});
 				break;
 			case 'token':
-				tokenQuery = this.qb.buildEqualToQuery({ field, value });
+				tokenQuery = this.qb.buildTokenEqualToQuery({ field, value });
 				break;
 			default:
 				throw new Error(
@@ -548,7 +551,7 @@ class QueryBuilder {
 					);
 			}
 		}
-		return subQuery;
+		return { type, subQuery };
 	}
 
 	/**
@@ -707,8 +710,10 @@ class QueryBuilder {
 
 			// For each match to perform, transform them into the appropriate format using the db specific qb;
 			let matchesToPerform = [];
+			let tokenMatches = [];
 			rawMatchesToPerform.forEach(rawMatch => {
 				let orStatements = [];
+				let tokenOrStatements = [];
 				// Because there can be multiple fields to check for a given parameter, account for all of them in the
 				// or statement being constructed.
 				rawMatch.field.forEach(field => {
@@ -718,16 +723,24 @@ class QueryBuilder {
 					// For each value, add to the or statement for the given field
 					rawMatch.values.forEach(value => {
 						fieldRawMatch.value = value;
-						orStatements.push(this.getSubSearchQuery(fieldRawMatch));
+						const { type, subQuery } = this.getSubSearchQuery(fieldRawMatch);
+						// implementations need these explicility separated
+						if (type === 'token') {
+							tokenOrStatements.push(subQuery);
+						} else {
+							orStatements.push(subQuery);
+						}
 					});
 				});
 				matchesToPerform.push(orStatements);
+				tokenMatches.push(tokenOrStatements);
 			});
 
 			// Assemble the search query
 			query = this.qb.assembleSearchQuery({
 				joinsToPerform,
 				matchesToPerform,
+				tokenMatches,
 				searchResultTransformations,
 				implementationParameters: this.implementationParameters,
 				includeArchived,
