@@ -12127,5 +12127,12 @@ describe('Constructor Tests', () => {
 			expect(errors).toHaveLength(0);
 			expect(query).toEqual(expectedResult);
 		});
+		test('packageName should default to fhir-qb-mongo if left out', () => {
+			const qb = new QueryBuilder({
+				globalParameterDefinitions,
+				implementationParameters: { archivedParamPath: 'meta._isArchived' },
+			});
+			expect(qb).toBeTruthy();
+		});
 	});
 });
