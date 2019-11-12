@@ -18,6 +18,10 @@ function allowedScopes(name, action) {
 		`patient/*.${action}`,
 		`patient/${name}.*`,
 		`patient/${name}.${action}`,
+		'system/*.*',
+		`system/*.${action}`,
+		`system/${name}.*`,
+		`system/${name}.${action}`
 	];
 }
 
