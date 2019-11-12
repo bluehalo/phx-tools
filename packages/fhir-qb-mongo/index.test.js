@@ -263,7 +263,7 @@ describe('Mongo Query Builder Tests', () => {
 		});
 		test('Should fill in empty matches with empty objects to keep queries valid', () => {
 			const expectedResult = [
-				{ $match: { $and: [{ $or: [{}] }] } },
+				{ $match: { $and: [] } },
 				{ $match: { 'meta._isArchived': false } },
 				{
 					$facet: {
@@ -283,6 +283,7 @@ describe('Mongo Query Builder Tests', () => {
 			let observedResult = mongoQB.assembleSearchQuery({
 				joinsToPerform: [],
 				matchesToPerform: [[]],
+				tokenMatches: [],
 				searchResultTransformations: {},
 				implementationParameters: { archivedParamPath: 'meta._isArchived' },
 				includeArchived: false,

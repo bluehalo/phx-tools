@@ -75,6 +75,7 @@ describe('Mongo Tests', () => {
 	};
 	const qb = new QueryBuilder({
 		globalParameterDefinitions,
+		packageName: '../fhir-qb-mongo/index.js',
 		implementationParameters: { archivedParamPath: 'meta._isArchived' },
 	});
 	describe('Build Date Query Tests', () => {
@@ -5036,7 +5037,7 @@ describe('Mongo Tests', () => {
 				expect(query).toEqual(expectedResult);
 			});
 		});
-		describe('CodableConcept Token Tests', () => {
+		describe('CodeableConcept Token Tests', () => {
 			test('Should return an and query with 1 equal to condition when given just a system', () => {
 				const req = {
 					method: 'GET',
@@ -5047,7 +5048,7 @@ describe('Mongo Tests', () => {
 				const parameterDefinitions = {
 					foo: {
 						type: 'token',
-						fhirtype: 'CodableConcept',
+						fhirtype: 'CodeableConcept',
 						xpath: 'Resource.foo',
 					},
 				};
@@ -5092,7 +5093,7 @@ describe('Mongo Tests', () => {
 				const parameterDefinitions = {
 					foo: {
 						type: 'token',
-						fhirtype: 'CodableConcept',
+						fhirtype: 'CodeableConcept',
 						xpath: 'Resource.foo',
 					},
 				};
@@ -5137,7 +5138,7 @@ describe('Mongo Tests', () => {
 				const parameterDefinitions = {
 					foo: {
 						type: 'token',
-						fhirtype: 'CodableConcept',
+						fhirtype: 'CodeableConcept',
 						xpath: 'Resource.foo',
 					},
 				};
@@ -5182,7 +5183,7 @@ describe('Mongo Tests', () => {
 				const parameterDefinitions = {
 					foo: {
 						type: 'token',
-						fhirtype: 'CodableConcept',
+						fhirtype: 'CodeableConcept',
 						xpath: 'Resource.foo',
 					},
 				};
@@ -5419,13 +5420,7 @@ describe('Mongo Tests', () => {
 								{
 									$or: [
 										{
-											$or: [
-												{ 'foo.system': 'bar' },
-												{ 'foo.value': 'bar' },
-												{ 'foo.use': 'bar' },
-												{ 'foo.rank': 'bar' },
-												{ 'foo.period': 'bar' },
-											],
+											$and: [{ 'foo.value': 'bar' }],
 										},
 									],
 								},
@@ -5478,13 +5473,7 @@ describe('Mongo Tests', () => {
 								{
 									$or: [
 										{
-											$or: [
-												{ 'foo.system': 'bar' },
-												{ 'foo.value': 'bar' },
-												{ 'foo.use': 'bar' },
-												{ 'foo.rank': 'bar' },
-												{ 'foo.period': 'bar' },
-											],
+											$and: [{ 'foo.value': 'bar' }],
 										},
 									],
 								},
@@ -5537,13 +5526,7 @@ describe('Mongo Tests', () => {
 								{
 									$or: [
 										{
-											$or: [
-												{ 'foo.system': 'baz' },
-												{ 'foo.value': 'baz' },
-												{ 'foo.use': 'baz' },
-												{ 'foo.rank': 'baz' },
-												{ 'foo.period': 'baz' },
-											],
+											$and: [{ 'foo.system': 'bar' }, { 'foo.value': 'baz' }],
 										},
 									],
 								},
@@ -6406,7 +6389,7 @@ describe('Mongo Tests', () => {
 		});
 		test('Should be able to initialize a new qb without supplying global parameters', () => {
 			const noGlobalQB = new QueryBuilder({
-				packageName: '@asymmetrik/fhir-qb-mongo',
+				packageName: '../fhir-qb-mongo',
 			});
 			expect(noGlobalQB).toBeDefined();
 		});
@@ -10741,20 +10724,9 @@ describe('SQL Tests', () => {
 					includeArchived,
 				});
 				const expectedResult = {
-					where: {
+					tokens: {
 						[Op.and]: [
-							{
-								[Op.or]: [
-									{
-										[Op.and]: [
-											{
-												name: 'foo.system',
-												value: 'bar',
-											},
-										],
-									},
-								],
-							},
+							{ [Op.or]: [{ [Op.and]: [{ name: 'foo' }, { system: 'bar' }] }] },
 						],
 					},
 				};
@@ -10778,20 +10750,9 @@ describe('SQL Tests', () => {
 					includeArchived,
 				});
 				const expectedResult = {
-					where: {
+					tokens: {
 						[Op.and]: [
-							{
-								[Op.or]: [
-									{
-										[Op.and]: [
-											{
-												name: 'foo.code',
-												value: 'bar',
-											},
-										],
-									},
-								],
-							},
+							{ [Op.or]: [{ [Op.and]: [{ name: 'foo' }, { code: 'bar' }] }] },
 						],
 					},
 				};
@@ -10815,20 +10776,9 @@ describe('SQL Tests', () => {
 					includeArchived,
 				});
 				const expectedResult = {
-					where: {
+					tokens: {
 						[Op.and]: [
-							{
-								[Op.or]: [
-									{
-										[Op.and]: [
-											{
-												name: 'foo.code',
-												value: 'bar',
-											},
-										],
-									},
-								],
-							},
+							{ [Op.or]: [{ [Op.and]: [{ name: 'foo' }, { code: 'bar' }] }] },
 						],
 					},
 				};
@@ -10852,20 +10802,15 @@ describe('SQL Tests', () => {
 					includeArchived,
 				});
 				const expectedResult = {
-					where: {
+					tokens: {
 						[Op.and]: [
 							{
 								[Op.or]: [
 									{
 										[Op.and]: [
-											{
-												name: 'foo.system',
-												value: 'bar',
-											},
-											{
-												name: 'foo.code',
-												value: 'baz',
-											},
+											{ name: 'foo' },
+											{ system: 'bar' },
+											{ code: 'baz' },
 										],
 									},
 								],
@@ -10877,7 +10822,7 @@ describe('SQL Tests', () => {
 				expect(query).toEqual(expectedResult);
 			});
 		});
-		describe('CodableConcept Token Tests', () => {
+		describe('CodeableConcept Token Tests', () => {
 			test('Should return an and query with 1 equal to condition when given just a system', () => {
 				const req = {
 					method: 'GET',
@@ -10888,7 +10833,7 @@ describe('SQL Tests', () => {
 				const parameterDefinitions = {
 					foo: {
 						type: 'token',
-						fhirtype: 'CodableConcept',
+						fhirtype: 'CodeableConcept',
 						xpath: 'Resource.foo',
 					},
 				};
@@ -10899,20 +10844,9 @@ describe('SQL Tests', () => {
 					includeArchived,
 				});
 				const expectedResult = {
-					where: {
+					tokens: {
 						[Op.and]: [
-							{
-								[Op.or]: [
-									{
-										[Op.and]: [
-											{
-												name: 'foo.coding.system',
-												value: 'bar',
-											},
-										],
-									},
-								],
-							},
+							{ [Op.or]: [{ [Op.and]: [{ name: 'foo' }, { system: 'bar' }] }] },
 						],
 					},
 				};
@@ -10929,7 +10863,7 @@ describe('SQL Tests', () => {
 				const parameterDefinitions = {
 					foo: {
 						type: 'token',
-						fhirtype: 'CodableConcept',
+						fhirtype: 'CodeableConcept',
 						xpath: 'Resource.foo',
 					},
 				};
@@ -10940,20 +10874,9 @@ describe('SQL Tests', () => {
 					includeArchived,
 				});
 				const expectedResult = {
-					where: {
+					tokens: {
 						[Op.and]: [
-							{
-								[Op.or]: [
-									{
-										[Op.and]: [
-											{
-												name: 'foo.coding.code',
-												value: 'bar',
-											},
-										],
-									},
-								],
-							},
+							{ [Op.or]: [{ [Op.and]: [{ name: 'foo' }, { code: 'bar' }] }] },
 						],
 					},
 				};
@@ -10970,7 +10893,7 @@ describe('SQL Tests', () => {
 				const parameterDefinitions = {
 					foo: {
 						type: 'token',
-						fhirtype: 'CodableConcept',
+						fhirtype: 'CodeableConcept',
 						xpath: 'Resource.foo',
 					},
 				};
@@ -10981,17 +10904,15 @@ describe('SQL Tests', () => {
 					includeArchived,
 				});
 				const expectedResult = {
-					where: {
+					tokens: {
 						[Op.and]: [
 							{
 								[Op.or]: [
 									{
 										[Op.and]: [
-											{
-												name: 'foo.coding.system',
-												value: 'bar',
-											},
-											{ name: 'foo.coding.code', value: 'baz' },
+											{ name: 'foo' },
+											{ system: 'bar' },
+											{ code: 'baz' },
 										],
 									},
 								],
@@ -11021,20 +10942,9 @@ describe('SQL Tests', () => {
 					includeArchived,
 				});
 				const expectedResult = {
-					where: {
+					tokens: {
 						[Op.and]: [
-							{
-								[Op.or]: [
-									{
-										[Op.and]: [
-											{
-												name: 'foo.system',
-												value: 'bar',
-											},
-										],
-									},
-								],
-							},
+							{ [Op.or]: [{ [Op.and]: [{ name: 'foo' }, { system: 'bar' }] }] },
 						],
 					},
 				};
@@ -11058,20 +10968,9 @@ describe('SQL Tests', () => {
 					includeArchived,
 				});
 				const expectedResult = {
-					where: {
+					tokens: {
 						[Op.and]: [
-							{
-								[Op.or]: [
-									{
-										[Op.and]: [
-											{
-												name: 'foo.value',
-												value: 'bar',
-											},
-										],
-									},
-								],
-							},
+							{ [Op.or]: [{ [Op.and]: [{ name: 'foo' }, { code: 'bar' }] }] },
 						],
 					},
 				};
@@ -11095,20 +10994,15 @@ describe('SQL Tests', () => {
 					includeArchived,
 				});
 				const expectedResult = {
-					where: {
+					tokens: {
 						[Op.and]: [
 							{
 								[Op.or]: [
 									{
 										[Op.and]: [
-											{
-												name: 'foo.system',
-												value: 'bar',
-											},
-											{
-												name: 'foo.value',
-												value: 'baz',
-											},
+											{ name: 'foo' },
+											{ system: 'bar' },
+											{ code: 'baz' },
 										],
 									},
 								],
@@ -11142,33 +11036,12 @@ describe('SQL Tests', () => {
 					includeArchived,
 				});
 				const expectedResult = {
-					where: {
+					tokens: {
 						[Op.and]: [
 							{
 								[Op.or]: [
 									{
-										[Op.or]: [
-											{
-												name: 'foo.system',
-												value: 'bar',
-											},
-											{
-												name: 'foo.value',
-												value: 'bar',
-											},
-											{
-												name: 'foo.use',
-												value: 'bar',
-											},
-											{
-												name: 'foo.rank',
-												value: 'bar',
-											},
-											{
-												name: 'foo.period',
-												value: 'bar',
-											},
-										],
+										[Op.and]: [{ name: 'foo' }, { code: 'bar' }],
 									},
 								],
 							},
@@ -11199,33 +11072,12 @@ describe('SQL Tests', () => {
 					includeArchived,
 				});
 				const expectedResult = {
-					where: {
+					tokens: {
 						[Op.and]: [
 							{
 								[Op.or]: [
 									{
-										[Op.or]: [
-											{
-												name: 'foo.system',
-												value: 'bar',
-											},
-											{
-												name: 'foo.value',
-												value: 'bar',
-											},
-											{
-												name: 'foo.use',
-												value: 'bar',
-											},
-											{
-												name: 'foo.rank',
-												value: 'bar',
-											},
-											{
-												name: 'foo.period',
-												value: 'bar',
-											},
-										],
+										[Op.and]: [{ name: 'foo' }, { code: 'bar' }],
 									},
 								],
 							},
@@ -11256,32 +11108,15 @@ describe('SQL Tests', () => {
 					includeArchived,
 				});
 				const expectedResult = {
-					where: {
+					tokens: {
 						[Op.and]: [
 							{
 								[Op.or]: [
 									{
-										[Op.or]: [
-											{
-												name: 'foo.system',
-												value: 'baz',
-											},
-											{
-												name: 'foo.value',
-												value: 'baz',
-											},
-											{
-												name: 'foo.use',
-												value: 'baz',
-											},
-											{
-												name: 'foo.rank',
-												value: 'baz',
-											},
-											{
-												name: 'foo.period',
-												value: 'baz',
-											},
+										[Op.and]: [
+											{ name: 'foo' },
+											{ system: 'bar' },
+											{ code: 'baz' },
 										],
 									},
 								],
@@ -11311,13 +11146,12 @@ describe('SQL Tests', () => {
 					includeArchived,
 				});
 				const expectedResult = {
-					where: {
+					tokens: {
 						[Op.and]: [
 							{
 								[Op.or]: [
 									{
-										name: 'foo',
-										value: 'bar',
+										[Op.and]: [{ name: 'foo' }, { code: 'bar' }],
 									},
 								],
 							},
@@ -11344,13 +11178,12 @@ describe('SQL Tests', () => {
 					includeArchived,
 				});
 				const expectedResult = {
-					where: {
+					tokens: {
 						[Op.and]: [
 							{
 								[Op.or]: [
 									{
-										name: 'foo',
-										value: 'bar',
+										[Op.and]: [{ name: 'foo' }, { code: 'bar' }],
 									},
 								],
 							},
@@ -11360,7 +11193,7 @@ describe('SQL Tests', () => {
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
-			test('Should return an equal to query given a system and code (ignore the system)', () => {
+			test('Should return an equal to query given a system and code', () => {
 				const req = {
 					method: 'GET',
 					query: {
@@ -11377,13 +11210,16 @@ describe('SQL Tests', () => {
 					includeArchived,
 				});
 				const expectedResult = {
-					where: {
+					tokens: {
 						[Op.and]: [
 							{
 								[Op.or]: [
 									{
-										name: 'foo',
-										value: 'baz',
+										[Op.and]: [
+											{ name: 'foo' },
+											{ system: 'bar' },
+											{ code: 'baz' },
+										],
 									},
 								],
 							},
@@ -11454,13 +11290,12 @@ describe('SQL Tests', () => {
 					includeArchived,
 				});
 				const expectedResult = {
-					where: {
+					tokens: {
 						[Op.and]: [
 							{
 								[Op.or]: [
 									{
-										name: 'foo',
-										value: 'true',
+										[Op.and]: [{ name: 'foo' }, { code: 'true' }],
 									},
 								],
 							},
@@ -11487,13 +11322,12 @@ describe('SQL Tests', () => {
 					includeArchived,
 				});
 				const expectedResult = {
-					where: {
+					tokens: {
 						[Op.and]: [
 							{
 								[Op.or]: [
 									{
-										name: 'foo',
-										value: 'false',
+										[Op.and]: [{ name: 'foo' }, { code: 'false' }],
 									},
 								],
 							},
@@ -11520,13 +11354,16 @@ describe('SQL Tests', () => {
 					includeArchived,
 				});
 				const expectedResult = {
-					where: {
+					tokens: {
 						[Op.and]: [
 							{
 								[Op.or]: [
 									{
-										name: 'foo',
-										value: 'false',
+										[Op.and]: [
+											{ name: 'foo' },
+											{ system: 'bar' },
+											{ code: 'false' },
+										],
 									},
 								],
 							},
@@ -11555,16 +11392,9 @@ describe('SQL Tests', () => {
 					includeArchived,
 				});
 				const expectedResult = {
-					where: {
+					tokens: {
 						[Op.and]: [
-							{
-								[Op.or]: [
-									{
-										name: 'foo',
-										value: 'bar',
-									},
-								],
-							},
+							{ [Op.or]: [{ [Op.and]: [{ name: 'foo' }, { code: 'bar' }] }] },
 						],
 					},
 				};
@@ -11588,19 +11418,13 @@ describe('SQL Tests', () => {
 					includeArchived,
 				});
 				const expectedResult = {
-					where: {
+					tokens: {
 						[Op.and]: [
-							{
-								[Op.or]: [
-									{
-										name: 'foo',
-										value: 'bar',
-									},
-								],
-							},
+							{ [Op.or]: [{ [Op.and]: [{ name: 'foo' }, { code: 'bar' }] }] },
 						],
 					},
 				};
+
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -11621,19 +11445,13 @@ describe('SQL Tests', () => {
 					includeArchived,
 				});
 				const expectedResult = {
-					where: {
+					tokens: {
 						[Op.and]: [
-							{
-								[Op.or]: [
-									{
-										name: 'foo',
-										value: 'baz',
-									},
-								],
-							},
+							{ [Op.or]: [{ [Op.and]: [{ name: 'foo' }, { code: 'baz' }] }] },
 						],
 					},
 				};
+
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -11656,19 +11474,13 @@ describe('SQL Tests', () => {
 					includeArchived,
 				});
 				const expectedResult = {
-					where: {
+					tokens: {
 						[Op.and]: [
-							{
-								[Op.or]: [
-									{
-										name: 'foo',
-										value: 'bar',
-									},
-								],
-							},
+							{ [Op.or]: [{ [Op.and]: [{ name: 'foo' }, { code: 'bar' }] }] },
 						],
 					},
 				};
+
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -11689,23 +11501,16 @@ describe('SQL Tests', () => {
 					includeArchived,
 				});
 				const expectedResult = {
-					where: {
+					tokens: {
 						[Op.and]: [
-							{
-								[Op.or]: [
-									{
-										name: 'foo',
-										value: 'bar',
-									},
-								],
-							},
+							{ [Op.or]: [{ [Op.and]: [{ name: 'foo' }, { code: 'bar' }] }] },
 						],
 					},
 				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
-			test('Should return an equal to query given a system and code (ignore the system)', () => {
+			test('Should return an equal to query given a system and code', () => {
 				const req = {
 					method: 'GET',
 					query: {
@@ -11722,13 +11527,16 @@ describe('SQL Tests', () => {
 					includeArchived,
 				});
 				const expectedResult = {
-					where: {
+					tokens: {
 						[Op.and]: [
 							{
 								[Op.or]: [
 									{
-										name: 'foo',
-										value: 'baz',
+										[Op.and]: [
+											{ name: 'foo' },
+											{ system: 'bar' },
+											{ code: 'baz' },
+										],
 									},
 								],
 							},
@@ -12013,21 +11821,15 @@ describe('SQL Tests', () => {
 				parameterDefinitions,
 				includeArchived,
 			});
+			// [Op.and]: [{ name: 'id' }, { code: 'foo' }],
+
 			const expectedResult = {
-				where: {
+				tokens: {
 					[Op.and]: [
-						{
-							[Op.or]: [
-								{
-									name: 'id',
-									value: 'foo',
-								},
-							],
-						},
+						{ [Op.or]: [{ [Op.and]: [{ name: 'id' }, { code: 'foo' }] }] },
 					],
 				},
 			};
-
 			expect(errors).toHaveLength(0);
 			expect(query).toEqual(expectedResult);
 		});
@@ -12066,7 +11868,7 @@ describe('SQL Tests', () => {
 		});
 		test('Should be able to initialize a new qb without supplying global parameters', () => {
 			const noGlobalQB = new QueryBuilder({
-				packageName: '@asymmetrik/fhir-qb-mongo',
+				packageName: '../fhir-qb-mongo/index.js',
 			});
 			expect(noGlobalQB).toBeDefined();
 		});
@@ -12324,6 +12126,13 @@ describe('Constructor Tests', () => {
 			};
 			expect(errors).toHaveLength(0);
 			expect(query).toEqual(expectedResult);
+		});
+		test('packageName should default to fhir-qb-mongo if left out', () => {
+			const qb = new QueryBuilder({
+				globalParameterDefinitions,
+				implementationParameters: { archivedParamPath: 'meta._isArchived' },
+			});
+			expect(qb).toBeTruthy();
 		});
 	});
 });
