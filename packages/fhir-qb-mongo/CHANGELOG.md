@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.11.0](https://github.com/Asymmetrik/phx-tools/compare/@asymmetrik/fhir-qb-mongo@0.10.5...@asymmetrik/fhir-qb-mongo@0.11.0) (2019-11-12)
+
+
+### Features
+
+* add token searching for psql ([#32](https://github.com/Asymmetrik/phx-tools/issues/32)) ([b9222d4](https://github.com/Asymmetrik/phx-tools/commit/b9222d4))
+
+
+
+
+
 ## [0.10.2](https://github.com/Asymmetrik/phx-tools/compare/@asymmetrik/fhir-qb-mongo@0.10.1...@asymmetrik/fhir-qb-mongo@0.10.2) (2019-05-03)
 
 **Note:** Version bump only for package @asymmetrik/fhir-qb-mongo
