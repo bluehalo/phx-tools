@@ -1,10 +1,7 @@
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 
-/**
- * Given a parameter to sort on, return itself and it's correct direction
- */
-const getSortOrder = function(sortable) {
+let getSortOrder = function(sortable) {
 	if (sortable && sortable[0] === '-') {
 		return [sortable.substring(1), 'DESC'];
 	}
@@ -14,7 +11,7 @@ const getSortOrder = function(sortable) {
 /**
  * Given a comma seperated list of strings to order on, return a list of column and direction lists
  */
-const parseSortQuery = function(sortables) {
+let parseSortQuery = function(sortables) {
 	const split = sortables.split(',');
 	return split.map(getSortOrder);
 };
@@ -41,7 +38,7 @@ const supportedSearchTransformations = {
 /**
  * Form a Sequelize date comparison given a date and column
  */
-const formDateComparison = function(comparator, date, colName = 'value') {
+let formDateComparison = function(comparator, date, colName = 'value') {
 	return Sequelize.where(
 		Sequelize.fn('date', Sequelize.col(colName)),
 		comparator,
@@ -200,11 +197,50 @@ const buildEndsWithQuery = function({ field, value, caseSensitive = false }) {
 };
 
 /**
+ * Build a token query
+ */
+let buildTokenQuery = function({ name, system, code }) {
+	let queries = [{ name: name }];
+	if (system) {
+		queries.push({
+			system: system,
+		});
+	}
+	if (code) {
+		queries.push({
+			code: code,
+		});
+	}
+	return queries;
+};
+
+/**
+ *
+ */
+let buildTokenStringQuery = function({ field, value, system }) {
+	return buildAndQuery(buildTokenQuery({ name: field, code: value, system }));
+};
+
+/**
+ *
+ */
+let buildTokenURIQuery = function({ field, value }) {
+	return buildAndQuery([{ name: field }, { code: value }]);
+};
+
+/**
+ *
+ */
+let buildTokenEqualToQuery = function({ field, value }) {
+	return buildAndQuery([{ name: field }, { code: value }]);
+};
+
+/**
  * Apply search result transformations
  * @param query
  * @param searchResultTransformations
  */
-const applySearchResultTransformations = function({
+let applySearchResultTransformations = function({
 	query,
 	searchResultTransformations,
 }) {
@@ -222,11 +258,17 @@ const applySearchResultTransformations = function({
  * Assembles a mongo aggregation pipeline
  * @param joinsToPerform - List of joins to perform first through lookups
  * @param matchesToPerform - List of matches to perform
+ * @param searchResultTransformations
  * @param implementationParameters
+ * @param includeArchived
+ * @param pageNumber
+ * @param resultsPerPage
  * @returns {Array}
  */
-const assembleSearchQuery = function({
+let assembleSearchQuery = function({
 	matchesToPerform,
+	tokenMatches,
+	searchResultTransformations,
 	implementationParameters,
 }) {
 	let query = {};
@@ -241,30 +283,50 @@ const assembleSearchQuery = function({
 
 	// Construct the necessary queries for each match and add them the pipeline.
 	if (matchesToPerform.length > 0) {
-		let listOfOrs = [];
-		for (let match of matchesToPerform) {
-			if (match.length === 0) {
-				match.push({});
-			}
-			listOfOrs.push(buildOrQuery({ queries: match }));
+		let listOfOrs = matchesToPerform
+			.filter(match => match.length)
+			.map(match => buildOrQuery({ queries: match }));
+		if (listOfOrs.length) {
+			query.where = buildAndQuery(listOfOrs);
 		}
-		query.push({ where: buildAndQuery(listOfOrs) });
 	}
+
+	if (tokenMatches.length > 0) {
+		let listOfOrs = tokenMatches
+			.filter(match => match && match.length !== 0 && match !== {})
+			.map(match => buildOrQuery({ queries: match }));
+		if (listOfOrs.length) {
+			query.tokens = buildAndQuery(listOfOrs);
+		}
+	}
+
+	// query = applyArchivedFilter({ query, archivedParamPath, includeArchived });
+	query = applySearchResultTransformations({
+		query,
+		searchResultTransformations,
+	});
+	// query = applyPaging({ query, pageNumber, resultsPerPage });
 	return query;
 };
 
 module.exports = {
-	applySearchResultTransformations,
 	assembleSearchQuery,
 	buildAndQuery,
 	buildComparatorQuery,
 	buildContainsQuery,
 	buildEndsWithQuery,
 	buildEqualToQuery,
+	buildTokenQuery,
+	buildTokenStringQuery,
+	buildTokenEqualToQuery,
+	buildTokenURIQuery,
 	buildExistsQuery,
 	buildOrQuery,
 	buildInRangeQuery,
 	buildStartsWithQuery,
 	supportedSearchTransformations,
 	formDateComparison,
+	getSortOrder,
+	parseSortQuery,
+	applySearchResultTransformations,
 };

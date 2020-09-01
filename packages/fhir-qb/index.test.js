@@ -75,6 +75,7 @@ describe('Mongo Tests', () => {
 	};
 	const qb = new QueryBuilder({
 		globalParameterDefinitions,
+		packageName: '../fhir-qb-mongo/index.js',
 		implementationParameters: { archivedParamPath: 'meta._isArchived' },
 	});
 	describe('Build Date Query Tests', () => {
@@ -5036,7 +5037,7 @@ describe('Mongo Tests', () => {
 				expect(query).toEqual(expectedResult);
 			});
 		});
-		describe('CodableConcept Token Tests', () => {
+		describe('CodeableConcept Token Tests', () => {
 			test('Should return an and query with 1 equal to condition when given just a system', () => {
 				const req = {
 					method: 'GET',
@@ -5047,7 +5048,7 @@ describe('Mongo Tests', () => {
 				const parameterDefinitions = {
 					foo: {
 						type: 'token',
-						fhirtype: 'CodableConcept',
+						fhirtype: 'CodeableConcept',
 						xpath: 'Resource.foo',
 					},
 				};
@@ -5092,7 +5093,7 @@ describe('Mongo Tests', () => {
 				const parameterDefinitions = {
 					foo: {
 						type: 'token',
-						fhirtype: 'CodableConcept',
+						fhirtype: 'CodeableConcept',
 						xpath: 'Resource.foo',
 					},
 				};
@@ -5137,7 +5138,7 @@ describe('Mongo Tests', () => {
 				const parameterDefinitions = {
 					foo: {
 						type: 'token',
-						fhirtype: 'CodableConcept',
+						fhirtype: 'CodeableConcept',
 						xpath: 'Resource.foo',
 					},
 				};
@@ -5182,7 +5183,7 @@ describe('Mongo Tests', () => {
 				const parameterDefinitions = {
 					foo: {
 						type: 'token',
-						fhirtype: 'CodableConcept',
+						fhirtype: 'CodeableConcept',
 						xpath: 'Resource.foo',
 					},
 				};
@@ -5419,13 +5420,7 @@ describe('Mongo Tests', () => {
 								{
 									$or: [
 										{
-											$or: [
-												{ 'foo.system': 'bar' },
-												{ 'foo.value': 'bar' },
-												{ 'foo.use': 'bar' },
-												{ 'foo.rank': 'bar' },
-												{ 'foo.period': 'bar' },
-											],
+											$and: [{ 'foo.value': 'bar' }],
 										},
 									],
 								},
@@ -5478,13 +5473,7 @@ describe('Mongo Tests', () => {
 								{
 									$or: [
 										{
-											$or: [
-												{ 'foo.system': 'bar' },
-												{ 'foo.value': 'bar' },
-												{ 'foo.use': 'bar' },
-												{ 'foo.rank': 'bar' },
-												{ 'foo.period': 'bar' },
-											],
+											$and: [{ 'foo.value': 'bar' }],
 										},
 									],
 								},
@@ -5537,13 +5526,7 @@ describe('Mongo Tests', () => {
 								{
 									$or: [
 										{
-											$or: [
-												{ 'foo.system': 'baz' },
-												{ 'foo.value': 'baz' },
-												{ 'foo.use': 'baz' },
-												{ 'foo.rank': 'baz' },
-												{ 'foo.period': 'baz' },
-											],
+											$and: [{ 'foo.system': 'bar' }, { 'foo.value': 'baz' }],
 										},
 									],
 								},
@@ -6406,7 +6389,7 @@ describe('Mongo Tests', () => {
 		});
 		test('Should be able to initialize a new qb without supplying global parameters', () => {
 			const noGlobalQB = new QueryBuilder({
-				packageName: '@asymmetrik/fhir-qb-mongo',
+				packageName: '../fhir-qb-mongo',
 			});
 			expect(noGlobalQB).toBeDefined();
 		});
@@ -6749,24 +6732,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison('=', '2018-10-31T17:49:29.000Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison('=', '2018-10-31T17:49:29.000Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -6786,25 +6767,23 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison('>=', '2018-10-31T17:49:29.000Z'),
-												formDateComparison('<=', '2018-10-31T17:49:29.999Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison('>=', '2018-10-31T17:49:29.000Z'),
+											formDateComparison('<=', '2018-10-31T17:49:29.999Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
@@ -6825,25 +6804,23 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison('>=', '2018-10-31T17:49:00.000Z'),
-												formDateComparison('<=', '2018-10-31T17:49:59.999Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison('>=', '2018-10-31T17:49:00.000Z'),
+											formDateComparison('<=', '2018-10-31T17:49:59.999Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -6863,25 +6840,23 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison('>=', '2018-10-31T17:00:00.000Z'),
-												formDateComparison('<=', '2018-10-31T17:59:59.999Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison('>=', '2018-10-31T17:00:00.000Z'),
+											formDateComparison('<=', '2018-10-31T17:59:59.999Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -6901,25 +6876,23 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison('>=', '2018-10-31T00:00:00.000Z'),
-												formDateComparison('<=', '2018-10-31T23:59:59.999Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison('>=', '2018-10-31T00:00:00.000Z'),
+											formDateComparison('<=', '2018-10-31T23:59:59.999Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -6939,25 +6912,23 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison('>=', '2018-10-01T00:00:00.000Z'),
-												formDateComparison('<=', '2018-10-31T23:59:59.999Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison('>=', '2018-10-01T00:00:00.000Z'),
+											formDateComparison('<=', '2018-10-31T23:59:59.999Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -6977,25 +6948,23 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison('>=', '2018-01-01T00:00:00.000Z'),
-												formDateComparison('<=', '2018-12-31T23:59:59.999Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison('>=', '2018-01-01T00:00:00.000Z'),
+											formDateComparison('<=', '2018-12-31T23:59:59.999Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7015,25 +6984,23 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison('>=', '2018-01-01T00:00:00.000Z'),
-												formDateComparison('<=', '2018-12-31T23:59:59.999Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison('>=', '2018-01-01T00:00:00.000Z'),
+											formDateComparison('<=', '2018-12-31T23:59:59.999Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7056,24 +7023,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison('!=', '2018-10-31T17:49:29.000Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison('!=', '2018-10-31T17:49:29.000Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7093,25 +7058,23 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison('<=', '2018-10-31T17:49:29.000Z'),
-												formDateComparison('>=', '2018-10-31T17:49:29.999Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison('<=', '2018-10-31T17:49:29.000Z'),
+											formDateComparison('>=', '2018-10-31T17:49:29.999Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7132,25 +7095,23 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison('<=', '2018-10-31T17:49:00.000Z'),
-												formDateComparison('>=', '2018-10-31T17:49:59.999Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison('<=', '2018-10-31T17:49:00.000Z'),
+											formDateComparison('>=', '2018-10-31T17:49:59.999Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7171,25 +7132,23 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison('<=', '2018-10-31T17:00:00.000Z'),
-												formDateComparison('>=', '2018-10-31T17:59:59.999Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison('<=', '2018-10-31T17:00:00.000Z'),
+											formDateComparison('>=', '2018-10-31T17:59:59.999Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7209,25 +7168,23 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison('<=', '2018-10-31T00:00:00.000Z'),
-												formDateComparison('>=', '2018-10-31T23:59:59.999Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison('<=', '2018-10-31T00:00:00.000Z'),
+											formDateComparison('>=', '2018-10-31T23:59:59.999Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7247,25 +7204,23 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison('<=', '2018-10-01T00:00:00.000Z'),
-												formDateComparison('>=', '2018-10-31T23:59:59.999Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison('<=', '2018-10-01T00:00:00.000Z'),
+											formDateComparison('>=', '2018-10-31T23:59:59.999Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7285,25 +7240,23 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison('<=', '2018-01-01T00:00:00.000Z'),
-												formDateComparison('>=', '2018-12-31T23:59:59.999Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison('<=', '2018-01-01T00:00:00.000Z'),
+											formDateComparison('>=', '2018-12-31T23:59:59.999Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7326,24 +7279,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison(Op.gt, '2018-10-31T17:49:29.000Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison(Op.gt, '2018-10-31T17:49:29.000Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7363,24 +7314,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison(Op.gt, '2018-10-31T17:49:29.999Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison(Op.gt, '2018-10-31T17:49:29.999Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7400,24 +7349,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison(Op.gt, '2018-10-31T17:49:59.999Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison(Op.gt, '2018-10-31T17:49:59.999Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7438,24 +7385,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison(Op.gt, '2018-10-31T17:59:59.999Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison(Op.gt, '2018-10-31T17:59:59.999Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7475,24 +7420,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison(Op.gt, '2018-10-31T23:59:59.999Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison(Op.gt, '2018-10-31T23:59:59.999Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7512,24 +7455,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison(Op.gt, '2018-10-31T23:59:59.999Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison(Op.gt, '2018-10-31T23:59:59.999Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7549,24 +7490,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison(Op.gt, '2018-12-31T23:59:59.999Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison(Op.gt, '2018-12-31T23:59:59.999Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7589,24 +7528,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison(Op.gte, '2018-10-31T17:49:29.000Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison(Op.gte, '2018-10-31T17:49:29.000Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7626,24 +7563,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison(Op.gte, '2018-10-31T17:49:29.000Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison(Op.gte, '2018-10-31T17:49:29.000Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7663,24 +7598,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison(Op.gte, '2018-10-31T17:49:00.000Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison(Op.gte, '2018-10-31T17:49:00.000Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7701,24 +7634,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison(Op.gte, '2018-10-31T17:00:00.000Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison(Op.gte, '2018-10-31T17:00:00.000Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7738,24 +7669,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison(Op.gte, '2018-10-31T00:00:00.000Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison(Op.gte, '2018-10-31T00:00:00.000Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7775,24 +7704,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison(Op.gte, '2018-10-01T00:00:00.000Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison(Op.gte, '2018-10-01T00:00:00.000Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7812,24 +7739,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison(Op.gte, '2018-01-01T00:00:00.000Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison(Op.gte, '2018-01-01T00:00:00.000Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7852,24 +7777,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison(Op.lt, '2018-10-31T17:49:29.000Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison(Op.lt, '2018-10-31T17:49:29.000Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7889,24 +7812,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison(Op.lt, '2018-10-31T17:49:29.000Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison(Op.lt, '2018-10-31T17:49:29.000Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7926,24 +7847,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison(Op.lt, '2018-10-31T17:49:00.000Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison(Op.lt, '2018-10-31T17:49:00.000Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -7964,24 +7883,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison(Op.lt, '2018-10-31T17:00:00.000Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison(Op.lt, '2018-10-31T17:00:00.000Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -8001,24 +7918,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison(Op.lt, '2018-10-31T00:00:00.000Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison(Op.lt, '2018-10-31T00:00:00.000Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -8038,24 +7953,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison(Op.lt, '2018-10-01T00:00:00.000Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison(Op.lt, '2018-10-01T00:00:00.000Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -8075,24 +7988,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison(Op.lt, '2018-01-01T00:00:00.000Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison(Op.lt, '2018-01-01T00:00:00.000Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -8115,24 +8026,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison(Op.lte, '2018-10-31T17:49:29.000Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison(Op.lte, '2018-10-31T17:49:29.000Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -8152,24 +8061,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison(Op.lte, '2018-10-31T17:49:29.000Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison(Op.lte, '2018-10-31T17:49:29.000Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -8189,24 +8096,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison(Op.lte, '2018-10-31T17:49:00.000Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison(Op.lte, '2018-10-31T17:49:00.000Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -8227,24 +8132,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison(Op.lte, '2018-10-31T17:00:00.000Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison(Op.lte, '2018-10-31T17:00:00.000Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -8264,24 +8167,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison(Op.lte, '2018-10-31T00:00:00.000Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison(Op.lte, '2018-10-31T00:00:00.000Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -8301,24 +8202,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison(Op.lte, '2018-10-01T00:00:00.000Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison(Op.lte, '2018-10-01T00:00:00.000Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -8338,24 +8237,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison(Op.lte, '2018-01-01T00:00:00.000Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison(Op.lte, '2018-01-01T00:00:00.000Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -8378,24 +8275,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison(Op.gt, '2018-10-31T17:49:29.000Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison(Op.gt, '2018-10-31T17:49:29.000Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -8415,24 +8310,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison(Op.gt, '2018-10-31T17:49:29.999Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison(Op.gt, '2018-10-31T17:49:29.999Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -8452,24 +8345,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison(Op.gt, '2018-10-31T17:49:59.999Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison(Op.gt, '2018-10-31T17:49:59.999Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -8490,24 +8381,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison(Op.gt, '2018-10-31T17:59:59.999Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison(Op.gt, '2018-10-31T17:59:59.999Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -8527,24 +8416,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison(Op.gt, '2018-10-31T23:59:59.999Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison(Op.gt, '2018-10-31T23:59:59.999Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -8564,24 +8451,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison(Op.gt, '2018-10-31T23:59:59.999Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison(Op.gt, '2018-10-31T23:59:59.999Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -8601,24 +8486,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison(Op.gt, '2018-12-31T23:59:59.999Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison(Op.gt, '2018-12-31T23:59:59.999Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -8641,24 +8524,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison(Op.lt, '2018-10-31T17:49:29.000Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison(Op.lt, '2018-10-31T17:49:29.000Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -8678,24 +8559,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison(Op.lt, '2018-10-31T17:49:29.000Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison(Op.lt, '2018-10-31T17:49:29.000Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -8715,24 +8594,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison(Op.lt, '2018-10-31T17:49:00.000Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison(Op.lt, '2018-10-31T17:49:00.000Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -8753,24 +8630,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison(Op.lt, '2018-10-31T17:00:00.000Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison(Op.lt, '2018-10-31T17:00:00.000Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -8790,24 +8665,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison(Op.lt, '2018-10-31T00:00:00.000Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison(Op.lt, '2018-10-31T00:00:00.000Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -8827,24 +8700,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison(Op.lt, '2018-10-01T00:00:00.000Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison(Op.lt, '2018-10-01T00:00:00.000Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -8864,24 +8735,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{ name: 'foo' },
-												formDateComparison(Op.lt, '2018-01-01T00:00:00.000Z'),
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											formDateComparison(Op.lt, '2018-01-01T00:00:00.000Z'),
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -8925,10 +8794,10 @@ describe('SQL Tests', () => {
 					});
 
 					let observedLowerBound = moment(
-						query[0].where[Op.and][0][Op.or][0][Op.and][1].logic,
+						query.where[Op.and][0][Op.or][0][Op.and][1].logic,
 					);
 					let observedUpperBound = moment(
-						query[0].where[Op.and][0][Op.or][0][Op.and][2].logic,
+						query.where[Op.and][0][Op.or][0][Op.and][2].logic,
 					);
 
 					let lowerBoundDifference = moment
@@ -8982,10 +8851,10 @@ describe('SQL Tests', () => {
 						includeArchived,
 					});
 					let observedLowerBound = moment(
-						query[0].where[Op.and][0][Op.or][0][Op.and][1].logic,
+						query.where[Op.and][0][Op.or][0][Op.and][1].logic,
 					);
 					let observedUpperBound = moment(
-						query[0].where[Op.and][0][Op.or][0][Op.and][2].logic,
+						query.where[Op.and][0][Op.or][0][Op.and][2].logic,
 					);
 
 					let lowerBoundDifference = moment
@@ -9040,10 +8909,10 @@ describe('SQL Tests', () => {
 					});
 
 					let observedLowerBound = moment(
-						query[0].where[Op.and][0][Op.or][0][Op.and][1].logic,
+						query.where[Op.and][0][Op.or][0][Op.and][1].logic,
 					);
 					let observedUpperBound = moment(
-						query[0].where[Op.and][0][Op.or][0][Op.and][2].logic,
+						query.where[Op.and][0][Op.or][0][Op.and][2].logic,
 					);
 
 					let lowerBoundDifference = moment
@@ -9099,10 +8968,10 @@ describe('SQL Tests', () => {
 					});
 
 					let observedLowerBound = moment(
-						query[0].where[Op.and][0][Op.or][0][Op.and][1].logic,
+						query.where[Op.and][0][Op.or][0][Op.and][1].logic,
 					);
 					let observedUpperBound = moment(
-						query[0].where[Op.and][0][Op.or][0][Op.and][2].logic,
+						query.where[Op.and][0][Op.or][0][Op.and][2].logic,
 					);
 
 					let lowerBoundDifference = moment
@@ -9157,10 +9026,10 @@ describe('SQL Tests', () => {
 					});
 
 					let observedLowerBound = moment(
-						query[0].where[Op.and][0][Op.or][0][Op.and][1].logic,
+						query.where[Op.and][0][Op.or][0][Op.and][1].logic,
 					);
 					let observedUpperBound = moment(
-						query[0].where[Op.and][0][Op.or][0][Op.and][2].logic,
+						query.where[Op.and][0][Op.or][0][Op.and][2].logic,
 					);
 
 					let lowerBoundDifference = moment
@@ -9215,10 +9084,10 @@ describe('SQL Tests', () => {
 					});
 
 					let observedLowerBound = moment(
-						query[0].where[Op.and][0][Op.or][0][Op.and][1].logic,
+						query.where[Op.and][0][Op.or][0][Op.and][1].logic,
 					);
 					let observedUpperBound = moment(
-						query[0].where[Op.and][0][Op.or][0][Op.and][2].logic,
+						query.where[Op.and][0][Op.or][0][Op.and][2].logic,
 					);
 
 					let lowerBoundDifference = moment
@@ -9273,10 +9142,10 @@ describe('SQL Tests', () => {
 					});
 
 					let observedLowerBound = moment(
-						query[0].where[Op.and][0][Op.or][0][Op.and][1].logic,
+						query.where[Op.and][0][Op.or][0][Op.and][1].logic,
 					);
 					let observedUpperBound = moment(
-						query[0].where[Op.and][0][Op.or][0][Op.and][2].logic,
+						query.where[Op.and][0][Op.or][0][Op.and][2].logic,
 					);
 
 					let lowerBoundDifference = moment
@@ -9315,22 +9184,20 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											name: 'foo',
-											value: { [Op.between]: [99.5, 100.5] },
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										name: 'foo',
+										value: { [Op.between]: [99.5, 100.5] },
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -9353,22 +9220,20 @@ describe('SQL Tests', () => {
 						parameterDefinitions,
 						includeArchived,
 					});
-					const expectedResult = [
-						{
-							where: {
-								[Op.and]: [
-									{
-										[Op.or]: [
-											{
-												name: 'foo',
-												value: { [Op.between]: [99.9995, 100.0005] },
-											},
-										],
-									},
-								],
-							},
+					const expectedResult = {
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.between]: [99.9995, 100.0005] },
+										},
+									],
+								},
+							],
 						},
-					];
+					};
 					expect(errors).toHaveLength(0);
 					expect(query).toEqual(expectedResult);
 				},
@@ -9389,22 +9254,20 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											name: 'foo',
-											value: { [Op.between]: [99.5, 100.5] },
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										name: 'foo',
+										value: { [Op.between]: [99.5, 100.5] },
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(query).toEqual(expectedResult);
 			});
 		});
@@ -9425,22 +9288,20 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											name: 'foo',
-											value: { [Op.notBetween]: [99.5, 100.5] },
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										name: 'foo',
+										value: { [Op.notBetween]: [99.5, 100.5] },
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -9463,22 +9324,20 @@ describe('SQL Tests', () => {
 						parameterDefinitions,
 						includeArchived,
 					});
-					const expectedResult = [
-						{
-							where: {
-								[Op.and]: [
-									{
-										[Op.or]: [
-											{
-												name: 'foo',
-												value: { [Op.notBetween]: [99.9995, 100.0005] },
-											},
-										],
-									},
-								],
-							},
+					const expectedResult = {
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo',
+											value: { [Op.notBetween]: [99.9995, 100.0005] },
+										},
+									],
+								},
+							],
 						},
-					];
+					};
 					expect(errors).toHaveLength(0);
 					expect(query).toEqual(expectedResult);
 				},
@@ -9501,22 +9360,20 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											name: 'foo',
-											value: { [Op.lt]: 100.0000001 },
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										name: 'foo',
+										value: { [Op.lt]: 100.0000001 },
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
@@ -9537,22 +9394,20 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											name: 'foo',
-											value: { [Op.lte]: 100.0000001 },
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										name: 'foo',
+										value: { [Op.lte]: 100.0000001 },
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -9572,22 +9427,20 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											name: 'foo',
-											value: { [Op.gt]: 100.0000001 },
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										name: 'foo',
+										value: { [Op.gt]: 100.0000001 },
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -9607,22 +9460,20 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											name: 'foo',
-											value: { [Op.gte]: 100.0000001 },
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										name: 'foo',
+										value: { [Op.gte]: 100.0000001 },
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -9644,22 +9495,20 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											name: 'foo',
-											value: { [Op.between]: [-11, -9] },
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										name: 'foo',
+										value: { [Op.between]: [-11, -9] },
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -9681,22 +9530,20 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											name: 'foo',
-											value: { [Op.between]: [-10.5, -9.5] },
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										name: 'foo',
+										value: { [Op.between]: [-10.5, -9.5] },
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -9716,22 +9563,20 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											name: 'foo',
-											value: { [Op.between]: [9.5, 10.5] },
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										name: 'foo',
+										value: { [Op.between]: [9.5, 10.5] },
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -9756,22 +9601,20 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											name: 'foo',
-											value: { [Op.iRegexp]: '^Eve' },
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										name: 'foo',
+										value: { [Op.iRegexp]: '^Eve' },
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -9793,22 +9636,20 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											name: 'foo',
-											value: { [Op.iLike]: 'Eve' },
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										name: 'foo',
+										value: { [Op.iLike]: 'Eve' },
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -9830,22 +9671,20 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											name: 'foo',
-											value: 'Evë',
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										name: 'foo',
+										value: 'Evë',
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -9870,24 +9709,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											name: 'foo.value',
-											value: {
-												[Op.between]: [0.5, 1.5],
-											},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										name: 'foo.value',
+										value: {
+											[Op.between]: [0.5, 1.5],
 										},
-									],
-								},
-							],
-						},
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -9907,24 +9744,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											name: 'foo.value',
-											value: {
-												[Op.between]: [0.995, 1.005],
-											},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										name: 'foo.value',
+										value: {
+											[Op.between]: [0.995, 1.005],
 										},
-									],
-								},
-							],
-						},
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -9947,24 +9782,22 @@ describe('SQL Tests', () => {
 						parameterDefinitions,
 						includeArchived,
 					});
-					const expectedResult = [
-						{
-							where: {
-								[Op.and]: [
-									{
-										[Op.or]: [
-											{
-												name: 'foo.value',
-												value: {
-													[Op.between]: [0.000019995, 0.000020005],
-												},
+					const expectedResult = {
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo.value',
+											value: {
+												[Op.between]: [0.000019995, 0.000020005],
 											},
-										],
-									},
-								],
-							},
+										},
+									],
+								},
+							],
 						},
-					];
+					};
 					expect(errors).toHaveLength(0);
 					expect(query).toEqual(expectedResult);
 				},
@@ -9987,24 +9820,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											name: 'foo.value',
-											value: {
-												[Op.notBetween]: [0.5, 1.5],
-											},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										name: 'foo.value',
+										value: {
+											[Op.notBetween]: [0.5, 1.5],
 										},
-									],
-								},
-							],
-						},
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -10027,24 +9858,22 @@ describe('SQL Tests', () => {
 						parameterDefinitions,
 						includeArchived,
 					});
-					const expectedResult = [
-						{
-							where: {
-								[Op.and]: [
-									{
-										[Op.or]: [
-											{
-												name: 'foo.value',
-												value: {
-													[Op.notBetween]: [0.995, 1.005],
-												},
+					const expectedResult = {
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo.value',
+											value: {
+												[Op.notBetween]: [0.995, 1.005],
 											},
-										],
-									},
-								],
-							},
+										},
+									],
+								},
+							],
 						},
-					];
+					};
 					expect(errors).toHaveLength(0);
 					expect(query).toEqual(expectedResult);
 				},
@@ -10068,24 +9897,22 @@ describe('SQL Tests', () => {
 						parameterDefinitions,
 						includeArchived,
 					});
-					const expectedResult = [
-						{
-							where: {
-								[Op.and]: [
-									{
-										[Op.or]: [
-											{
-												name: 'foo.value',
-												value: {
-													[Op.notBetween]: [0.000019995, 0.000020005],
-												},
+					const expectedResult = {
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo.value',
+											value: {
+												[Op.notBetween]: [0.000019995, 0.000020005],
 											},
-										],
-									},
-								],
-							},
+										},
+									],
+								},
+							],
 						},
-					];
+					};
 					expect(errors).toHaveLength(0);
 					expect(query).toEqual(expectedResult);
 				},
@@ -10108,24 +9935,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											name: 'foo.value',
-											value: {
-												[Op.lt]: 2.4,
-											},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										name: 'foo.value',
+										value: {
+											[Op.lt]: 2.4,
 										},
-									],
-								},
-							],
-						},
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -10145,24 +9970,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											name: 'foo.value',
-											value: {
-												[Op.lt]: 0.0000024,
-											},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										name: 'foo.value',
+										value: {
+											[Op.lt]: 0.0000024,
 										},
-									],
-								},
-							],
-						},
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -10182,24 +10005,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											name: 'foo.value',
-											value: {
-												[Op.lte]: 2.4,
-											},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										name: 'foo.value',
+										value: {
+											[Op.lte]: 2.4,
 										},
-									],
-								},
-							],
-						},
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -10219,24 +10040,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											name: 'foo.value',
-											value: {
-												[Op.lte]: 0.0000024,
-											},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										name: 'foo.value',
+										value: {
+											[Op.lte]: 0.0000024,
 										},
-									],
-								},
-							],
-						},
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -10256,24 +10075,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											name: 'foo.value',
-											value: {
-												[Op.gt]: 2.4,
-											},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										name: 'foo.value',
+										value: {
+											[Op.gt]: 2.4,
 										},
-									],
-								},
-							],
-						},
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -10293,24 +10110,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											name: 'foo.value',
-											value: {
-												[Op.gt]: 0.0000024,
-											},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										name: 'foo.value',
+										value: {
+											[Op.gt]: 0.0000024,
 										},
-									],
-								},
-							],
-						},
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -10330,24 +10145,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											name: 'foo.value',
-											value: {
-												[Op.gte]: 2.4,
-											},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										name: 'foo.value',
+										value: {
+											[Op.gte]: 2.4,
 										},
-									],
-								},
-							],
-						},
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -10367,24 +10180,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											name: 'foo.value',
-											value: {
-												[Op.gte]: 0.0000024,
-											},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										name: 'foo.value',
+										value: {
+											[Op.gte]: 0.0000024,
 										},
-									],
-								},
-							],
-						},
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -10406,24 +10217,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											name: 'foo.value',
-											value: {
-												[Op.between]: [0.9, 1.1],
-											},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										name: 'foo.value',
+										value: {
+											[Op.between]: [0.9, 1.1],
 										},
-									],
-								},
-							],
-						},
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -10446,24 +10255,22 @@ describe('SQL Tests', () => {
 						parameterDefinitions,
 						includeArchived,
 					});
-					const expectedResult = [
-						{
-							where: {
-								[Op.and]: [
-									{
-										[Op.or]: [
-											{
-												name: 'foo.value',
-												value: {
-													[Op.between]: [0.9, 1.1],
-												},
+					const expectedResult = {
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo.value',
+											value: {
+												[Op.between]: [0.9, 1.1],
 											},
-										],
-									},
-								],
-							},
+										},
+									],
+								},
+							],
 						},
-					];
+					};
 					expect(errors).toHaveLength(0);
 					expect(query).toEqual(expectedResult);
 				},
@@ -10488,24 +10295,22 @@ describe('SQL Tests', () => {
 						parameterDefinitions,
 						includeArchived,
 					});
-					const expectedResult = [
-						{
-							where: {
-								[Op.and]: [
-									{
-										[Op.or]: [
-											{
-												name: 'foo.value',
-												value: {
-													[Op.between]: [0.000018, 0.000022],
-												},
+					const expectedResult = {
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											name: 'foo.value',
+											value: {
+												[Op.between]: [0.000018, 0.000022],
 											},
-										],
-									},
-								],
-							},
+										},
+									],
+								},
+							],
 						},
-					];
+					};
 					expect(errors).toHaveLength(0);
 					expect(query).toEqual(expectedResult);
 				},
@@ -10531,32 +10336,30 @@ describe('SQL Tests', () => {
 						parameterDefinitions,
 						includeArchived,
 					});
-					const expectedResult = [
-						{
-							where: {
-								[Op.and]: [
-									{
-										[Op.or]: [
-											{
-												[Op.and]: [
-													{
-														name: 'foo.value',
-														value: {
-															[Op.between]: [0.5, 1.5],
-														},
+					const expectedResult = {
+						where: {
+							[Op.and]: [
+								{
+									[Op.or]: [
+										{
+											[Op.and]: [
+												{
+													name: 'foo.value',
+													value: {
+														[Op.between]: [0.5, 1.5],
 													},
-													{
-														name: 'foo.system',
-														value: 'http://unitsofmeasure.org',
-													},
-												],
-											},
-										],
-									},
-								],
-							},
+												},
+												{
+													name: 'foo.system',
+													value: 'http://unitsofmeasure.org',
+												},
+											],
+										},
+									],
+								},
+							],
 						},
-					];
+					};
 					expect(errors).toHaveLength(0);
 					expect(query).toEqual(expectedResult);
 				},
@@ -10582,24 +10385,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											name: 'foo',
-											value: {
-												[Op.endsWith]: 'endWithMe',
-											},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										name: 'foo',
+										value: {
+											[Op.endsWith]: 'endWithMe',
 										},
-									],
-								},
-							],
-						},
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -10621,24 +10422,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											name: 'foo',
-											value: {
-												[Op.startsWith]: 'startWithMe',
-											},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										name: 'foo',
+										value: {
+											[Op.startsWith]: 'startWithMe',
 										},
-									],
-								},
-							],
-						},
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -10658,24 +10457,22 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											name: 'foo',
-											value: {
-												[Op.startsWith]: 'startWithMe/',
-											},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										name: 'foo',
+										value: {
+											[Op.startsWith]: 'startWithMe/',
 										},
-									],
-								},
-							],
-						},
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -10718,22 +10515,20 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											name: 'foo',
-											value: 'equalMe',
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					where: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										name: 'foo',
+										value: 'equalMe',
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -10759,22 +10554,20 @@ describe('SQL Tests', () => {
 				parameterDefinitions,
 				includeArchived,
 			});
-			const expectedResult = [
-				{
-					where: {
-						[Op.and]: [
-							{
-								[Op.or]: [
-									{
-										name: 'foo.reference',
-										value: 'Patient/123',
-									},
-								],
-							},
-						],
-					},
+			const expectedResult = {
+				where: {
+					[Op.and]: [
+						{
+							[Op.or]: [
+								{
+									name: 'foo.reference',
+									value: 'Patient/123',
+								},
+							],
+						},
+					],
 				},
-			];
+			};
 			expect(errors).toHaveLength(0);
 			expect(query).toEqual(expectedResult);
 		});
@@ -10794,22 +10587,20 @@ describe('SQL Tests', () => {
 				parameterDefinitions,
 				includeArchived,
 			});
-			const expectedResult = [
-				{
-					where: {
-						[Op.and]: [
-							{
-								[Op.or]: [
-									{
-										name: 'foo.reference',
-										value: 'Patient/123',
-									},
-								],
-							},
-						],
-					},
+			const expectedResult = {
+				where: {
+					[Op.and]: [
+						{
+							[Op.or]: [
+								{
+									name: 'foo.reference',
+									value: 'Patient/123',
+								},
+							],
+						},
+					],
 				},
-			];
+			};
 			expect(errors).toHaveLength(0);
 			expect(query).toEqual(expectedResult);
 		});
@@ -10832,34 +10623,32 @@ describe('SQL Tests', () => {
 				parameterDefinitions,
 				includeArchived,
 			});
-			const expectedResult = [
-				{
-					where: {
-						[Op.and]: [
-							{
-								[Op.or]: [
-									{
-										name: 'foo',
-										value: {
-											[Op.iRegexp]: '^foo',
-										},
+			const expectedResult = {
+				where: {
+					[Op.and]: [
+						{
+							[Op.or]: [
+								{
+									name: 'foo',
+									value: {
+										[Op.iRegexp]: '^foo',
 									},
-								],
-							},
-							{
-								[Op.or]: [
-									{
-										name: 'foo',
-										value: {
-											[Op.iRegexp]: '^bar',
-										},
+								},
+							],
+						},
+						{
+							[Op.or]: [
+								{
+									name: 'foo',
+									value: {
+										[Op.iRegexp]: '^bar',
 									},
-								],
-							},
-						],
-					},
+								},
+							],
+						},
+					],
 				},
-			];
+			};
 			expect(errors).toHaveLength(0);
 			expect(query).toEqual(expectedResult);
 		});
@@ -10879,40 +10668,38 @@ describe('SQL Tests', () => {
 				parameterDefinitions,
 				includeArchived,
 			});
-			const expectedResult = [
-				{
-					where: {
-						[Op.and]: [
-							{
-								[Op.or]: [
-									{
-										name: 'foo',
-										value: {
-											[Op.iRegexp]: '^foo',
-										},
+			const expectedResult = {
+				where: {
+					[Op.and]: [
+						{
+							[Op.or]: [
+								{
+									name: 'foo',
+									value: {
+										[Op.iRegexp]: '^foo',
 									},
-								],
-							},
-							{
-								[Op.or]: [
-									{
-										name: 'foo',
-										value: {
-											[Op.iRegexp]: '^bar',
-										},
+								},
+							],
+						},
+						{
+							[Op.or]: [
+								{
+									name: 'foo',
+									value: {
+										[Op.iRegexp]: '^bar',
 									},
-									{
-										name: 'foo',
-										value: {
-											[Op.iRegexp]: '^baz',
-										},
+								},
+								{
+									name: 'foo',
+									value: {
+										[Op.iRegexp]: '^baz',
 									},
-								],
-							},
-						],
-					},
+								},
+							],
+						},
+					],
 				},
-			];
+			};
 			expect(errors).toHaveLength(0);
 			expect(query).toEqual(expectedResult);
 		});
@@ -10936,26 +10723,13 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{
-													name: 'foo.system',
-													value: 'bar',
-												},
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					tokens: {
+						[Op.and]: [
+							{ [Op.or]: [{ [Op.and]: [{ name: 'foo' }, { system: 'bar' }] }] },
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -10975,26 +10749,13 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{
-													name: 'foo.code',
-													value: 'bar',
-												},
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					tokens: {
+						[Op.and]: [
+							{ [Op.or]: [{ [Op.and]: [{ name: 'foo' }, { code: 'bar' }] }] },
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -11014,26 +10775,13 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{
-													name: 'foo.code',
-													value: 'bar',
-												},
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					tokens: {
+						[Op.and]: [
+							{ [Op.or]: [{ [Op.and]: [{ name: 'foo' }, { code: 'bar' }] }] },
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -11053,35 +10801,28 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{
-													name: 'foo.system',
-													value: 'bar',
-												},
-												{
-													name: 'foo.code',
-													value: 'baz',
-												},
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					tokens: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											{ system: 'bar' },
+											{ code: 'baz' },
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
 		});
-		describe('CodableConcept Token Tests', () => {
+		describe('CodeableConcept Token Tests', () => {
 			test('Should return an and query with 1 equal to condition when given just a system', () => {
 				const req = {
 					method: 'GET',
@@ -11092,7 +10833,7 @@ describe('SQL Tests', () => {
 				const parameterDefinitions = {
 					foo: {
 						type: 'token',
-						fhirtype: 'CodableConcept',
+						fhirtype: 'CodeableConcept',
 						xpath: 'Resource.foo',
 					},
 				};
@@ -11102,26 +10843,13 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{
-													name: 'foo.coding.system',
-													value: 'bar',
-												},
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					tokens: {
+						[Op.and]: [
+							{ [Op.or]: [{ [Op.and]: [{ name: 'foo' }, { system: 'bar' }] }] },
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -11135,7 +10863,7 @@ describe('SQL Tests', () => {
 				const parameterDefinitions = {
 					foo: {
 						type: 'token',
-						fhirtype: 'CodableConcept',
+						fhirtype: 'CodeableConcept',
 						xpath: 'Resource.foo',
 					},
 				};
@@ -11145,26 +10873,13 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{
-													name: 'foo.coding.code',
-													value: 'bar',
-												},
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					tokens: {
+						[Op.and]: [
+							{ [Op.or]: [{ [Op.and]: [{ name: 'foo' }, { code: 'bar' }] }] },
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -11178,7 +10893,7 @@ describe('SQL Tests', () => {
 				const parameterDefinitions = {
 					foo: {
 						type: 'token',
-						fhirtype: 'CodableConcept',
+						fhirtype: 'CodeableConcept',
 						xpath: 'Resource.foo',
 					},
 				};
@@ -11188,27 +10903,23 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{
-													name: 'foo.coding.system',
-													value: 'bar',
-												},
-												{ name: 'foo.coding.code', value: 'baz' },
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					tokens: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											{ system: 'bar' },
+											{ code: 'baz' },
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -11230,26 +10941,13 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{
-													name: 'foo.system',
-													value: 'bar',
-												},
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					tokens: {
+						[Op.and]: [
+							{ [Op.or]: [{ [Op.and]: [{ name: 'foo' }, { system: 'bar' }] }] },
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -11269,26 +10967,13 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{
-													name: 'foo.value',
-													value: 'bar',
-												},
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					tokens: {
+						[Op.and]: [
+							{ [Op.or]: [{ [Op.and]: [{ name: 'foo' }, { code: 'bar' }] }] },
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -11308,30 +10993,23 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.and]: [
-												{
-													name: 'foo.system',
-													value: 'bar',
-												},
-												{
-													name: 'foo.value',
-													value: 'baz',
-												},
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					tokens: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											{ system: 'bar' },
+											{ code: 'baz' },
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -11357,42 +11035,19 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.or]: [
-												{
-													name: 'foo.system',
-													value: 'bar',
-												},
-												{
-													name: 'foo.value',
-													value: 'bar',
-												},
-												{
-													name: 'foo.use',
-													value: 'bar',
-												},
-												{
-													name: 'foo.rank',
-													value: 'bar',
-												},
-												{
-													name: 'foo.period',
-													value: 'bar',
-												},
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					tokens: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [{ name: 'foo' }, { code: 'bar' }],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -11416,42 +11071,19 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.or]: [
-												{
-													name: 'foo.system',
-													value: 'bar',
-												},
-												{
-													name: 'foo.value',
-													value: 'bar',
-												},
-												{
-													name: 'foo.use',
-													value: 'bar',
-												},
-												{
-													name: 'foo.rank',
-													value: 'bar',
-												},
-												{
-													name: 'foo.period',
-													value: 'bar',
-												},
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					tokens: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [{ name: 'foo' }, { code: 'bar' }],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -11475,42 +11107,23 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											[Op.or]: [
-												{
-													name: 'foo.system',
-													value: 'baz',
-												},
-												{
-													name: 'foo.value',
-													value: 'baz',
-												},
-												{
-													name: 'foo.use',
-													value: 'baz',
-												},
-												{
-													name: 'foo.rank',
-													value: 'baz',
-												},
-												{
-													name: 'foo.period',
-													value: 'baz',
-												},
-											],
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					tokens: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											{ system: 'bar' },
+											{ code: 'baz' },
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -11532,22 +11145,19 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											name: 'foo',
-											value: 'bar',
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					tokens: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [{ name: 'foo' }, { code: 'bar' }],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -11567,26 +11177,23 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											name: 'foo',
-											value: 'bar',
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					tokens: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [{ name: 'foo' }, { code: 'bar' }],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
-			test('Should return an equal to query given a system and code (ignore the system)', () => {
+			test('Should return an equal to query given a system and code', () => {
 				const req = {
 					method: 'GET',
 					query: {
@@ -11602,22 +11209,23 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											name: 'foo',
-											value: 'baz',
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					tokens: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											{ system: 'bar' },
+											{ code: 'baz' },
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -11681,22 +11289,19 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											name: 'foo',
-											value: 'true',
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					tokens: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [{ name: 'foo' }, { code: 'true' }],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -11716,22 +11321,19 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											name: 'foo',
-											value: 'false',
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					tokens: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [{ name: 'foo' }, { code: 'false' }],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -11751,22 +11353,23 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											name: 'foo',
-											value: 'false',
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					tokens: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											{ system: 'bar' },
+											{ code: 'false' },
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -11788,22 +11391,13 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											name: 'foo',
-											value: 'bar',
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					tokens: {
+						[Op.and]: [
+							{ [Op.or]: [{ [Op.and]: [{ name: 'foo' }, { code: 'bar' }] }] },
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -11823,22 +11417,14 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											name: 'foo',
-											value: 'bar',
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					tokens: {
+						[Op.and]: [
+							{ [Op.or]: [{ [Op.and]: [{ name: 'foo' }, { code: 'bar' }] }] },
+						],
 					},
-				];
+				};
+
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -11858,22 +11444,14 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											name: 'foo',
-											value: 'baz',
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					tokens: {
+						[Op.and]: [
+							{ [Op.or]: [{ [Op.and]: [{ name: 'foo' }, { code: 'baz' }] }] },
+						],
 					},
-				];
+				};
+
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -11895,22 +11473,14 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											name: 'foo',
-											value: 'bar',
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					tokens: {
+						[Op.and]: [
+							{ [Op.or]: [{ [Op.and]: [{ name: 'foo' }, { code: 'bar' }] }] },
+						],
 					},
-				];
+				};
+
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -11930,26 +11500,17 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											name: 'foo',
-											value: 'bar',
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					tokens: {
+						[Op.and]: [
+							{ [Op.or]: [{ [Op.and]: [{ name: 'foo' }, { code: 'bar' }] }] },
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
-			test('Should return an equal to query given a system and code (ignore the system)', () => {
+			test('Should return an equal to query given a system and code', () => {
 				const req = {
 					method: 'GET',
 					query: {
@@ -11965,22 +11526,23 @@ describe('SQL Tests', () => {
 					parameterDefinitions,
 					includeArchived,
 				});
-				const expectedResult = [
-					{
-						where: {
-							[Op.and]: [
-								{
-									[Op.or]: [
-										{
-											name: 'foo',
-											value: 'baz',
-										},
-									],
-								},
-							],
-						},
+				const expectedResult = {
+					tokens: {
+						[Op.and]: [
+							{
+								[Op.or]: [
+									{
+										[Op.and]: [
+											{ name: 'foo' },
+											{ system: 'bar' },
+											{ code: 'baz' },
+										],
+									},
+								],
+							},
+						],
 					},
-				];
+				};
 				expect(errors).toHaveLength(0);
 				expect(query).toEqual(expectedResult);
 			});
@@ -12096,24 +11658,22 @@ describe('SQL Tests', () => {
 				parameterDefinitions,
 				includeArchived,
 			});
-			const expectedResult = [
-				{
-					where: {
-						[Op.and]: [
-							{
-								[Op.or]: [
-									{
-										[Op.and]: [
-											{ name: 'foo' },
-											formDateComparison('=', '2018-10-31T17:49:29.000Z'),
-										],
-									},
-								],
-							},
-						],
-					},
+			const expectedResult = {
+				where: {
+					[Op.and]: [
+						{
+							[Op.or]: [
+								{
+									[Op.and]: [
+										{ name: 'foo' },
+										formDateComparison('=', '2018-10-31T17:49:29.000Z'),
+									],
+								},
+							],
+						},
+					],
 				},
-			];
+			};
 			expect(errors).toHaveLength(0);
 			expect(query).toEqual(expectedResult);
 		});
@@ -12136,24 +11696,22 @@ describe('SQL Tests', () => {
 				parameterDefinitions,
 				includeArchived,
 			});
-			const expectedResult = [
-				{
-					where: {
-						[Op.and]: [
-							{
-								[Op.or]: [
-									{
-										[Op.and]: [
-											{ name: 'foo' },
-											formDateComparison('=', '2017-10-31T17:49:29.000Z'),
-										],
-									},
-								],
-							},
-						],
-					},
+			const expectedResult = {
+				where: {
+					[Op.and]: [
+						{
+							[Op.or]: [
+								{
+									[Op.and]: [
+										{ name: 'foo' },
+										formDateComparison('=', '2017-10-31T17:49:29.000Z'),
+									],
+								},
+							],
+						},
+					],
 				},
-			];
+			};
 			expect(errors).toHaveLength(0);
 			expect(query).toEqual(expectedResult);
 		});
@@ -12177,34 +11735,32 @@ describe('SQL Tests', () => {
 				parameterDefinitions,
 				includeArchived,
 			});
-			const expectedResult = [
-				{
-					where: {
-						[Op.and]: [
-							{
-								[Op.or]: [
-									{
-										[Op.and]: [
-											{ name: 'foo' },
-											formDateComparison('=', '2017-10-31T17:49:29.000Z'),
-										],
-									},
-								],
-							},
-							{
-								[Op.or]: [
-									{
-										[Op.and]: [
-											{ name: 'bar' },
-											formDateComparison('=', '2018-10-31T17:49:29.000Z'),
-										],
-									},
-								],
-							},
-						],
-					},
+			const expectedResult = {
+				where: {
+					[Op.and]: [
+						{
+							[Op.or]: [
+								{
+									[Op.and]: [
+										{ name: 'foo' },
+										formDateComparison('=', '2017-10-31T17:49:29.000Z'),
+									],
+								},
+							],
+						},
+						{
+							[Op.or]: [
+								{
+									[Op.and]: [
+										{ name: 'bar' },
+										formDateComparison('=', '2018-10-31T17:49:29.000Z'),
+									],
+								},
+							],
+						},
+					],
 				},
-			];
+			};
 			expect(errors).toHaveLength(0);
 			expect(query).toEqual(expectedResult);
 		});
@@ -12265,23 +11821,15 @@ describe('SQL Tests', () => {
 				parameterDefinitions,
 				includeArchived,
 			});
-			const expectedResult = [
-				{
-					where: {
-						[Op.and]: [
-							{
-								[Op.or]: [
-									{
-										name: 'id',
-										value: 'foo',
-									},
-								],
-							},
-						],
-					},
-				},
-			];
+			// [Op.and]: [{ name: 'id' }, { code: 'foo' }],
 
+			const expectedResult = {
+				tokens: {
+					[Op.and]: [
+						{ [Op.or]: [{ [Op.and]: [{ name: 'id' }, { code: 'foo' }] }] },
+					],
+				},
+			};
 			expect(errors).toHaveLength(0);
 			expect(query).toEqual(expectedResult);
 		});
@@ -12299,30 +11847,28 @@ describe('SQL Tests', () => {
 				parameterDefinitions,
 				includeArchived,
 			});
-			const expectedResult = [
-				{
-					where: {
-						[Op.and]: [
-							{
-								[Op.or]: [
-									{
-										[Op.and]: [
-											{ name: 'meta.lastUpdated' },
-											formDateComparison('=', '2018-10-31T17:49:29.000Z'),
-										],
-									},
-								],
-							},
-						],
-					},
+			const expectedResult = {
+				where: {
+					[Op.and]: [
+						{
+							[Op.or]: [
+								{
+									[Op.and]: [
+										{ name: 'meta.lastUpdated' },
+										formDateComparison('=', '2018-10-31T17:49:29.000Z'),
+									],
+								},
+							],
+						},
+					],
 				},
-			];
+			};
 			expect(errors).toHaveLength(0);
 			expect(query).toEqual(expectedResult);
 		});
 		test('Should be able to initialize a new qb without supplying global parameters', () => {
 			const noGlobalQB = new QueryBuilder({
-				packageName: '@asymmetrik/fhir-qb-mongo',
+				packageName: '../fhir-qb-mongo/index.js',
 			});
 			expect(noGlobalQB).toBeDefined();
 		});
@@ -12350,30 +11896,28 @@ describe('SQL Tests', () => {
 				parameterDefinitions,
 				includeArchived,
 			});
-			const expectedResult = [
-				{
-					where: {
-						[Op.and]: [
-							{
-								[Op.or]: [
-									{
-										name: 'foo',
-										value: {
-											[Op.iRegexp]: '^Eve',
-										},
+			const expectedResult = {
+				where: {
+					[Op.and]: [
+						{
+							[Op.or]: [
+								{
+									name: 'foo',
+									value: {
+										[Op.iRegexp]: '^Eve',
 									},
-									{
-										name: 'bar',
-										value: {
-											[Op.iRegexp]: '^Eve',
-										},
+								},
+								{
+									name: 'bar',
+									value: {
+										[Op.iRegexp]: '^Eve',
 									},
-								],
-							},
-						],
-					},
+								},
+							],
+						},
+					],
 				},
-			];
+			};
 			expect(errors).toHaveLength(0);
 			expect(query).toEqual(expectedResult);
 		});
@@ -12393,58 +11937,56 @@ describe('SQL Tests', () => {
 				parameterDefinitions,
 				includeArchived,
 			});
-			const expectedResult = [
-				{
-					where: {
-						[Op.and]: [
-							{
-								[Op.or]: [
-									{
-										name: 'foo',
-										value: {
-											[Op.iRegexp]: '^foo',
-										},
+			const expectedResult = {
+				where: {
+					[Op.and]: [
+						{
+							[Op.or]: [
+								{
+									name: 'foo',
+									value: {
+										[Op.iRegexp]: '^foo',
 									},
-									{
-										name: 'qux',
-										value: {
-											[Op.iRegexp]: '^foo',
-										},
+								},
+								{
+									name: 'qux',
+									value: {
+										[Op.iRegexp]: '^foo',
 									},
-								],
-							},
-							{
-								[Op.or]: [
-									{
-										name: 'foo',
-										value: {
-											[Op.iRegexp]: '^bar',
-										},
+								},
+							],
+						},
+						{
+							[Op.or]: [
+								{
+									name: 'foo',
+									value: {
+										[Op.iRegexp]: '^bar',
 									},
-									{
-										name: 'foo',
-										value: {
-											[Op.iRegexp]: '^baz',
-										},
+								},
+								{
+									name: 'foo',
+									value: {
+										[Op.iRegexp]: '^baz',
 									},
-									{
-										name: 'qux',
-										value: {
-											[Op.iRegexp]: '^bar',
-										},
+								},
+								{
+									name: 'qux',
+									value: {
+										[Op.iRegexp]: '^bar',
 									},
-									{
-										name: 'qux',
-										value: {
-											[Op.iRegexp]: '^baz',
-										},
+								},
+								{
+									name: 'qux',
+									value: {
+										[Op.iRegexp]: '^baz',
 									},
-								],
-							},
-						],
-					},
+								},
+							],
+						},
+					],
 				},
-			];
+			};
 			expect(errors).toHaveLength(0);
 			expect(query).toEqual(expectedResult);
 		});
@@ -12568,24 +12110,29 @@ describe('Constructor Tests', () => {
 				parameterDefinitions,
 				includeArchived,
 			});
-			const expectedResult = [
-				{
-					where: {
-						[Op.and]: [
-							{
-								[Op.or]: [
-									{
-										name: 'foobar',
-										value: { [Op.between]: [99.5, 100.5] },
-									},
-								],
-							},
-						],
-					},
+			const expectedResult = {
+				where: {
+					[Op.and]: [
+						{
+							[Op.or]: [
+								{
+									name: 'foobar',
+									value: { [Op.between]: [99.5, 100.5] },
+								},
+							],
+						},
+					],
 				},
-			];
+			};
 			expect(errors).toHaveLength(0);
 			expect(query).toEqual(expectedResult);
+		});
+		test('packageName should default to fhir-qb-mongo if left out', () => {
+			const qb = new QueryBuilder({
+				globalParameterDefinitions,
+				implementationParameters: { archivedParamPath: 'meta._isArchived' },
+			});
+			expect(qb).toBeTruthy();
 		});
 	});
 });

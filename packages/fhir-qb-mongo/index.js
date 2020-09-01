@@ -26,6 +26,17 @@ let buildEqualToQuery = function({ field, value, invert = false }) {
 	return { [field]: invert ? { $ne: value } : value };
 };
 
+let buildTokenQuery = function({ systemPath, codePath, system, code }) {
+	let queries = [];
+	if (system) {
+		queries.push(buildEqualToQuery({ field: systemPath, value: system }));
+	}
+	if (code) {
+		queries.push(buildEqualToQuery({ field: codePath, value: code }));
+	}
+	return queries;
+};
+
 /**
  * Builds query to get records where the value of the field is [<,<=,>,>=,!=] to the value.
  */
@@ -152,6 +163,27 @@ let applyArchivedFilter = function({
 };
 
 /**
+ * For mongo, this can just be an Equals query
+ */
+let buildTokenURIQuery = function({ field, value }) {
+	return buildEqualToQuery({ field, value });
+};
+
+/**
+ * For mongo, this can just be an Equals query
+ */
+let buildTokenStringQuery = function({ field, value }) {
+	return buildEqualToQuery({ field, value });
+};
+
+/**
+ * For mongo, this can just be an Equals query
+ */
+let buildTokenEqualToQuery = function({ field, value }) {
+	return buildEqualToQuery({ field, value });
+};
+
+/**
  * Apply paging
  * @param query
  * @param pageNumber
@@ -198,6 +230,7 @@ let applyPaging = function({ query, pageNumber, resultsPerPage }) {
 let assembleSearchQuery = function({
 	joinsToPerform,
 	matchesToPerform,
+	tokenMatches = [],
 	searchResultTransformations,
 	implementationParameters,
 	includeArchived,
@@ -234,13 +267,17 @@ let assembleSearchQuery = function({
 	}
 
 	// Construct the necessary queries for each match and add them the pipeline.
+	// Token matches are treated like normal matches for Tokens
+	matchesToPerform = matchesToPerform.concat(tokenMatches);
+
 	if (matchesToPerform.length > 0) {
 		let listOfOrs = [];
 		for (let match of matchesToPerform) {
 			if (match.length === 0) {
 				match.push({});
+			} else {
+				listOfOrs.push(buildOrQuery({ queries: match }));
 			}
-			listOfOrs.push(buildOrQuery({ queries: match }));
 		}
 		query.push({ $match: buildAndQuery(listOfOrs) });
 	}
@@ -267,6 +304,10 @@ module.exports = {
 	buildContainsQuery,
 	buildEndsWithQuery,
 	buildEqualToQuery,
+	buildTokenQuery,
+	buildTokenURIQuery,
+	buildTokenStringQuery,
+	buildTokenEqualToQuery,
 	buildExistsQuery,
 	buildOrQuery,
 	buildInRangeQuery,
