@@ -1,9 +1,47 @@
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 
-let supportedSearchTransformations = {};
+/**
+ * Given a parameter to sort on, return itself and it's correct direction
+ */
+const getSortOrder = function(sortable) {
+	if (sortable && sortable[0] === '-') {
+		return [sortable.substring(1), 'DESC'];
+	}
+	return [sortable, 'ASC'];
+};
 
-let formDateComparison = function(comparator, date, colName = 'value') {
+/**
+ * Given a comma seperated list of strings to order on, return a list of column and direction lists
+ */
+const parseSortQuery = function(sortables) {
+	const split = sortables.split(',');
+	return split.map(getSortOrder);
+};
+
+/**
+ * Currently only support _count and _sort out of the list of search result set paramaters
+ */
+const supportedSearchTransformations = {
+	_count: {
+		label: 'limit',
+		transform: value => {
+			return value;
+		},
+	},
+
+	_sort: {
+		label: 'order',
+		transform: value => {
+			return parseSortQuery(value);
+		},
+	},
+};
+
+/**
+ * Form a Sequelize date comparison given a date and column
+ */
+const formDateComparison = function(comparator, date, colName = 'value') {
 	return Sequelize.where(
 		Sequelize.fn('date', Sequelize.col(colName)),
 		comparator,
@@ -14,14 +52,14 @@ let formDateComparison = function(comparator, date, colName = 'value') {
 /**
  * Takes in a list of queries and wraps them in an $and block
  */
-let buildAndQuery = function(queries) {
+const buildAndQuery = function(queries) {
 	return { [Op.and]: queries };
 };
 
 /**
  * Takes in a list of queries and wraps them in an $or block
  */
-let buildOrQuery = function({ queries, invert = false }) {
+const buildOrQuery = function({ queries, invert = false }) {
 	if (invert) {
 		return { [Op.not]: { [Op.or]: queries } };
 	} else {
@@ -33,7 +71,7 @@ let buildOrQuery = function({ queries, invert = false }) {
  * Builds query to get records where the value of the field equal to the value.
  * Setting invert to true will get records that are NOT equal instead.
  */
-let buildEqualToQuery = function({
+const buildEqualToQuery = function({
 	field,
 	value,
 	invert = false,
@@ -52,7 +90,7 @@ let buildEqualToQuery = function({
 /**
  * Builds query to get records where the value of the field is [<,<=,>,>=,!=] to the value.
  */
-let buildComparatorQuery = function({
+const buildComparatorQuery = function({
 	field,
 	value,
 	comparator,
@@ -81,7 +119,7 @@ let buildComparatorQuery = function({
  * Builds query to get records where the value of the field is in the specified range
  * Setting invert to true will get records that are NOT in the specified range.
  */
-let buildInRangeQuery = function({
+const buildInRangeQuery = function({
 	field,
 	lowerBound,
 	upperBound,
@@ -120,7 +158,7 @@ let buildInRangeQuery = function({
  * Builds query to retrieve records where the field exists (or not).
  */
 // TODO: Need to figure out how to do exist check.
-let buildExistsQuery = function({ field, exists }) {
+const buildExistsQuery = function(/* { field, exists } */) {
 	return 'NOT IMPLEMENTED';
 };
 
@@ -128,7 +166,7 @@ let buildExistsQuery = function({ field, exists }) {
  * Builds query to get records where the value of the field contains the value.
  * Setting caseSensitive to true will cause the regex to be case insensitive
  */
-let buildContainsQuery = function({ field, value, caseSensitive = false }) {
+const buildContainsQuery = function({ field, value, caseSensitive = false }) {
 	// TODO: contains is not working as expected, like is for string matching - doublecheck this
 	if (caseSensitive) {
 		return { name: field, value: { [Op.like]: value } };
@@ -141,7 +179,7 @@ let buildContainsQuery = function({ field, value, caseSensitive = false }) {
  * Builds query to get records where the value of the field starts with the value.
  * Setting caseSensitive to true will cause the regex to be case insensitive
  */
-let buildStartsWithQuery = function({ field, value, caseSensitive = false }) {
+const buildStartsWithQuery = function({ field, value, caseSensitive = false }) {
 	if (caseSensitive) {
 		return { name: field, value: { [Op.startsWith]: value } };
 	} else {
@@ -153,12 +191,31 @@ let buildStartsWithQuery = function({ field, value, caseSensitive = false }) {
  * Builds query to get records where the value of the field ends with the value.
  * Setting caseSensitive to true will cause the regex to be case insensitive
  */
-let buildEndsWithQuery = function({ field, value, caseSensitive = false }) {
+const buildEndsWithQuery = function({ field, value, caseSensitive = false }) {
 	if (caseSensitive) {
 		return { name: field, value: { [Op.endsWith]: value } };
 	} else {
 		return { name: field, value: { [Op.iRegexp]: `${value}$` } };
 	}
+};
+
+/**
+ * Apply search result transformations
+ * @param query
+ * @param searchResultTransformations
+ */
+const applySearchResultTransformations = function({
+	query,
+	searchResultTransformations,
+}) {
+	Object.keys(searchResultTransformations).forEach(transformation => {
+		const transformer = supportedSearchTransformations[transformation];
+		const label = transformer.label;
+		query[label] = transformer.transform(
+			searchResultTransformations[transformation],
+		);
+	});
+	return query;
 };
 
 /**
@@ -168,11 +225,11 @@ let buildEndsWithQuery = function({ field, value, caseSensitive = false }) {
  * @param implementationParameters
  * @returns {Array}
  */
-let assembleSearchQuery = function({
+const assembleSearchQuery = function({
 	matchesToPerform,
 	implementationParameters,
 }) {
-	let query = [];
+	let query = {};
 
 	// Check that the necessary implementation parameters were passed through
 	let { archivedParamPath } = implementationParameters;
@@ -197,6 +254,7 @@ let assembleSearchQuery = function({
 };
 
 module.exports = {
+	applySearchResultTransformations,
 	assembleSearchQuery,
 	buildAndQuery,
 	buildComparatorQuery,
