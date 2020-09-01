@@ -1,6 +1,6 @@
 const handler = require('./index.js');
 
-let req = {
+const req = {
 	protocol: 'https',
 	get: _prop => 'localhost:3000',
 	params: {
@@ -21,6 +21,10 @@ describe('FHIR Response Utility', () => {
 				end: end,
 				json: json,
 			})),
+			sendStatus: jest.fn(() => ({
+				end: end,
+				json: json,
+			})),
 		};
 	});
 
@@ -35,7 +39,7 @@ describe('FHIR Response Utility', () => {
 
 	describe('read', () => {
 		test('should set the correct status code', () => {
-			let results = { results: 'GOLD' };
+			const results = { results: 'GOLD' };
 			handler.read(req, res, results);
 
 			expect(res.type.mock.calls).toHaveLength(1);
@@ -46,7 +50,7 @@ describe('FHIR Response Utility', () => {
 		});
 
 		test('should invoke status().json with the results', () => {
-			let results = { results: 'GOLD' };
+			const results = { results: 'GOLD' };
 			handler.read(req, res, results);
 
 			expect(res.status.mock.calls).toHaveLength(1);
@@ -59,7 +63,7 @@ describe('FHIR Response Utility', () => {
 
 	describe('readOne', () => {
 		test('should set the correct status code', () => {
-			let results = { results: 'GOLD' };
+			const results = { results: 'GOLD' };
 			handler.readOne(req, res, results);
 
 			expect(res.type.mock.calls).toHaveLength(1);
@@ -69,8 +73,19 @@ describe('FHIR Response Utility', () => {
 			expect(res.status.mock.calls[0][0]).toBe(200);
 		});
 
+		test('should respond with a 404 when there is no resource', () => {
+			const results = undefined;
+			handler.readOne(req, res, results);
+
+			expect(res.type.mock.calls).toHaveLength(1);
+			expect(res.type.mock.calls[0][0]).toBe('application/fhir+json');
+
+			expect(res.sendStatus.mock.calls).toHaveLength(1);
+			expect(res.sendStatus.mock.calls[0][0]).toBe(404);
+		});
+
 		test('should set the E-Tag and Last-Modified headers with metadata', () => {
-			let results = {
+			const results = {
 				results: 'GOLD',
 				meta: {
 					lastUpdated: 'now',
@@ -96,7 +111,7 @@ describe('FHIR Response Utility', () => {
 
 	describe('create', () => {
 		test('should set the correct status code', () => {
-			let results = { id: 'foo' };
+			const results = { id: 'foo' };
 			handler.create(req, res, results, { type: 'Patient' });
 
 			expect(res.status.mock.calls).toHaveLength(1);
@@ -106,7 +121,7 @@ describe('FHIR Response Utility', () => {
 		});
 
 		test('should set the E-Tag and Content-Location headers with version', () => {
-			let results = { id: 'foo', resource_version: '1' };
+			const results = { id: 'foo', resource_version: '1' };
 			handler.create(req, res, results, { type: 'Patient' });
 
 			let expectedContentLocation =
@@ -127,7 +142,7 @@ describe('FHIR Response Utility', () => {
 		});
 
 		test('should set the Location header with resource location', () => {
-			let results = { id: 'foo' };
+			const results = { id: 'foo' };
 			handler.create(req, res, results, { type: 'Patient' });
 
 			expect(res.set.mock.calls).toHaveLength(1);
@@ -143,8 +158,8 @@ describe('FHIR Response Utility', () => {
 
 	describe('update', () => {
 		test('should set the correct status code', () => {
-			let update = { id: 'foo', created: false };
-			let created = { id: 'foo', created: true };
+			const update = { id: 'foo', created: false };
+			const created = { id: 'foo', created: true };
 			handler.update(req, res, update, { type: 'Patient' });
 			handler.update(req, res, created, { type: 'Patient' });
 
@@ -159,7 +174,7 @@ describe('FHIR Response Utility', () => {
 		});
 
 		test('should set the correct response headers with version', () => {
-			let results = { id: 'foo', resource_version: '1', created: true };
+			const results = { id: 'foo', resource_version: '1', created: true };
 			handler.update(req, res, results, { type: 'Patient' });
 
 			let expectedContentLocation =
@@ -178,7 +193,7 @@ describe('FHIR Response Utility', () => {
 		});
 
 		test('should set the correct Location and Last-modified headers always', () => {
-			let results = { id: 'foo' };
+			const results = { id: 'foo' };
 			let expectedDate = new Date().getTime();
 			// Number of milliseconds tolerance we want to allow
 			let tolerance = 60 * 1000;
@@ -236,7 +251,7 @@ describe('FHIR Response Utility', () => {
 
 	describe('history', () => {
 		test('should set the correct status code', () => {
-			let results = { results: 'GOLD' };
+			const results = { results: 'GOLD' };
 			handler.history(req, res, results);
 
 			expect(res.type.mock.calls).toHaveLength(1);
@@ -247,7 +262,7 @@ describe('FHIR Response Utility', () => {
 		});
 
 		test('should invoke status().json with the results', () => {
-			let results = { results: 'GOLD' };
+			const results = { results: 'GOLD' };
 			handler.history(req, res, results);
 
 			expect(res.status.mock.calls).toHaveLength(1);

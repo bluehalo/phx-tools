@@ -35,18 +35,23 @@ function read(req, res, json) {
  * @description Used when you are returning a single resource of any type
  * @param {Express.req} req - Express request object
  * @param {Express.res} res - Express response object
- * @param {Object} json - json to send to client
+ * @param {Object} resource - resource to send to client
  */
-function readOne(req, res, json) {
+function readOne(req, res, resource) {
 	let fhirVersion = req.params.base_version;
 
-	if (json && json.meta) {
-		res.set('Last-Modified', json.meta.lastUpdated);
-		res.set('ETag', `W/"${json.meta.versionId}"`);
+	if (resource && resource.meta) {
+		res.set('Last-Modified', resource.meta.lastUpdated);
+		res.set('ETag', `W/"${resource.meta.versionId}"`);
 	}
 
 	res.type(getContentType(fhirVersion));
-	res.status(200).json(json);
+
+	if (!resource) {
+		res.sendStatus(404);
+	} else {
+		res.status(200).json(resource);
+	}
 }
 
 /**

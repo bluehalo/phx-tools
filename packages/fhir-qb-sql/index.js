@@ -49,14 +49,14 @@ let formDateComparison = function(comparator, date, colName = 'value') {
 /**
  * Takes in a list of queries and wraps them in an $and block
  */
-let buildAndQuery = function(queries) {
+const buildAndQuery = function(queries) {
 	return { [Op.and]: queries };
 };
 
 /**
  * Takes in a list of queries and wraps them in an $or block
  */
-let buildOrQuery = function({ queries, invert = false }) {
+const buildOrQuery = function({ queries, invert = false }) {
 	if (invert) {
 		return { [Op.not]: { [Op.or]: queries } };
 	} else {
@@ -68,7 +68,7 @@ let buildOrQuery = function({ queries, invert = false }) {
  * Builds query to get records where the value of the field equal to the value.
  * Setting invert to true will get records that are NOT equal instead.
  */
-let buildEqualToQuery = function({
+const buildEqualToQuery = function({
 	field,
 	value,
 	invert = false,
@@ -87,7 +87,7 @@ let buildEqualToQuery = function({
 /**
  * Builds query to get records where the value of the field is [<,<=,>,>=,!=] to the value.
  */
-let buildComparatorQuery = function({
+const buildComparatorQuery = function({
 	field,
 	value,
 	comparator,
@@ -116,7 +116,7 @@ let buildComparatorQuery = function({
  * Builds query to get records where the value of the field is in the specified range
  * Setting invert to true will get records that are NOT in the specified range.
  */
-let buildInRangeQuery = function({
+const buildInRangeQuery = function({
 	field,
 	lowerBound,
 	upperBound,
@@ -155,7 +155,7 @@ let buildInRangeQuery = function({
  * Builds query to retrieve records where the field exists (or not).
  */
 // TODO: Need to figure out how to do exist check.
-let buildExistsQuery = function({ field, exists }) {
+const buildExistsQuery = function(/* { field, exists } */) {
 	return 'NOT IMPLEMENTED';
 };
 
@@ -163,7 +163,7 @@ let buildExistsQuery = function({ field, exists }) {
  * Builds query to get records where the value of the field contains the value.
  * Setting caseSensitive to true will cause the regex to be case insensitive
  */
-let buildContainsQuery = function({ field, value, caseSensitive = false }) {
+const buildContainsQuery = function({ field, value, caseSensitive = false }) {
 	// TODO: contains is not working as expected, like is for string matching - doublecheck this
 	if (caseSensitive) {
 		return { name: field, value: { [Op.like]: value } };
@@ -176,7 +176,7 @@ let buildContainsQuery = function({ field, value, caseSensitive = false }) {
  * Builds query to get records where the value of the field starts with the value.
  * Setting caseSensitive to true will cause the regex to be case insensitive
  */
-let buildStartsWithQuery = function({ field, value, caseSensitive = false }) {
+const buildStartsWithQuery = function({ field, value, caseSensitive = false }) {
 	if (caseSensitive) {
 		return { name: field, value: { [Op.startsWith]: value } };
 	} else {
@@ -188,7 +188,7 @@ let buildStartsWithQuery = function({ field, value, caseSensitive = false }) {
  * Builds query to get records where the value of the field ends with the value.
  * Setting caseSensitive to true will cause the regex to be case insensitive
  */
-let buildEndsWithQuery = function({ field, value, caseSensitive = false }) {
+const buildEndsWithQuery = function({ field, value, caseSensitive = false }) {
 	if (caseSensitive) {
 		return { name: field, value: { [Op.endsWith]: value } };
 	} else {
@@ -266,17 +266,12 @@ let applySearchResultTransformations = function({
  * @returns {Array}
  */
 let assembleSearchQuery = function({
-	joinsToPerform,
 	matchesToPerform,
 	tokenMatches,
 	searchResultTransformations,
 	implementationParameters,
-	includeArchived,
-	pageNumber,
-	resultsPerPage,
 }) {
 	let query = {};
-	let toSuppress = {};
 
 	// Check that the necessary implementation parameters were passed through
 	let { archivedParamPath } = implementationParameters;
