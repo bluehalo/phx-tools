@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
 
-## [1.1.2](https://github.com/Asymmetrik/phx-tools/compare/@asymmetrik/fhir-gql-schema-utils@1.1.2...@asymmetrik/fhir-gql-schema-utils@1.1.1) (2019-04-05)
+## [1.1.2](https://github.com/Asymmetrik/phx-tools/compare/@asymmetrik/fhir-gql-schema-utils@1.1.2...@asymmetrik/fhir-gql-schema-utils@1.1.1) (2021-09-14)
 
 ### Dependency
 Update Dependencies
