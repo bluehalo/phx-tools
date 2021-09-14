@@ -6,7 +6,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 ## [1.1.2](https://github.com/Asymmetrik/phx-tools/compare/@asymmetrik/sof-strategy@1.1.2...@asymmetrik/sof-strategy@1.1.1) (2021-09-14)
 
 ### Dependency
-Update Dependencies
+* Update Dependencies
 
 ## [1.1.1](https://github.com/Asymmetrik/phx-tools/compare/@asymmetrik/sof-strategy@1.0.3...@asymmetrik/sof-strategy@1.1.1) (2019-04-05)
 

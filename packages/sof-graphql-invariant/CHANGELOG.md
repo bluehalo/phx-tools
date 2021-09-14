@@ -6,7 +6,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 ## [1.1.4](https://github.com/Asymmetrik/phx-tools/compare/@asymmetrik/sof-graphql-invariant@1.1.4...@asymmetrik/sof-graphql-invariant@1.1.3) (2021-09-14)
 
 ### Dependency
-Update Dependencies
+* Update Dependencies
 
 
 ## [1.1.1](https://github.com/Asymmetrik/phx-tools/compare/@asymmetrik/sof-graphql-invariant@1.0.3...@asymmetrik/sof-graphql-invariant@1.1.1) (2019-04-05)
