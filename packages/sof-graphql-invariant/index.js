@@ -64,25 +64,21 @@ function operationOutcome(message, code, severity) {
  * invoking a resolver. Can be anything a valid resolver normally returns.
  */
 module.exports = function smartOnFHIRScopeInvariant(options = {}, resolver) {
-	// The schema.name is always of type OperationOutcome_Input 
-	// The graphql module is loaded twice because.  This causes the instanceOf to fail
-	// https://github.com/MichalLytek/type-graphql/issues/144
-	// TODO we are ignoring this check for now.
-	// let { name, action, schema } = options;
-	// // Error if an input schema is not provided
-	// if (!isInputType(schema)) {
-	// 	let message = 'Invalid schema, schema must be an input type schema.';
-	// 	return formatError(message);
-	// }
-	// // If they did not provide a resolver, error out now
-	// else if (typeof resolver !== 'function') {
-	// 	let message = 'Invalid resolver, resolver argument must be a function.';
-	// 	return formatError(
-	// 		message,
-	// 		coerceInputValue(operationOutcome(message, 'exception', 'error'), schema)
-	// 			.value,
-	// 	);
-	// }
+	let { name, action, schema } = options;
+	// Error if an input schema is not provided
+	if (!isInputType(schema)) {
+		let message = 'Invalid schema, schema must be an input type schema.';
+		return formatError(message);
+	}
+	// If they did not provide a resolver, error out now
+	else if (typeof resolver !== 'function') {
+		let message = 'Invalid resolver, resolver argument must be a function.';
+		return formatError(
+			message,
+			coerceInputValue(operationOutcome(message, 'exception', 'error'), schema)
+				.value,
+		);
+	}
 
 	// return our resolver function
 	return function scopeResolver(root, args, context, info) {
